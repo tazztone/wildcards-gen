@@ -101,39 +101,6 @@ def build_recursive(current_idx: int, categories: Dict, children_map: Dict, dept
 
     return child_dict
 
-def is_semantically_significant(wnid: str, min_depth: int = 6, min_hyponyms: int = 10) -> bool:
-    """
-    Determine if a concept is semantically significant enough to be a category.
-    
-    A concept is significant if:
-    - It's shallow in WordNet hierarchy (fundamental concept), OR
-    - It has many hyponyms (useful for organization)
-    """
-    synset = get_synset_from_wnid(wnid)
-    if not synset:
-        return False
-    
-    # Check depth (shallower = more fundamental)
-    # min_depth() returns the shortest path to root (entity.n.01)
-    try:
-        depth = synset.min_depth()
-        if depth <= min_depth:
-            return True
-    except Exception:
-        pass
-    
-    # Check hyponym count (more descendants = more useful as category)
-    try:
-        # closure is a bit slow, but more accurate for "branching"
-        # For performance, we could skip this if depth is very high
-        hyponyms = list(synset.closure(lambda s: s.hyponyms()))
-        if len(hyponyms) >= min_hyponyms:
-            return True
-    except Exception:
-        pass
-    
-    return False
-
 def generate_tencent_hierarchy(
     max_depth: int = 5, 
     with_glosses: bool = True,
@@ -164,6 +131,14 @@ def generate_tencent_hierarchy(
         return leaves
 
     from ruamel.yaml.comments import CommentedMap
+    from ..smart import SmartConfig, should_prune_node
+    
+    smart_config = SmartConfig(
+        enabled=smart,
+        min_depth=min_significance_depth,
+        min_hyponyms=min_hyponyms,
+        min_leaf_size=min_leaf_size
+    )
     
     def build_commented(current_idx: int, current_depth: int) -> Any:
         cat_info = categories[current_idx]
@@ -180,17 +155,15 @@ def generate_tencent_hierarchy(
         should_flatten = False
         
         if smart:
-            # Semantic Significance
-            is_significant = is_semantically_significant(wnid, min_significance_depth, min_hyponyms)
-            
-            # Linear Chain Pruning (skip if only 1 child)
-            has_multiple_children = len(children) > 1
-            
-            # Roots are always significant
+            synset = get_synset_from_wnid(wnid)
             is_root = categories[current_idx]['parent'] == -1
             
-            if not is_root and (not is_significant or not has_multiple_children):
-                should_flatten = True
+            should_flatten = should_prune_node(
+                synset=synset, 
+                child_count=len(children), 
+                is_root=is_root, 
+                config=smart_config
+            )
         else:
             # Traditional depth-based pruning
             if current_depth >= max_depth:
@@ -203,7 +176,7 @@ def generate_tencent_hierarchy(
             filtered_leaves = sorted(list(set([l for l in leaves if l.lower() != normalized_name])), key=str.casefold)
             
             # Min leaf size check for smart mode
-            if smart and len(filtered_leaves) < min_leaf_size:
+            if smart and len(filtered_leaves) < smart_config.min_leaf_size:
                 return None # Merge into parent
                 
             return filtered_leaves if filtered_leaves else None
