@@ -32,12 +32,18 @@ flowchart LR
 One tool for all your taxonomy needs. Replaces disparate scripts with a robust CLI and GUI.
 
 ### 🧠 Hybrid Intelligence
-*   **Dataset Mode (Deterministic)**: Extracts precise hierarchies from **ImageNet**, **COCO**, **Open Images**, and **Tencent ML-Images**. Uses **WordNet glosses** to automatically derive instructions.
-*   **LLM Mode (Generative)**: Uses OpenRouter (default: `google/gemma-3-27b-it:free`) to categorize messy lists, create taxonomies from scratch, or "enrich" existing skeletons.
+*   **Dataset Mode (Deterministic)**: Extracts precise hierarchies from **ImageNet**, **COCO**, **Open Images**, and **Tencent ML-Images**. Uses **WordNet glosses** to automatically derive instructions. **(No LLM used, 100% offline & free)**.
+*   **LLM Mode (Generative)**: Uses OpenRouter (default: `google/gemma-3-27b-it:free`) to categorize messy lists, create taxonomies from scratch, or "enrich" existing skeletons. **(Requires API Key)**.
 
 ### 🛡️ Robust & Verified
 *   **Structure Preservation**: Built on `ruamel.yaml` to ensure instructions are never lost.
 *   **Deep Hierarchies**: Supports arbitrary nesting depth.
+
+### 🔍 How it generates:
+1. **Download**: Grabs raw dataset metadata.
+2. **Scan**: Maps IDs to physical names (e.g. "n02121808" -> "lion").
+3. **Lookup**: Asks WordNet for a precise definition.
+4. **Build**: Constructs a YAML file where every line has a built-in guide.
 
 ---
 
@@ -76,10 +82,11 @@ You want a massive list of animals, organized scientifically, with descriptions 
 wildcards-gen dataset imagenet --root animal.n.01 --depth 4 -o output/creatures.yaml
 ```
 
-**Scenario: Massive Object Library**
-You need general objects from a huge dataset.
+**Scenario: The "Ultimate" Universal Skeleton**
+You want a single, massive file containing *everything*—objects, scenes, animals, and concepts—hierarchically organized to serve as the master skeleton for your entire wildcard library.
 ```bash
-wildcards-gen dataset tencent --depth 3 -o output/objects.yaml
+# Generate the full Tencent ML-Images hierarchy (11,000+ categories)
+wildcards-gen dataset tencent --depth 5 -o output/universal_skeleton.yaml
 ```
 
 ### 2. LLM-Powered Creation
@@ -126,3 +133,18 @@ uv venv .venv
 source .venv/bin/activate
 uv pip install -e .
 ```
+
+---
+
+## ❓ Common Questions
+
+**Q: Do I need an API key for everything?**
+**A:** No. All `dataset` commands (ImageNet, COCO, etc.) are **completely local and free**. You only need an API key for `create`, `categorize`, and `enrich`.
+
+**Q: What's the difference between a category and a leaf?**
+**A:** In the generated YAML:
+   - **Categories** are dictionary keys. They get `# instruction:` comments to help the AI understand the context.
+   - **Wildcards/Leaves** are list items. These are the actual values the AI will choose from.
+
+**Q: Which LLM should I use?**
+**A:** We default to `google/gemma-3-27b-it:free` on OpenRouter, which is very capable and free. If you need more precision for complex categorization, larger models may work better.
