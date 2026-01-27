@@ -82,12 +82,20 @@ You want a massive list of animals, organized scientifically, with descriptions 
 wildcards-gen dataset imagenet --root animal.n.01 --depth 4 -o output/creatures.yaml
 ```
 
-**Scenario: The "Ultimate" Universal Skeleton**
-You want a single, massive file containing *everything*—objects, scenes, animals, and concepts—hierarchically organized to serve as the master skeleton for your entire wildcard library.
+**Scenario: The "Ultimate" Universal Skeleton (Smart Mode)**
+You want a single, massive file containing *everything*—objects, scenes, animals, and concepts—hierarchically organized. Using `--smart` mode (recommended) uses WordNet semantics to prune irrelevant nodes and keep meaningful categories.
 ```bash
-# Generate the full Tencent ML-Images hierarchy (11,000+ categories)
-wildcards-gen dataset tencent --depth 5 -o output/universal_skeleton.yaml
+# Generate a smart, semantically-pruned skeleton (Recommended)
+wildcards-gen dataset tencent --smart -o output/universal_skeleton.yaml
 ```
+
+#### 🎚️ Tuning Smart Mode (Tencent)
+When using `--smart`, you can fine-tune what becomes a category vs. what gets flattened into a list:
+
+- `--min-depth [6]`: Nodes shallower than this in WordNet (like "animal", "tool") are always kept as categories. **Lower** = fewer, more top-level categories.
+- `--min-hyponyms [10]`: Nodes with more than this many descendants are kept as categories for organization. **Higher** = more items flattened into parent lists.
+- `--min-leaf [3]`: If a subcategory would only contain 1 or 2 items, it's merged into its parent. **Higher** = larger, more diverse leaf lists.
+
 
 ### 2. LLM-Powered Creation
 *Best for: Abstract concepts, fiction, artistic styles.*
