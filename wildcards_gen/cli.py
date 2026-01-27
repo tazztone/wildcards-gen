@@ -46,7 +46,11 @@ def cmd_dataset_imagenet(args):
         filter_set=args.filter if args.filter != 'none' else None,
         with_glosses=not args.no_glosses,
         strict_filter=not args.no_strict,
-        blacklist_abstract=args.blacklist
+        blacklist_abstract=args.blacklist,
+        smart=args.smart,
+        min_significance_depth=args.min_depth,
+        min_hyponyms=args.min_hyponyms,
+        min_leaf_size=args.min_leaf
     )
     
     mgr = StructureManager()
@@ -70,7 +74,11 @@ def cmd_dataset_openimages(args):
     """Handle openimages subcommand."""
     hierarchy = generate_openimages_hierarchy(
         max_depth=args.depth,
-        with_glosses=not args.no_glosses
+        with_glosses=not args.no_glosses,
+        smart=args.smart,
+        min_significance_depth=args.min_depth,
+        min_hyponyms=args.min_hyponyms,
+        min_leaf_size=args.min_leaf
     )
     
     mgr = StructureManager()
@@ -213,6 +221,12 @@ def main():
     p_dataset = subparsers.add_parser('dataset', help='Generate from CV dataset')
     dataset_sub = p_dataset.add_subparsers(dest='dataset_type', required=True)
     
+    def add_smart_args(parser):
+        parser.add_argument('--smart', action='store_true', help='Use semantic significance pruning (ignoring --depth)')
+        parser.add_argument('--min-depth', type=int, default=6, help='[Smart] Max WordNet depth for significance (lower = more fundamental categories)')
+        parser.add_argument('--min-hyponyms', type=int, default=10, help='[Smart] Min descendants to keep as category (higher = fewer, larger categories)')
+        parser.add_argument('--min-leaf', type=int, default=3, help='[Smart] Min items per leaf list (smaller lists are merged upward)')
+
     # ImageNet
     p_imagenet = dataset_sub.add_parser('imagenet', help='ImageNet (WordNet-based) hierarchy')
     p_imagenet.add_argument('--root', default=config.get("datasets.imagenet.root_synset"), help='Root synset')
@@ -221,6 +235,7 @@ def main():
     p_imagenet.add_argument('--no-glosses', action='store_true', help='Skip WordNet glosses')
     p_imagenet.add_argument('--no-strict', action='store_true', help='Disable strict filtering')
     p_imagenet.add_argument('--blacklist', action='store_true', help='Blacklist abstract categories')
+    add_smart_args(p_imagenet)
     p_imagenet.add_argument('-o', '--output', default=os.path.join(config.output_dir, 'imagenet.yaml'))
     p_imagenet.set_defaults(func=cmd_dataset_imagenet)
     
@@ -235,6 +250,7 @@ def main():
     p_oi = dataset_sub.add_parser('openimages', help='Open Images hierarchy')
     p_oi.add_argument('--depth', type=int, default=config.get("generation.default_depth"))
     p_oi.add_argument('--no-glosses', action='store_true')
+    add_smart_args(p_oi)
     p_oi.add_argument('-o', '--output', default=os.path.join(config.output_dir, 'openimages.yaml'))
     p_oi.set_defaults(func=cmd_dataset_openimages)
 
@@ -242,10 +258,7 @@ def main():
     p_tencent = dataset_sub.add_parser('tencent', help='Tencent ML-Images hierarchy')
     p_tencent.add_argument('--depth', type=int, default=config.get("generation.default_depth"), help='Max depth (ignored if --smart)')
     p_tencent.add_argument('--no-glosses', action='store_true', help='Skip WordNet glosses')
-    p_tencent.add_argument('--smart', action='store_true', help='Use semantic significance pruning (ignoring --depth)')
-    p_tencent.add_argument('--min-depth', type=int, default=6, help='[Smart] Max WordNet depth for significance (lower = more fundamental categories)')
-    p_tencent.add_argument('--min-hyponyms', type=int, default=10, help='[Smart] Min descendants to keep as category (higher = fewer, larger categories)')
-    p_tencent.add_argument('--min-leaf', type=int, default=3, help='[Smart] Min items per leaf list (smaller lists are merged upward)')
+    add_smart_args(p_tencent)
     p_tencent.add_argument('-o', '--output', default=os.path.join(config.output_dir, 'tencent.yaml'))
     p_tencent.set_defaults(func=cmd_dataset_tencent)
     

@@ -89,13 +89,15 @@ You want a single, massive file containing *everything*—objects, scenes, anima
 wildcards-gen dataset tencent --smart -o output/universal_skeleton.yaml
 ```
 
-#### 🎚️ Tuning Smart Mode (Tencent)
+#### 🎚️ Tuning Smart Mode
 When using `--smart`, you can fine-tune what becomes a category vs. what gets flattened into a list:
 
 - `--min-depth [6]`: Nodes shallower than this in WordNet (like "animal", "tool") are always kept as categories. **Lower** = fewer, more top-level categories.
 - `--min-hyponyms [10]`: Nodes with more than this many descendants are kept as categories for organization. **Higher** = more items flattened into parent lists.
 - `--min-leaf [3]`: If a subcategory would only contain 1 or 2 items, it's merged into its parent. **Higher** = larger, more diverse leaf lists.
 
+> [!TIP]
+> **Smart Mode** is also available for `imagenet` and `openimages` commands!
 
 ### 2. LLM-Powered Creation
 *Best for: Abstract concepts, fiction, artistic styles.*
