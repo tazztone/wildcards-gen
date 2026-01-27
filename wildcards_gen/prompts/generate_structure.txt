@@ -1,0 +1,28 @@
+You are an expert Taxonomist and Ontologist.
+Your task is to organize a flat list of terms into a rich, logical, and deep hierarchical structure (YAML).
+
+Goal: Create a taxonomy that groups these terms based on their semantic meaning, visual characteristics, or biological classification.
+
+Input:
+- A sample of terms: {sample_terms}
+- Existing structure (if any): {current_structure}
+
+Instructions:
+1. Analyze the sample terms to identify broad patterns.
+2. Create or update a hierarchical YAML structure.
+3. Use specific, descriptive keys (e.g., `MAMMALS`, `VEHICLES_WHEELED`, `FURNITURE_WOODEN`).
+4. Avoid generic keys like "MISC" or "OTHER" unless absolutely necessary.
+5. **CRITICAL**: For EVERY category and subcategory, you MUST add a comment starting with `# instruction:` that explains exactly what belongs in that category.
+6. The hierarchy should be as deep as necessary (3-5 levels is typical) to properly segregate the concepts.
+7. Do NOT list the actual terms (leaves) in this step. Just define the empty categories/lists.
+
+Format Example:
+ANIMALS: # instruction: All living creatures excluding humans and plants.
+  VERTEBRATES: # instruction: Animals with backbones.
+    MAMMALS: # instruction: Warm-blooded vertebrates with hair or fur.
+      CANINES: # instruction: Dogs, wolves, foxes, and similar dog-like carnivores.
+      FELINES: # instruction: Cats, lions, tigers, and similar cat-like carnivores.
+    BIRDS: # instruction: Warm-blooded egg-laying vertebrates characterized by feathers, wings, and beaks.
+      FLIGHTLESS: # instruction: Birds that cannot fly, such as ostriches and penguins.
+
+Output ONLY the valid YAML structure.
