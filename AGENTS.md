@@ -26,6 +26,7 @@ The `# instruction:` comment is the payload. It tells the downhill AI what a cat
 *   **`wildcards_gen/cli.py`**: The single entry point. Defined using `argparse`. Now includes `gui` subcommand.
 *   **`wildcards_gen/gui.py`**: Gradio-based web interface for dataset generation.
 *   **`wildcards_gen/core/`**:
+    *   `config.py`: Hierarchical configuration manager (CLI > Local > User > Env > Defaults).
     *   `structure.py`: Wrapper for `ruamel.yaml` logic.
     *   `llm.py`: OpenRouter interaction. Includes `_clean_response()` to fix markdown issues. Default model: `google/gemma-3-27b-it:free`.
     *   `wordnet.py`: NLTK WordNet wrappers.
