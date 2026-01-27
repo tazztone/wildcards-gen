@@ -25,6 +25,13 @@ The `# instruction:` comment is the payload. It tells the downhill AI what a cat
 *   **LLM (Flexible)**: Used for `categorize/create`. We use a custom `LLMEngine` that handles prompt loading and response cleaning (stripping markdown backticks).
 *   **Prompt Pipeline**: `create` uses a two-phase prompt (Architect -> Mason). Architect defines the core roots; Mason fills in the sub-categories.
 
+### 4. Smart Semantic Pruning
+To prevent "directory bloat" and noisy hierarchies, the tool uses an intelligent pruning strategy (enabled via `--smart`):
+*   **Semantic Significance**: Uses WordNet depth and branching factor to keep meaningful categories (e.g., "fruit") while flattening obscure intermediates.
+*   **Linear Chain Removal**: Skips nodes that only have one child, consolidating them into the parent to reduce nesting depth.
+*   **Minimum Leaf Size**: Small categories are merged upward to ensure every list in the skeleton has enough variety to be useful.
+*   **Self-Reference Filtering**: Ensures leaf nodes never contain their own parent name (e.g., `nose:` instead of `nose: - nose`).
+
 ## Data Flow & State
 
 1.  **Input**: raw strings (CLI), text files (categorize), or synset strings (ImageNet).
@@ -65,11 +72,16 @@ When a command like `wildcards-gen dataset tencent` is run, the backend follows 
 2.  **Data Acquisition**: The `downloaders.py` module manages local caching. If a dataset (like Tencent's 11k categories) is missing, it streams it from source repositories to the `downloads/` directory.
 3.  **Parsing & Graph Discovery**: Specific dataset modules (e.g., `tencent.py`) parse raw TSV/JSON files into a Directed Graph (mapping IDs, Names, and Parent-Child relationships).
 4.  **Semantic Enrichment**: The builder recurses through the graph. For every node, it queries the local **NLTK WordNet** database via `wordnet.py`. It retrieves the "Gloss" (definition) using the WordNet ID.
-5.  **Inline Structure Building**: We use `ruamel.yaml`'s `CommentedMap`. Instead of a standard dictionary, every key-value pair is created as an object that can hold metadata. The retrieved definition is attached *inline* as an EOL comment: `# instruction: ...`.
-6.  **Serialization**: The final structure is saved via `StructureManager`, ensuring that the complex `CommentedMap` is serialized back to clean YAML while preserving all metadata instructions.
+5.  **Inline Structure Building & Smart Pruning**: We use `ruamel.yaml`'s `CommentedMap`. The builder evaluates each node's significance:
+    *   **In Traditional Mode**: Truncates strictly at `max_depth`.
+    *   **In Smart Mode**: Evaluates semantic value. If a node is significant and branching, it becomes a key; otherwise, its descendants are flattened into a leaf list.
+6.  **Serialization**: The final structure is saved via `StructureManager`, ensuring that the complex `CommentedMap` is serialized back to clean YAML while preserving all metadata instructions and alphabetical sorting at every level.
 
 ## Session Takeaways (Jan 2026)
 *   **Open Images Fix**: The original generator produced flat lists. The new port ensures full hierarchy preservation.
 *   **Tencent ML-Images**: Added support for this massive dataset (11k categories) using text-only download logic.
 *   **LLM Stability**: The `LLMEngine` must aggressively clean output (e.g. ` ```yaml `) to prevent parsing errors.
 *   **Unified CLI**: Managing one tool is significantly easier than multiple scripts.
+*   **Duplicate Wildcard Fix**: Resolved the `nose: - nose` issue by implementing strict self-reference filtering and empty-key output for leaves.
+*   **Smart Semantic Logic**: Added WordNet-based depth and hyponym analysis to produce "meaningful" categories instead of arbitrary depth truncation.
+*   **Usability Improvements**: Implemented case-insensitive alphabetical sorting across all datasets to improve manual navigability.
