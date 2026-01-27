@@ -14,11 +14,13 @@ class SmartConfig:
                  enabled: bool = False,
                  min_depth: int = 6,
                  min_hyponyms: int = 10,
-                 min_leaf_size: int = 3):
+                 min_leaf_size: int = 3,
+                 merge_orphans: bool = False):
         self.enabled = enabled
         self.min_depth = min_depth
         self.min_hyponyms = min_hyponyms
         self.min_leaf_size = min_leaf_size
+        self.merge_orphans = merge_orphans
 
 def is_synset_significant(synset: Any, config: SmartConfig) -> bool:
     """
@@ -83,3 +85,30 @@ def should_prune_node(
         
     # If not significant and not a root, prune it.
     return True
+
+
+def handle_small_leaves(
+    leaves: list,
+    config: SmartConfig
+) -> tuple:
+    """
+    Handle a leaf list that may be too small per min_leaf_size.
+    
+    Returns:
+        (value_to_add, orphans_to_bubble_up)
+        
+    If merge_orphans is True and list is small: (None, leaves)
+    Otherwise: (leaves, [])
+    """
+    if not config.enabled:
+        return (leaves if leaves else [], [])
+    
+    if len(leaves) < config.min_leaf_size:
+        if config.merge_orphans:
+            # Bubble up to parent
+            return (None, leaves)
+        else:
+            # Keep as small list (100% retention)
+            return (leaves if leaves else [], [])
+    
+    return (leaves if leaves else [], [])

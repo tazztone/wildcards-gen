@@ -190,7 +190,8 @@ def generate_openimages_hierarchy(
     smart: bool = False,
     min_significance_depth: int = 6,
     min_hyponyms: int = 10,
-    min_leaf_size: int = 3
+    min_leaf_size: int = 3,
+    merge_orphans: bool = False
 ) -> CommentedMap:
     """
     Generate hierarchy from Open Images dataset.
@@ -199,6 +200,7 @@ def generate_openimages_hierarchy(
         max_depth: Maximum hierarchy depth before flattening
         with_glosses: Add WordNet glosses as instructions
         smart: Use semantic significance pruning
+        merge_orphans: Merge small pruned lists into parent
         
     Returns:
         CommentedMap with the hierarchy
@@ -210,7 +212,8 @@ def generate_openimages_hierarchy(
         enabled=smart,
         min_depth=min_significance_depth,
         min_hyponyms=min_hyponyms,
-        min_leaf_size=min_leaf_size
+        min_leaf_size=min_leaf_size,
+        merge_orphans=merge_orphans
     )
     
     logger.info("Generating Open Images hierarchy...")
