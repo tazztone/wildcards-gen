@@ -1,0 +1,8 @@
+Furniture:
+  Wine rack: # instruction: Items related to Wine rack
+    - Wine rack
+  Nightstand: # instruction: Items related to Nightstand
+    - Nightstand
+  Bed: # instruction: Items related to various types of beds
+    Infant bed: # instruction: Items related to Infant bed
+      - Infant bed
