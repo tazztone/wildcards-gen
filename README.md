@@ -11,13 +11,13 @@ This tool combines the precision of **WordNet** (for computer vision datasets) w
 Replaces disparate scripts (`Wildcard-Hierarchy-Generator`, `wildcards-categorize`) with a single, robust CLI: `wildcards-gen`. One tool for all your taxonomy needs.
 
 ### 🧠 Hybrid Intelligence
-*   **Dataset Mode (Deterministic)**: Extracts precise hierarchies from ImageNet, COCO, and Open Images. Uses **WordNet glosses** to automatically generate `# instruction:` comments (e.g., "a living organism characterized by voluntary movement" for *animal*).
-*   **LLM Mode (Generative)**: Uses OpenRouter (e.g., GPT-4o) to categorize messy lists, create taxonomies from scratch, or "enrich" existing skeletons with better descriptions.
+*   **Dataset Mode (Deterministic)**: Extracts precise hierarchies from **ImageNet**, **COCO**, **Open Images**, and **Tencent ML-Images**. Uses **WordNet glosses** to automatically generate `# instruction:` comments (e.g., "a living organism characterized by voluntary movement" for *animal*).
+*   **LLM Mode (Generative)**: Uses OpenRouter (default: `google/gemma-3-27b-it:free`) to categorize messy lists, create taxonomies from scratch, or "enrich" existing skeletons with better descriptions.
 
 ### 🛡️ Robust & Verified
 *   **Structure Preservation**: Built on `ruamel.yaml` to ensure `# instruction:` comments are never lost during processing.
 *   **Markdown Cleaning**: Automatically strips markdown backticks from LLM responses, ensuring valid YAML output every time.
-*   **Deep Hierarchies**: Fully supports nested structures. *Note: Open Images generation has been patched to produce proper trees instead of flat lists.*
+*   **Deep Hierarchies**: Fully supports nested structures. *Note: Open Images and Tencent generation produce proper trees, not flat lists.*
 
 ---
 
@@ -52,14 +52,28 @@ wildcards-gen dataset coco -o output/coco.yaml
 wildcards-gen dataset imagenet --root musical_instrument.n.01 --depth 3 -o output/instruments.yaml
 ```
 
-**Open Images (Massive Scale)**
+**Tencent ML-Images (Massive Scale)**
+```bash
+wildcards-gen dataset tencent --depth 3 -o output/tencent.yaml
+```
+
+**Open Images**
 ```bash
 wildcards-gen dataset openimages -o output/openimages.yaml
 ```
 
-### 2. LLM-Powered Commands
+### 2. GUI Mode (New!)
+
+Prefer a visual interface? Launch the local web app to generate skeletons interactively:
+```bash
+wildcards-gen gui
+```
+*Features: Dropdown selector, depth slider, instant preview, and download.*
+
+### 3. LLM-Powered Commands
 
 Requires `OPENROUTER_API_KEY` environment variable.
+Defaults to `google/gemma-3-27b-it:free` for cost-free operation.
 
 **Create from Scratch**
 Generate a full taxonomy for any topic:

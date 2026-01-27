@@ -23,12 +23,13 @@ The `# instruction:` comment is the payload. It tells the downhill AI what a cat
 
 ## Codebase Organization
 
-*   **`wildcards_gen/cli.py`**: The single entry point. Defined using `argparse`.
+*   **`wildcards_gen/cli.py`**: The single entry point. Defined using `argparse`. Now includes `gui` subcommand.
+*   **`wildcards_gen/gui.py`**: Gradio-based web interface for dataset generation.
 *   **`wildcards_gen/core/`**:
     *   `structure.py`: Wrapper for `ruamel.yaml` logic.
-    *   `llm.py`: OpenRouter interaction. includes `_clean_response()` to fix markdown issues.
+    *   `llm.py`: OpenRouter interaction. Includes `_clean_response()` to fix markdown issues. Default model: `google/gemma-3-27b-it:free`.
     *   `wordnet.py`: NLTK WordNet wrappers.
-    *   `datasets/`: Logic for specific datasets (ImageNet, COCO, OpenImages).
+    *   `datasets/`: Logic for specific datasets (ImageNet, COCO, OpenImages, Tencent).
 
 ## Maintenance & Contribution
 
@@ -38,5 +39,6 @@ The `# instruction:` comment is the payload. It tells the downhill AI what a cat
 
 ## Session Takeaways (Jan 2026)
 *   **Open Images Fix**: The original generator produced flat lists. The new port ensures full hierarchy preservation.
+*   **Tencent ML-Images**: Added support for this massive dataset (11k categories) using text-only download logic.
 *   **LLM Stability**: The `LLMEngine` must aggressively clean output (e.g. ` ```yaml `) to prevent parsing errors.
 *   **Unified CLI**: Managing one tool is significantly easier than multiple scripts.
