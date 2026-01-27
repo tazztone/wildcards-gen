@@ -188,7 +188,8 @@ def generate_imagenet_tree(
     smart: bool = False,
     min_significance_depth: int = 6,
     min_hyponyms: int = 10,
-    min_leaf_size: int = 3
+    min_leaf_size: int = 3,
+    merge_orphans: bool = False
 ) -> CommentedMap:
     """
     Generate ImageNet hierarchy tree from a root synset.
@@ -201,6 +202,7 @@ def generate_imagenet_tree(
         strict_filter: Only include primary synset meanings
         blacklist_abstract: Skip abstract categories
         smart: Use semantic significance pruning
+        merge_orphans: Merge small pruned lists into parent
     """
     ensure_nltk_data()
     
@@ -209,7 +211,8 @@ def generate_imagenet_tree(
         enabled=smart,
         min_depth=min_significance_depth,
         min_hyponyms=min_hyponyms,
-        min_leaf_size=min_leaf_size
+        min_leaf_size=min_leaf_size,
+        merge_orphans=merge_orphans
     )
     
     # Load filter set

@@ -134,13 +134,14 @@ def generate_tencent_hierarchy(
         return leaves
 
     from ruamel.yaml.comments import CommentedMap
-    from ..smart import SmartConfig, should_prune_node
+    from ..smart import SmartConfig, should_prune_node, handle_small_leaves
     
     smart_config = SmartConfig(
         enabled=smart,
         min_depth=min_significance_depth,
         min_hyponyms=min_hyponyms,
-        min_leaf_size=min_leaf_size
+        min_leaf_size=min_leaf_size,
+        merge_orphans=merge_orphans
     )
 
     def merge_nodes(existing: Any, new_val: Any) -> Any:

@@ -1,7 +1,7 @@
 
 import unittest
 from unittest.mock import MagicMock
-from wildcards_gen.core.smart import SmartConfig, should_prune_node, is_synset_significant
+from wildcards_gen.core.smart import SmartConfig, should_prune_node, is_synset_significant, handle_small_leaves
 
 class TestSmartLogic(unittest.TestCase):
     def setUp(self):
@@ -61,6 +61,80 @@ class TestSmartLogic(unittest.TestCase):
         synset.closure.return_value = hyponyms
         
         self.assertFalse(should_prune_node(synset, 2, False, self.config))
+
+
+class TestHandleSmallLeaves(unittest.TestCase):
+    """Tests for handle_small_leaves function (data retention logic)."""
+
+    def test_disabled_config_keeps_leaves(self):
+        """When smart mode disabled, always return leaves as-is."""
+        config = SmartConfig(enabled=False)
+        leaves = ['a', 'b']
+        value, orphans = handle_small_leaves(leaves, config)
+        self.assertEqual(value, ['a', 'b'])
+        self.assertEqual(orphans, [])
+
+    def test_small_list_kept_by_default(self):
+        """Small lists are kept as-is when merge_orphans=False (100% retention)."""
+        config = SmartConfig(enabled=True, min_leaf_size=3, merge_orphans=False)
+        leaves = ['a', 'b']  # < 3 items
+        value, orphans = handle_small_leaves(leaves, config)
+        self.assertEqual(value, ['a', 'b'])
+        self.assertEqual(orphans, [])
+
+    def test_small_list_bubbled_up_with_merge_orphans(self):
+        """Small lists bubble up when merge_orphans=True."""
+        config = SmartConfig(enabled=True, min_leaf_size=3, merge_orphans=True)
+        leaves = ['katydid', 'locust']  # < 3 items
+        value, orphans = handle_small_leaves(leaves, config)
+        self.assertIsNone(value)
+        self.assertEqual(orphans, ['katydid', 'locust'])
+
+    def test_large_list_always_kept(self):
+        """Lists >= min_leaf_size are always kept regardless of merge_orphans."""
+        config = SmartConfig(enabled=True, min_leaf_size=3, merge_orphans=True)
+        leaves = ['a', 'b', 'c', 'd']  # >= 3 items
+        value, orphans = handle_small_leaves(leaves, config)
+        self.assertEqual(value, ['a', 'b', 'c', 'd'])
+        self.assertEqual(orphans, [])
+
+    def test_empty_list_handled(self):
+        """Empty list returns empty list (not None)."""
+        config = SmartConfig(enabled=True, min_leaf_size=3, merge_orphans=False)
+        value, orphans = handle_small_leaves([], config)
+        self.assertEqual(value, [])
+        self.assertEqual(orphans, [])
+
+    def test_single_item_list_kept_by_default(self):
+        """Single item list kept when merge_orphans=False."""
+        config = SmartConfig(enabled=True, min_leaf_size=3, merge_orphans=False)
+        leaves = ['tongs']
+        value, orphans = handle_small_leaves(leaves, config)
+        self.assertEqual(value, ['tongs'])
+        self.assertEqual(orphans, [])
+
+    def test_single_item_bubbled_with_merge_orphans(self):
+        """Single item bubbles up when merge_orphans=True."""
+        config = SmartConfig(enabled=True, min_leaf_size=3, merge_orphans=True)
+        leaves = ['tongs']
+        value, orphans = handle_small_leaves(leaves, config)
+        self.assertIsNone(value)
+        self.assertEqual(orphans, ['tongs'])
+
+
+class TestSmartConfigMergeOrphans(unittest.TestCase):
+    """Tests for SmartConfig merge_orphans field."""
+
+    def test_merge_orphans_default_false(self):
+        """merge_orphans defaults to False."""
+        config = SmartConfig(enabled=True)
+        self.assertFalse(config.merge_orphans)
+
+    def test_merge_orphans_can_be_set(self):
+        """merge_orphans can be set to True."""
+        config = SmartConfig(enabled=True, merge_orphans=True)
+        self.assertTrue(config.merge_orphans)
+
 
 if __name__ == '__main__':
     unittest.main()
