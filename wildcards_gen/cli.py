@@ -82,7 +82,11 @@ def cmd_dataset_tencent(args):
     """Handle tencent subcommand."""
     hierarchy = generate_tencent_hierarchy(
         max_depth=args.depth,
-        with_glosses=not args.no_glosses
+        with_glosses=not args.no_glosses,
+        smart=args.smart,
+        min_significance_depth=args.min_depth,
+        min_hyponyms=args.min_hyponyms,
+        min_leaf_size=args.min_leaf
     )
     
     mgr = StructureManager()
@@ -236,8 +240,12 @@ def main():
 
     # Tencent
     p_tencent = dataset_sub.add_parser('tencent', help='Tencent ML-Images hierarchy')
-    p_tencent.add_argument('--depth', type=int, default=config.get("generation.default_depth"))
-    p_tencent.add_argument('--no-glosses', action='store_true')
+    p_tencent.add_argument('--depth', type=int, default=config.get("generation.default_depth"), help='Max depth (ignored if --smart)')
+    p_tencent.add_argument('--no-glosses', action='store_true', help='Skip WordNet glosses')
+    p_tencent.add_argument('--smart', action='store_true', help='Use semantic significance pruning (ignoring --depth)')
+    p_tencent.add_argument('--min-depth', type=int, default=6, help='[Smart] Max WordNet depth for significance (lower = more fundamental categories)')
+    p_tencent.add_argument('--min-hyponyms', type=int, default=10, help='[Smart] Min descendants to keep as category (higher = fewer, larger categories)')
+    p_tencent.add_argument('--min-leaf', type=int, default=3, help='[Smart] Min items per leaf list (smaller lists are merged upward)')
     p_tencent.add_argument('-o', '--output', default=os.path.join(config.output_dir, 'tencent.yaml'))
     p_tencent.set_defaults(func=cmd_dataset_tencent)
     

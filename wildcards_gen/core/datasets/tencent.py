@@ -101,7 +101,47 @@ def build_recursive(current_idx: int, categories: Dict, children_map: Dict, dept
 
     return child_dict
 
-def generate_tencent_hierarchy(max_depth: int = 3, with_glosses: bool = True) -> Dict:
+def is_semantically_significant(wnid: str, min_depth: int = 6, min_hyponyms: int = 10) -> bool:
+    """
+    Determine if a concept is semantically significant enough to be a category.
+    
+    A concept is significant if:
+    - It's shallow in WordNet hierarchy (fundamental concept), OR
+    - It has many hyponyms (useful for organization)
+    """
+    synset = get_synset_from_wnid(wnid)
+    if not synset:
+        return False
+    
+    # Check depth (shallower = more fundamental)
+    # min_depth() returns the shortest path to root (entity.n.01)
+    try:
+        depth = synset.min_depth()
+        if depth <= min_depth:
+            return True
+    except Exception:
+        pass
+    
+    # Check hyponym count (more descendants = more useful as category)
+    try:
+        # closure is a bit slow, but more accurate for "branching"
+        # For performance, we could skip this if depth is very high
+        hyponyms = list(synset.closure(lambda s: s.hyponyms()))
+        if len(hyponyms) >= min_hyponyms:
+            return True
+    except Exception:
+        pass
+    
+    return False
+
+def generate_tencent_hierarchy(
+    max_depth: int = 5, 
+    with_glosses: bool = True,
+    smart: bool = False,
+    min_significance_depth: int = 6,
+    min_hyponyms: int = 10,
+    min_leaf_size: int = 3
+) -> Dict:
     """Generate Tencent ML-Images hierarchy."""
     file_path = download_tencent_hierarchy()
     categories, children_map, roots = parse_hierarchy_file(file_path)
@@ -109,93 +149,103 @@ def generate_tencent_hierarchy(max_depth: int = 3, with_glosses: bool = True) ->
     if with_glosses:
         ensure_nltk_data()
     
-    full_tree = {}
-    instructions = {}
-    
-    def build(current_idx, current_depth):
-        cat_info = categories[current_idx]
-        name = cat_info['name'].split(',')[0].strip()
-        wnid = cat_info['id']
+    def collect_leaves(idx: int) -> List[str]:
+        """Collect all descendant leaf names."""
+        leaves = []
+        children = children_map.get(idx, [])
         
-        # Get instruction
-        if with_glosses:
-            synset = get_synset_from_wnid(wnid)
-            if synset:
-                instructions[name] = get_synset_gloss(synset)
-            else:
-                instructions[name] = f"Items related to {name}"
+        if not children:
+            name = categories[idx]['name'].split(',')[0].strip()
+            leaves.append(name)
+        else:
+            for child_idx in children:
+                leaves.extend(collect_leaves(child_idx))
         
-        children = children_map.get(current_idx, [])
-        if not children or current_depth >= max_depth:
-            return [name] # Leaf represented as list of 1? Or just empty list?
-            # Standard leaf in this project is list of strings.
-        
-        subtree = {}
-        for child_idx in children:
-            child_name = categories[child_idx]['name'].split(',')[0].strip()
-            subtree[child_name] = build(child_idx, current_depth + 1)
-            
-        return subtree
+        return leaves
 
-    # Process all roots
-    for root_idx in roots:
-        root_name = categories[root_idx]['name'].split(',')[0].strip()
-        full_tree[root_name] = build(root_idx, 1)
-        
-    # Attach instructions? 
-    # Limitation: StructureManager.to_string expects standard dict.
-    # Use StructureManager helper to add comments?
-    # It has `add_comment_recursive`.
-    
-    # We return the tree, but we need to pass instructions too.
-    # The current pattern in datasets/imagenet.py is:
-    # It embeds instructions directly? No, it uses `comment_map`.
-    
-    # HACK: We'll attach instructions to the output dict using a special attribute or just return both?
-    # The existing generators return a Dist. 
-    # Let's check imagenet.py...
-    # It returns a plain dict. And uses `set_instruction_comment` on the Ruamel object? 
-    # No, imagenet.py returns a CommentedMap from Ruamel YAML!
-    
-    # So we need to use ruamel.yaml directly here or StructureManager.
     from ruamel.yaml.comments import CommentedMap
     
-    def build_commented(current_idx, current_depth):
+    def build_commented(current_idx: int, current_depth: int) -> Any:
         cat_info = categories[current_idx]
         name = cat_info['name'].split(',')[0].strip()
         wnid = cat_info['id']
         
         children = children_map.get(current_idx, [])
         
-        # Leaf logic
-        if not children or current_depth >= max_depth:
-            return [name]
+        # Base case: actual leaf
+        if not children:
+            return None
             
+        # Decision logic: keep as category or flatten?
+        should_flatten = False
+        
+        if smart:
+            # Semantic Significance
+            is_significant = is_semantically_significant(wnid, min_significance_depth, min_hyponyms)
+            
+            # Linear Chain Pruning (skip if only 1 child)
+            has_multiple_children = len(children) > 1
+            
+            # Roots are always significant
+            is_root = categories[current_idx]['parent'] == -1
+            
+            if not is_root and (not is_significant or not has_multiple_children):
+                should_flatten = True
+        else:
+            # Traditional depth-based pruning
+            if current_depth >= max_depth:
+                should_flatten = True
+
+        if should_flatten:
+            leaves = collect_leaves(current_idx)
+            # Filter self-matches
+            normalized_name = name.lower()
+            filtered_leaves = sorted(list(set([l for l in leaves if l.lower() != normalized_name])), key=str.casefold)
+            
+            # Min leaf size check for smart mode
+            if smart and len(filtered_leaves) < min_leaf_size:
+                return None # Merge into parent
+                
+            return filtered_leaves if filtered_leaves else None
+
+        # Build category
         cm = CommentedMap()
-        for child_idx in children:
+        sorted_children = sorted(children, key=lambda idx: categories[idx]['name'].split(',')[0].strip().casefold())
+        
+        valid_items_added = 0
+        for child_idx in sorted_children:
             child_name = categories[child_idx]['name'].split(',')[0].strip()
             child_val = build_commented(child_idx, current_depth + 1)
             
-            cm[child_name] = child_val
-            
-            # Add comment to this key in the parent map (cm)
-            if with_glosses:
-                child_wnid = categories[child_idx]['id']
-                synset = get_synset_from_wnid(child_wnid)
-                instr = get_synset_gloss(synset) if synset else f"Items related to {child_name}"
-                cm.yaml_add_eol_comment(f"# instruction: {instr}", child_name)
+            # If child_val is None, it means the child was empty or merged upward
+            if child_val is not None or not smart:
+                cm[child_name] = child_val
+                valid_items_added += 1
                 
+                # Add comment
+                if with_glosses:
+                    child_wnid = categories[child_idx]['id']
+                    synset = get_synset_from_wnid(child_wnid)
+                    instr = get_synset_gloss(synset) if synset else f"Items related to {child_name}"
+                    cm.yaml_add_eol_comment(f"# instruction: {instr}", child_name)
+        
+        if valid_items_added == 0:
+            # If all children were pruned/merged, flatten itself
+            leaves = collect_leaves(current_idx)
+            normalized_name = name.lower()
+            filtered_leaves = sorted(list(set([l for l in leaves if l.lower() != normalized_name])), key=str.casefold)
+            return filtered_leaves if filtered_leaves else None
+            
         return cm
 
     # Root level
     final_map = CommentedMap()
-    for root_idx in roots:
+    sorted_roots = sorted(roots, key=lambda idx: categories[idx]['name'].split(',')[0].strip().casefold())
+    
+    for root_idx in sorted_roots:
         root_name = categories[root_idx]['name'].split(',')[0].strip()
-        
-        # Valid root check (Tencent has 4 roots)
         final_map[root_name] = build_commented(root_idx, 1)
         
-        # Add comment for root
         if with_glosses:
             wnid = categories[root_idx]['id']
             synset = get_synset_from_wnid(wnid)
