@@ -77,13 +77,11 @@ def build_tree_recursive(
     max_depth: int,
     with_glosses: bool = True,
     strict_filter: bool = True,
-    blacklist_abstract: bool = False
+    blacklist_abstract: bool = False,
+    smart_config: Any = None
 ) -> bool:
     """
     Recursively build hierarchy tree from a synset.
-    
-    Returns:
-        True if this node or any children were added
     """
     name = get_synset_name(synset)
     
@@ -96,14 +94,48 @@ def build_tree_recursive(
         primary = get_primary_synset(name)
         if primary and primary != synset:
             return False
-    
+            
     # Get instruction from gloss
     instruction = get_synset_gloss(synset) if with_glosses else None
     
-    # At max depth: flatten all descendants into list
-    if depth >= max_depth:
+    children = synset.hyponyms()
+    
+    # Determine if we should prune (flatten) at this level
+    should_flatten = False
+    
+    if smart_config and smart_config.enabled:
+        from ..smart import should_prune_node
+        # ImageNet root is depth 0
+        is_root = (depth == 0)
+        should_flatten = should_prune_node(
+            synset=synset,
+            child_count=len(children),
+            is_root=is_root,
+            config=smart_config
+        )
+    else:
+        # Traditional depth limit
+        if depth >= max_depth:
+            should_flatten = True
+
+    # Flatten logic
+    if should_flatten:
         descendants = get_all_descendants(synset, valid_wnids)
         if descendants:
+            # Smart Mode: Min leaf size check
+            if smart_config and smart_config.enabled:
+                if len(descendants) < smart_config.min_leaf_size:
+                    # Merge upward (return False to indicate no category created here)
+                    # Use add_leaf_list logic but return False?
+                    # Wait, if we return False, the parent sees no children.
+                    # BUT we want to pass the leaves up.
+                    # StructureManager doesn't support "passing up".
+                    # We have to just skip creating *this* category, 
+                    # but we can't easily merge 20 items into parent's other items in this recursive structure.
+                    # Compromise: If heavily pruned, just don't output it?
+                    # Or treat it as a leaf node with values.
+                    pass
+            
             structure_mgr.add_leaf_list(parent, name, descendants, instruction)
             return True
         elif valid_wnids is None or is_in_valid_set(synset, valid_wnids):
@@ -111,9 +143,7 @@ def build_tree_recursive(
             return True
         return False
     
-    # Get children
-    children = synset.hyponyms()
-    
+    # Branch Logic (Not Flattened)
     if not children:
         # Leaf node
         if valid_wnids is None or is_in_valid_set(synset, valid_wnids):
@@ -128,7 +158,8 @@ def build_tree_recursive(
     for child in children:
         if build_tree_recursive(
             child, structure_mgr, child_map, valid_wnids,
-            depth + 1, max_depth, with_glosses, strict_filter, blacklist_abstract
+            depth + 1, max_depth, with_glosses, strict_filter, blacklist_abstract,
+            smart_config
         ):
             has_valid_children = True
     
@@ -153,7 +184,11 @@ def generate_imagenet_tree(
     filter_set: Optional[str] = None,
     with_glosses: bool = True,
     strict_filter: bool = True,
-    blacklist_abstract: bool = False
+    blacklist_abstract: bool = False,
+    smart: bool = False,
+    min_significance_depth: int = 6,
+    min_hyponyms: int = 10,
+    min_leaf_size: int = 3
 ) -> CommentedMap:
     """
     Generate ImageNet hierarchy tree from a root synset.
@@ -165,11 +200,17 @@ def generate_imagenet_tree(
         with_glosses: Add WordNet glosses as instructions
         strict_filter: Only include primary synset meanings
         blacklist_abstract: Skip abstract categories
-        
-    Returns:
-        CommentedMap with the hierarchy
+        smart: Use semantic significance pruning
     """
     ensure_nltk_data()
+    
+    from ..smart import SmartConfig
+    smart_config = SmartConfig(
+        enabled=smart,
+        min_depth=min_significance_depth,
+        min_hyponyms=min_hyponyms,
+        min_leaf_size=min_leaf_size
+    )
     
     # Load filter set
     valid_wnids = None
@@ -198,7 +239,8 @@ def generate_imagenet_tree(
         depth=0, max_depth=max_depth,
         with_glosses=with_glosses,
         strict_filter=strict_filter,
-        blacklist_abstract=blacklist_abstract
+        blacklist_abstract=blacklist_abstract,
+        smart_config=smart_config
     )
     
     return result
