@@ -24,7 +24,7 @@ class LLMEngine:
     def __init__(
         self,
         api_key: str,
-        model: str = "openai/gpt-4o-mini",
+        model: str = "google/gemma-3-27b-it:free",
         base_url: str = "https://openrouter.ai/api/v1"
     ):
         self.api_key = api_key

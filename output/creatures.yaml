@@ -1,0 +1,4085 @@
+animal:  # instruction: a living organism characterized by voluntary movement
+  work animal:  # instruction: an animal trained for and used for heavy labor
+    draft animal:  # instruction: an animal used for pulling heavy loads
+      - draft animal
+    beast of burden: # instruction: an animal such as a donkey or ox or elephant used for transporting loads or doing other heavy work
+      pack animal:  # instruction: an animal (such as a mule or burro or horse) used to carry loads
+        - packhorse
+  female: # instruction: an animal that produces gametes (ova) that can be fertilized by male gametes (spermatozoa)
+    filly:  # instruction: a young female horse under the age of four
+      - filly
+    female mammal: # instruction: animals that nourish their young with milk
+      - female mammal
+  molter: # instruction: an animal (especially birds and arthropods and reptiles) that periodically shed their outer layer (feathers or cuticle or skin or hair)
+    - molter
+  metazoan: # instruction: any animal of the subkingdom Metazoa; all animals except protozoans and sponges
+    - metazoan
+  hexapod: # instruction: an animal having six feet
+    - hexapod
+  critter: # instruction: a regional term for `creature' (especially for domestic animals)
+    - critter
+  chordate: # instruction: any animal of the phylum Chordata having a notochord or spinal column
+    cephalochordate:  # instruction: fish-like animals having a notochord rather than a true spinal column
+      lancelet:  # instruction: small translucent lancet-shaped burrowing marine animal; primitive forerunner of the vertebrates
+        - lancelet
+    tunicate: # instruction: primitive marine animal having a saclike unsegmented body and a urochord that is conspicuous in the larva
+      ascidian:  # instruction: minute sedentary marine invertebrate having a saclike body with siphons through which water enters and leaves
+        - sea squirt
+      doliolum: # instruction: free-swimming oceanic tunicate with a barrel-shaped transparent body
+        - doliolum
+      larvacean: # instruction: any member of the class Larvacea
+        - larvacean
+      appendicularia: # instruction: free-swimming tadpole-shaped pelagic tunicate resembling larvae of other tunicates
+        - appendicularia
+      salp: # instruction: minute floating marine tunicate having a transparent body with an opening at each end
+        - salp
+    vertebrate: # instruction: animals having a bony or cartilaginous skeleton with a segmented spinal column and a large brain enclosed in a skull or cranium
+      reptile:  # instruction: any cold-blooded vertebrate of the class Reptilia including tortoises, turtles, snakes, lizards, alligators, crocodiles, and extinct forms
+        - African chameleon
+        - African coral snake
+        - African crocodile
+        - African monitor
+        - American alligator
+        - American chameleon
+        - Asian coral snake
+        - Asian crocodile
+        - Atlantic ridley
+        - Australian blacksnake
+        - Australian coral snake
+        - California whipsnake
+        - Chihuahuan spotted whiptail
+        - Chinese alligator
+        - Chronoperates paradoxus
+        - Diapsida
+        - Edmontonia
+        - European tortoise
+        - Gila monster
+        - Indian cobra
+        - Indian python
+        - Indian rat snake
+        - Komodo dragon
+        - Lanthanotus borneensis
+        - Mojave rattlesnake
+        - Mononychus olecranus
+        - Morlett's crocodile
+        - Pacific ridley
+        - Sonoran lyre snake
+        - Sonoran whipsnake
+        - Texas horned lizard
+        - Texas tortoise
+        - Western box turtle
+        - Western diamondback
+        - Western ribbon snake
+        - adder
+        - agama
+        - agamid
+        - alligator
+        - alligator lizard
+        - alligator snapping turtle
+        - allosaur
+        - amethystine python
+        - anaconda
+        - anapsid
+        - anatotitan
+        - anguid lizard
+        - ankylosaur
+        - apatosaur
+        - archosaur
+        - argentinosaur
+        - armored dinosaur
+        - asp
+        - banded gecko
+        - banded krait
+        - banded sand snake
+        - barosaur
+        - basilisk
+        - beaded lizard
+        - black mamba
+        - black rat snake
+        - black-headed snake
+        - black-necked cobra
+        - blacksnake
+        - blind snake
+        - blindworm
+        - blue racer
+        - boa
+        - boa constrictor
+        - bone-headed dinosaur
+        - box turtle
+        - bull snake
+        - caiman
+        - caiman lizard
+        - canebrake rattlesnake
+        - carnosaur
+        - carpet snake
+        - ceratopsian
+        - ceratosaur
+        - chameleon
+        - checkered whiptail
+        - chelonian
+        - chicken snake
+        - chuckwalla
+        - coachwhip
+        - cobra
+        - coelophysis
+        - collared lizard
+        - colubrid snake
+        - common garter snake
+        - common iguana
+        - common kingsnake
+        - common snapping turtle
+        - common water snake
+        - compsognathus
+        - constrictor
+        - cooter
+        - copperhead
+        - coral snake
+        - corn snake
+        - corythosaur
+        - crocodile
+        - crocodilian reptile
+        - cynodont
+        - death adder
+        - deinocheirus
+        - deinonychus
+        - desert iguana
+        - desert tortoise
+        - diamondback
+        - diamondback terrapin
+        - diapsid
+        - dicynodont
+        - dimetrodon
+        - dinosaur
+        - diplodocus
+        - dragon
+        - dromaeosaur
+        - earless lizard
+        - eastern coral snake
+        - eastern fence lizard
+        - eastern ground snake
+        - eastern indigo snake
+        - edaphosaurus
+        - edmontosaurus
+        - elapid
+        - eoraptor
+        - false gavial
+        - fence lizard
+        - fer-de-lance
+        - flying gecko
+        - frilled lizard
+        - fringe-toed lizard
+        - gaboon viper
+        - garter snake
+        - gavial
+        - gecko
+        - genus Argentinosaurus
+        - giant tortoise
+        - glass lizard
+        - glossy snake
+        - gopher snake
+        - gopher tortoise
+        - grass snake
+        - green lizard
+        - green mamba
+        - green snake
+        - green turtle
+        - ground rattler
+        - ground snake
+        - ground-shaker
+        - hadrosaur
+        - hamadryad
+        - hawksbill turtle
+        - herrerasaur
+        - hognose snake
+        - hoop snake
+        - horned chameleon
+        - horned lizard
+        - horned viper
+        - horseshoe whipsnake
+        - ichthyosaur
+        - ichthyosaurus
+        - ictodosaur
+        - iguanid
+        - iguanodon
+        - indigo snake
+        - king snake
+        - krait
+        - lacertid lizard
+        - leaf-nosed snake
+        - leatherback turtle
+        - legless lizard
+        - leopard lizard
+        - lined snake
+        - lizard
+        - loggerhead
+        - lyre snake
+        - mamba
+        - maniraptor
+        - marine iguana
+        - massasauga
+        - megalosaur
+        - milk snake
+        - moloch
+        - monitor
+        - mountain devil
+        - mountain skink
+        - mud turtle
+        - musk turtle
+        - night lizard
+        - night snake
+        - nothosaur
+        - ornithischian
+        - ornithomimid
+        - ornithopod
+        - oviraptorid
+        - pachycephalosaur
+        - painted turtle
+        - pelycosaur
+        - pine snake
+        - pisanosaur
+        - pit viper
+        - plateau striped whiptail
+        - plesiosaur
+        - prairie rattlesnake
+        - protoceratops
+        - psittacosaur
+        - pterodactyl
+        - pterosaur
+        - puff adder
+        - python
+        - racer
+        - racerunner
+        - rat snake
+        - rattlesnake
+        - red-bellied snake
+        - red-bellied terrapin
+        - reticulated python
+        - ribbon snake
+        - ridley
+        - ringhals
+        - ringneck snake
+        - rock python
+        - rock rattlesnake
+        - rosy boa
+        - rough green snake
+        - rubber boa
+        - sagebrush lizard
+        - sand lizard
+        - sand snake
+        - saurian
+        - saurischian
+        - sauropod
+        - sea snake
+        - sea turtle
+        - side-blotched lizard
+        - sidewinder
+        - skink
+        - slider
+        - smooth green snake
+        - smooth softshell
+        - snake
+        - snapping turtle
+        - soft-shelled turtle
+        - speckled rattlesnake
+        - spectacled caiman
+        - spiny lizard
+        - spiny softshell
+        - staurikosaur
+        - stegosaur
+        - stenopterygius
+        - struthiomimus
+        - styracosaur
+        - synapsid
+        - taipan
+        - teiid lizard
+        - teju
+        - terrapin
+        - thecodont
+        - therapsid
+        - theropod
+        - thunder snake
+        - tiger rattlesnake
+        - tiger snake
+        - timber rattlesnake
+        - titanosaur
+        - tortoise
+        - trachodon
+        - tree lizard
+        - triceratops
+        - tuatara
+        - turtle
+        - tyrannosaur
+        - utahraptor
+        - velociraptor
+        - venomous lizard
+        - vine snake
+        - viper
+        - viperine grass snake
+        - water moccasin
+        - water snake
+        - western blind snake
+        - western coral snake
+        - western fence lizard
+        - western skink
+        - western whiptail
+        - whip-snake
+        - whiptail
+        - worm lizard
+        - zebra-tailed lizard
+      Amniota: # instruction: higher vertebrates (reptiles, birds and mammals) possessing an amnion during development
+        - Amniota
+      bird: # instruction: warm-blooded egg-laying vertebrates characterized by feathers and forelimbs modified as wings
+        - Accipitriformes
+        - Adelie
+        - Aegypiidae
+        - African grey
+        - American bittern
+        - American coot
+        - American crow
+        - American egret
+        - American gallinule
+        - American magpie
+        - American merganser
+        - American redstart
+        - American water ouzel
+        - American widgeon
+        - American woodcock
+        - Andean condor
+        - Archilochus colubris
+        - Arkansas kingbird
+        - Asian black grouse
+        - Atlantic puffin
+        - Audubon's caracara
+        - Audubon's warbler
+        - Australian magpie
+        - Australian turtledove
+        - Baltimore oriole
+        - Barrow's goldeneye
+        - Bewick's swan
+        - Blackburn
+        - Bohemian waxwing
+        - Brazilian trumpeter
+        - Bullock's oriole
+        - California condor
+        - California quail
+        - Canada jay
+        - Cape May warbler
+        - Carolina chickadee
+        - Carolina parakeet
+        - Carolina wren
+        - Cassin's kingbird
+        - Chinese goose
+        - Clark's nutcracker
+        - Cooper's hawk
+        - Cornish
+        - Dominique
+        - Dorking
+        - Egyptian vulture
+        - English sparrow
+        - Eskimo curlew
+        - Euopean hoopoe
+        - Eurasian kingfisher
+        - Eurasian woodcock
+        - European bittern
+        - European black grouse
+        - European creeper
+        - European cuckoo
+        - European curlew
+        - European gallinule
+        - European goatsucker
+        - European magpie
+        - European nuthatch
+        - European roller
+        - European sandpiper
+        - European shrike
+        - European swift
+        - European water ouzel
+        - Florida gallinule
+        - Greek partridge
+        - Hudsonian godwit
+        - Hungarian partridge
+        - Ibero-mesornis
+        - Java sparrow
+        - Kamchatkan sea eagle
+        - Manx shearwater
+        - Montagu's harrier
+        - Mother Carey's chicken
+        - New World blackbird
+        - New World chat
+        - New World flycatcher
+        - New World goldfinch
+        - New World jay
+        - New World oriole
+        - New World sparrow
+        - New World vulture
+        - New World warbler
+        - New Zealand wren
+        - Old World chat
+        - Old World coot
+        - Old World flycatcher
+        - Old World jay
+        - Old World oriole
+        - Old World quail
+        - Old World scops owl
+        - Old World vulture
+        - Old World warbler
+        - Old world white pelican
+        - Oriental scops owl
+        - Orpington
+        - Plymouth Rock
+        - Polynesian tattler
+        - Rhode Island red
+        - Rock Cornish
+        - Rocky Mountain jay
+        - Sinornis
+        - Streptopelia turtur
+        - Texas chachalaca
+        - Wilson's phalarope
+        - Wilson's snipe
+        - Wilson's warbler
+        - accentor
+        - adjutant bird
+        - afropavo
+        - albatross
+        - amazon
+        - ani
+        - anomalopteryx
+        - anseriform bird
+        - ant shrike
+        - ant thrush
+        - antbird
+        - apodiform bird
+        - aquatic bird
+        - archaeopteryx
+        - archaeornis
+        - argus
+        - auk
+        - auklet
+        - avadavat
+        - avocet
+        - babbler
+        - bald eagle
+        - banana quit
+        - band-tailed pigeon
+        - banded stilt
+        - bank martin
+        - bantam
+        - barbet
+        - barn owl
+        - barn swallow
+        - barnacle goose
+        - barred owl
+        - baya
+        - bearded vulture
+        - bee eater
+        - bellbird
+        - belted kingfisher
+        - bird of paradise
+        - bird of passage
+        - bird of prey
+        - bittern
+        - black duck
+        - black grouse
+        - black guillemot
+        - black kite
+        - black stork
+        - black swan
+        - black turnstone
+        - black vulture
+        - black-backed gull
+        - black-billed cuckoo
+        - black-capped chickadee
+        - black-crowned night heron
+        - black-footed albatross
+        - black-fronted bush shrike
+        - black-necked grebe
+        - black-necked stilt
+        - black-winged stilt
+        - blackbird
+        - blackcap
+        - blackcock
+        - blackpoll
+        - blue goose
+        - blue jay
+        - blue mockingbird
+        - blue peafowl
+        - blue tit
+        - blue-headed vireo
+        - bluebird
+        - bluethroat
+        - bluewing
+        - boatbill
+        - bobolink
+        - bobwhite
+        - booby
+        - bowerbird
+        - brambling
+        - brant
+        - broadbill
+        - brood hen
+        - brown creeper
+        - brown thrasher
+        - brush turkey
+        - budgerigar
+        - bufflehead
+        - bulbul
+        - bullfinch
+        - bunting
+        - bush shrike
+        - bushtit
+        - bustard
+        - butcherbird
+        - buteonine
+        - button quail
+        - buzzard
+        - cacique
+        - cackler
+        - cactus wren
+        - canary
+        - canvasback
+        - capercaillie
+        - capon
+        - caprimulgiform bird
+        - caracara
+        - carancha
+        - cardinal
+        - carinate
+        - carrier pigeon
+        - cassowary
+        - catbird
+        - cattle egret
+        - cedar waxwing
+        - chachalaca
+        - chaffinch
+        - chaja
+        - chewink
+        - chick
+        - chickadee
+        - chicken
+        - chicken hawk
+        - chimney swift
+        - chipping sparrow
+        - chough
+        - chuck-will's-widow
+        - chunga
+        - clay-colored robin
+        - cliff swallow
+        - coastal diving bird
+        - cob
+        - cochin
+        - cock
+        - cock of the rock
+        - cockateel
+        - cockatoo
+        - cockerel
+        - columbiform bird
+        - common European jay
+        - common brant goose
+        - common canary
+        - common murre
+        - common nutcracker
+        - common scoter
+        - common spoonbill
+        - common starling
+        - common yellowthroat
+        - condor
+        - coot
+        - coraciiform bird
+        - cormorant
+        - corncrake
+        - corvine bird
+        - coscoroba
+        - cotinga
+        - coucal
+        - courlan
+        - courser
+        - cowbird
+        - crake
+        - crane
+        - cream-colored courser
+        - creeper
+        - crested cariama
+        - crested myna
+        - crested screamer
+        - crocodile bird
+        - crossbill
+        - crow
+        - crow pheasant
+        - cuckoo
+        - cuculiform bird
+        - curassow
+        - curlew
+        - curlew sandpiper
+        - currawong
+        - cygnet
+        - dabbling duck
+        - dabchick
+        - dark-eyed junco
+        - dickeybird
+        - diving duck
+        - diving petrel
+        - dodo
+        - domestic fowl
+        - domestic pigeon
+        - dotterel
+        - dove
+        - dowitcher
+        - downy woodpecker
+        - drake
+        - duck
+        - duckling
+        - eagle
+        - eaglet
+        - eastern kingbird
+        - eastern meadowlark
+        - egret
+        - eider
+        - elephant bird
+        - emperor penguin
+        - emu
+        - ern
+        - evening grosbeak
+        - eyas
+        - fairy bluebird
+        - fairy swallow
+        - falcon
+        - falcon-gentle
+        - field sparrow
+        - fieldfare
+        - fig-bird
+        - finch
+        - fishing eagle
+        - flamingo
+        - flicker
+        - flycatching warbler
+        - frigate bird
+        - frogmouth
+        - fulmar
+        - gallinaceous bird
+        - gallinule
+        - game bird
+        - game fowl
+        - gamecock
+        - gander
+        - gannet
+        - garganey
+        - gaviiform seabird
+        - giant moa
+        - giant petrel
+        - gilded flicker
+        - gnatcatcher
+        - goatsucker
+        - godwit
+        - gold-crowned kinglet
+        - goldcrest
+        - golden eagle
+        - golden oriole
+        - golden pheasant
+        - golden plover
+        - goldeneye
+        - goldfinch
+        - goosander
+        - goose
+        - goshawk
+        - gosling
+        - grackle
+        - grassfinch
+        - great auk
+        - great blue heron
+        - great bowerbird
+        - great bustard
+        - great crested grebe
+        - great grey owl
+        - great horned owl
+        - great skua
+        - great snipe
+        - great white heron
+        - greater prairie chicken
+        - greater scaup
+        - greater whitethroat
+        - greater yellowlegs
+        - grebe
+        - green peafowl
+        - green woodpecker
+        - green-tailed towhee
+        - greenshank
+        - greenwing
+        - grey kingbird
+        - greyback
+        - greyhen
+        - greylag
+        - griffon vulture
+        - grosbeak
+        - ground roller
+        - grouse
+        - guan
+        - guillemot
+        - guinea fowl
+        - guinea hen
+        - gull
+        - gyrfalcon
+        - harpy
+        - harrier
+        - harrier eagle
+        - hawfinch
+        - hawk
+        - hawk owl
+        - heath hen
+        - hedge sparrow
+        - hen
+        - hepatic tanager
+        - hermit thrush
+        - heron
+        - herring gull
+        - hill myna
+        - hoatzin
+        - hobby
+        - homing pigeon
+        - honey buzzard
+        - honey eater
+        - honey guide
+        - honeycreeper
+        - honker
+        - hooded merganser
+        - hoopoe
+        - hoot owl
+        - hornbill
+        - horned owl
+        - horned puffin
+        - horned screamer
+        - house finch
+        - house martin
+        - house wren
+        - hummingbird
+        - ibis
+        - indigo bunting
+        - ivory gull
+        - ivorybill
+        - jabiru
+        - jacamar
+        - jackass penguin
+        - jackdaw
+        - jacksnipe
+        - jaeger
+        - jay
+        - junco
+        - jungle cock
+        - jungle fowl
+        - jungle hen
+        - kaki
+        - kea
+        - kestrel
+        - killdeer
+        - king penguin
+        - king vulture
+        - kingbird
+        - kingfisher
+        - kinglet
+        - kite
+        - kittiwake
+        - kiwi
+        - knot
+        - kookaburra
+        - lapwing
+        - larid
+        - lark
+        - laughing gull
+        - laughing owl
+        - layer
+        - least bittern
+        - least sandpiper
+        - lesser prairie chicken
+        - lesser scaup
+        - lesser whitethroat
+        - lesser yellowlegs
+        - limpkin
+        - linnet
+        - little auk
+        - little blue heron
+        - little egret
+        - little owl
+        - loggerhead shrike
+        - long-billed marsh wren
+        - long-eared owl
+        - loon
+        - lorikeet
+        - lory
+        - lovebird
+        - lyrebird
+        - macaw
+        - magpie
+        - maleo
+        - mallard
+        - mallee fowl
+        - mallee hen
+        - mamo
+        - manakin
+        - mandarin duck
+        - marabou
+        - marsh harrier
+        - marsh hawk
+        - marsh wren
+        - martin
+        - meadow pipit
+        - meadowlark
+        - megapode
+        - merganser
+        - mew
+        - migrant shrike
+        - migratory quail
+        - missel thrush
+        - moa
+        - mockingbird
+        - monal
+        - moorcock
+        - moorhen
+        - mother hen
+        - motmot
+        - mountain quail
+        - mourning dove
+        - murre
+        - muscovy duck
+        - mute swan
+        - myna
+        - myrtle warbler
+        - nester
+        - night bird
+        - night heron
+        - night raven
+        - nighthawk
+        - nightingale
+        - nonpasserine bird
+        - northern bobwhite
+        - northern oriole
+        - northern phalarope
+        - northern shrike
+        - notornis
+        - nutcracker
+        - nuthatch
+        - ocellated turkey
+        - oilbird
+        - old squaw
+        - openbill
+        - orchard oriole
+        - ortolan
+        - ortygan
+        - oscine
+        - osprey
+        - ostrich
+        - ovenbird
+        - owl
+        - owlet
+        - oystercatcher
+        - painted sandgrouse
+        - pallas's sandgrouse
+        - parakeet
+        - parasitic jaeger
+        - parrot
+        - partridge
+        - parula warbler
+        - passenger pigeon
+        - passerine
+        - peachick
+        - peacock
+        - peafowl
+        - peahen
+        - pectoral sandpiper
+        - pelagic bird
+        - pelecaniform seabird
+        - pelican
+        - pen
+        - penguin
+        - peregrine
+        - petrel
+        - pewee
+        - phalarope
+        - phasianid
+        - pheasant
+        - pheasant coucal
+        - phoebe
+        - piciform bird
+        - piculet
+        - pied-billed grebe
+        - pigeon
+        - pigeon guillemot
+        - pigeon hawk
+        - pin-tailed sandgrouse
+        - pine grosbeak
+        - pine siskin
+        - pink cockatoo
+        - pintail
+        - piping crow
+        - piping guan
+        - piping plover
+        - pipit
+        - pitta
+        - plain turkey
+        - plain wanderer
+        - plover
+        - pochard
+        - podicipitiform seabird
+        - policeman bird
+        - poll
+        - poorwill
+        - popinjay
+        - pouter pigeon
+        - prairie chicken
+        - pratincole
+        - procellariiform seabird
+        - protoavis
+        - ptarmigan
+        - puffbird
+        - puffin
+        - pullet
+        - purple finch
+        - purple gallinule
+        - purple grackle
+        - purple martin
+        - pyrrhuloxia
+        - quack-quack
+        - quail
+        - quetzal
+        - rail
+        - rainbow lorikeet
+        - ratite
+        - raven
+        - razorbill
+        - red grouse
+        - red jungle fowl
+        - red phalarope
+        - red siskin
+        - red-backed sandpiper
+        - red-breasted merganser
+        - red-breasted nuthatch
+        - red-breasted sapsucker
+        - red-breasted snipe
+        - red-eyed vireo
+        - red-legged partridge
+        - red-necked grebe
+        - red-shafted flicker
+        - red-shouldered hawk
+        - red-winged blackbird
+        - redhead
+        - redheaded woodpecker
+        - redpoll
+        - redshank
+        - redstart
+        - redtail
+        - redwing
+        - reed bunting
+        - reeve
+        - resplendent quetzel
+        - rhea
+        - riflebird
+        - rifleman bird
+        - ring ouzel
+        - ring-necked parakeet
+        - ring-necked pheasant
+        - ringdove
+        - ringtail
+        - roadrunner
+        - robin
+        - rock dove
+        - rock hopper
+        - rock wren
+        - roller
+        - rook
+        - rose-colored starling
+        - roseate spoonbill
+        - rough-legged hawk
+        - ruby-crowned kinglet
+        - ruddy duck
+        - ruddy turnstone
+        - ruff
+        - ruffed grouse
+        - rusty blackbird
+        - sacred ibis
+        - saddlebill
+        - sage grouse
+        - sanderling
+        - sandgrouse
+        - sandpiper
+        - sapsucker
+        - satin bowerbird
+        - scarlet tanager
+        - scaup
+        - scissortail
+        - scops owl
+        - scoter
+        - screamer
+        - screech owl
+        - scrubbird
+        - sea duck
+        - sea eagle
+        - sea swallow
+        - seabird
+        - secretary bird
+        - sedge warbler
+        - sedge wren
+        - serin
+        - sharp-tailed grouse
+        - shearwater
+        - sheldrake
+        - shelduck
+        - shoebill
+        - shorebird
+        - shoveler
+        - shrike
+        - siskin
+        - skimmer
+        - skua
+        - skylark
+        - smew
+        - snakebird
+        - snipe
+        - snow bunting
+        - snow goose
+        - snowy egret
+        - solan
+        - solitaire
+        - solitary vireo
+        - song sparrow
+        - song thrush
+        - songbird
+        - sparrow
+        - sparrow hawk
+        - sphenisciform seabird
+        - spoonbill
+        - spotted antbird
+        - spotted crake
+        - spotted flycatcher
+        - spotted owl
+        - spotted sandpiper
+        - spring chicken
+        - spruce grouse
+        - squab
+        - starling
+        - stilt
+        - stone curlew
+        - stonechat
+        - stork
+        - storm petrel
+        - stormy petrel
+        - striped button quail
+        - sulphur-crested cockatoo
+        - summer tanager
+        - surfbird
+        - swallow
+        - swallow-tailed kite
+        - swamp sparrow
+        - swan
+        - swift
+        - swiftlet
+        - tailorbird
+        - tanager
+        - tattler
+        - tawny eagle
+        - tawny owl
+        - teal
+        - tern
+        - thick-billed murre
+        - thickhead
+        - thornbill
+        - thrasher
+        - thrush
+        - thrush nightingale
+        - tiercel
+        - tinamou
+        - titmouse
+        - tody
+        - toucan
+        - toucanet
+        - touraco
+        - towhee
+        - tragopan
+        - tree sparrow
+        - tree swallow
+        - tree swift
+        - trogon
+        - tropic bird
+        - trumpeter
+        - tufted puffin
+        - tufted titmouse
+        - tundra swan
+        - turkey
+        - turkey cock
+        - turnstone
+        - turtledove
+        - twitterer
+        - tyrannid
+        - umbrella bird
+        - upland sandpiper
+        - varied Lorikeet
+        - veery
+        - verdin
+        - vermillion flycatcher
+        - vesper sparrow
+        - vireo
+        - vulture
+        - wading bird
+        - wagtail
+        - wall creeper
+        - wandering albatross
+        - warbler
+        - water ouzel
+        - water thrush
+        - water turkey
+        - waterfowl
+        - waxwing
+        - weaver
+        - weka
+        - western meadowlark
+        - western tanager
+        - western wood pewee
+        - wheatear
+        - whinchat
+        - whippoorwill
+        - whistling swan
+        - white pelican
+        - white stork
+        - white-bellied swallow
+        - white-breasted nuthatch
+        - white-chinned petrel
+        - white-crowned sparrow
+        - white-headed stilt
+        - white-rumped shrike
+        - white-tailed kite
+        - white-throated sparrow
+        - whole snipe
+        - whooper
+        - whooping crane
+        - whydah
+        - widgeon
+        - wild duck
+        - willet
+        - winter wren
+        - wood drake
+        - wood duck
+        - wood hoopoe
+        - wood ibis
+        - wood pigeon
+        - wood swallow
+        - wood thrush
+        - wood warbler
+        - woodcock
+        - woodhewer
+        - woodpecker
+        - wren
+        - wren warbler
+        - wren-tit
+        - wryneck
+        - yellow warbler
+        - yellow-bellied sapsucker
+        - yellow-breasted bunting
+        - yellow-breasted chat
+        - yellow-crowned night heron
+        - yellow-shafted flicker
+        - yellowhammer
+        - yellowlegs
+        - yellowthroat
+        - zebra finch
+      amniote: # instruction: any member of the Amniota
+        - amniote
+      tetrapod: # instruction: a vertebrate animal having four feet or legs or leglike appendages
+        - quadruped
+      aquatic vertebrate: # instruction: animal living wholly or chiefly in or on water
+        - American plaice
+        - American smooth dogfish
+        - Arctic char
+        - Atlantic cod
+        - Atlantic croaker
+        - Atlantic halibut
+        - Atlantic herring
+        - Atlantic manta
+        - Atlantic sailfish
+        - Atlantic salmon
+        - Atlantic sea bream
+        - Atlantic spiny dogfish
+        - Atlantic tripletail
+        - Bermuda chub
+        - Chile bonito
+        - Chinese paddlefish
+        - Coryphaena equisetis
+        - Coryphaena hippurus
+        - English sole
+        - European bream
+        - European catfish
+        - European flatfish
+        - European perch
+        - European sea bream
+        - European sole
+        - Florida pompano
+        - Florida smoothhound
+        - Holocentrus ascensionis
+        - John Dory
+        - Kentucky black bass
+        - Molly Miller
+        - Myxine glutinosa
+        - Myxinikela siroka
+        - New World opah
+        - Ostariophysi
+        - Pacific cod
+        - Pacific halibut
+        - Pacific herring
+        - Pacific sardine
+        - Pacific spiny dogfish
+        - Pacific sturgeon
+        - Pacific tripletail
+        - Rocky Mountain whitefish
+        - Scomberomorus maculatus
+        - Spanish grunt
+        - Spanish mackerel
+        - albacore
+        - alewife
+        - allice shad
+        - alligatorfish
+        - amberjack
+        - anaspid
+        - anchovy
+        - anemone fish
+        - angel shark
+        - angelfish
+        - anomalops
+        - archerfish
+        - argentine
+        - armored catfish
+        - armored searobin
+        - balloonfish
+        - barbu
+        - barndoor skate
+        - barracouta
+        - barracuda
+        - barrelfish
+        - basking shark
+        - bass
+        - batfish
+        - beaked salmon
+        - beaugregory
+        - belted sandfish
+        - beluga
+        - bigeye
+        - bigeye scad
+        - billfish
+        - biplane flying fish
+        - black bass
+        - black bream
+        - black buffalo
+        - black crappie
+        - black marlin
+        - black sea bass
+        - blackfish
+        - blackmouth bass
+        - blacktip shark
+        - blanquillo
+        - blennioid fish
+        - blenny
+        - blue catfish
+        - blue marlin
+        - blue pike
+        - blue shark
+        - bluefin
+        - bluefish
+        - bluegill
+        - bluehead
+        - bluethroat pikeblenny
+        - boarfish
+        - bolti
+        - bonefish
+        - bonito
+        - bonito shark
+        - bony fish
+        - bottom lurkers
+        - bottom-feeder
+        - bowfin
+        - boxfish
+        - brill
+        - brisling
+        - brit
+        - brook trout
+        - brotula
+        - brown bullhead
+        - brown trout
+        - buffalo fish
+        - bull shark
+        - bullhead
+        - burbot
+        - burrfish
+        - butterfish
+        - butterfly fish
+        - butterfly ray
+        - capelin
+        - carangid fish
+        - cardinal tetra
+        - cardinalfish
+        - carp
+        - carpet shark
+        - cartilaginous fish
+        - cat shark
+        - catalufa
+        - catfish
+        - catostomid
+        - ceratodus
+        - cero
+        - chaetodon
+        - chain pickerel
+        - channel catfish
+        - char
+        - characin
+        - chimaera
+        - chinook
+        - chub
+        - chub mackerel
+        - chum salmon
+        - cichlid
+        - cisco
+        - climbing perch
+        - clingfish
+        - clinid
+        - clown anemone fish
+        - clupeid fish
+        - cobia
+        - cod
+        - codling
+        - coelacanth
+        - coho
+        - common American shad
+        - common eel
+        - common mackerel
+        - common shiner
+        - conchfish
+        - coney
+        - conger
+        - conodont
+        - copper rockfish
+        - corbina
+        - cornetfish
+        - cottonwick
+        - cow shark
+        - cowfish
+        - cownose ray
+        - crappie
+        - creole-fish
+        - crevalle jack
+        - croaker
+        - crossopterygian
+        - crucian carp
+        - crucifix fish
+        - cunner
+        - cusk
+        - cusk-eel
+        - cutlassfish
+        - cyclostome
+        - cyprinid
+        - cypriniform fish
+        - cyprinodont
+        - dace
+        - damselfish
+        - dealfish
+        - deepwater pipefish
+        - deepwater squirrelfish
+        - devil ray
+        - doctorfish
+        - dogfish
+        - dollarfish
+        - dolphinfish
+        - domestic carp
+        - dory
+        - dragonet
+        - driftfish
+        - drum
+        - dusky shark
+        - dwarf pipefish
+        - eagle ray
+        - eel
+        - eelblenny
+        - eelpout
+        - elasmobranch
+        - electric catfish
+        - electric eel
+        - electric ray
+        - elver
+        - emerald shiner
+        - eptatretus
+        - escolar
+        - filefish
+        - fingerling
+        - fish
+        - fish doctor
+        - flagfish
+        - flame fish
+        - flashlight fish
+        - flatfish
+        - flathead
+        - flathead catfish
+        - flounder
+        - flying fish
+        - flying gurnard
+        - food fish
+        - freshwater bass
+        - freshwater bream
+        - frogfish
+        - gadoid
+        - game fish
+        - ganoid
+        - gar
+        - gempylid
+        - goatfish
+        - goby
+        - golden shiner
+        - goldfish
+        - goosefish
+        - great barracuda
+        - great white shark
+        - greeneye
+        - greenling
+        - grenadier
+        - grey flounder
+        - grey skate
+        - grey snapper
+        - groundfish
+        - grouper
+        - grubby
+        - grunt
+        - gudgeon
+        - guitarfish
+        - gunnel
+        - guppy
+        - gurnard
+        - haddock
+        - hagfish
+        - hake
+        - halfbeak
+        - halibut
+        - hammerhead
+        - handsaw fish
+        - harvestfish
+        - herring
+        - heterostracan
+        - hind
+        - hog sucker
+        - hogchoker
+        - hogfish
+        - holocephalan
+        - horned pout
+        - horned whiff
+        - horse mackerel
+        - jack
+        - jackknife-fish
+        - jacksmelt
+        - jawfish
+        - jawless vertebrate
+        - jewfish
+        - kelp greenling
+        - killifish
+        - king mackerel
+        - king whiting
+        - kingfish
+        - ladyfish
+        - lake trout
+        - lake whitefish
+        - lamprey
+        - lancetfish
+        - landlocked salmon
+        - lanternfish
+        - largemouth
+        - leather carp
+        - leatherjacket
+        - lefteye flounder
+        - lemon shark
+        - lemon sole
+        - ling
+        - lingcod
+        - lionfish
+        - little skate
+        - liza
+        - lizardfish
+        - loach
+        - longfin mako
+        - lookdown
+        - louvar
+        - lumpfish
+        - lumpsucker
+        - lungfish
+        - mackerel
+        - mackerel scad
+        - mackerel shark
+        - maigre
+        - mako
+        - manta
+        - margate
+        - marlin
+        - mediterranean anchovy
+        - menhaden
+        - miller's-thumb
+        - minnow
+        - mirror carp
+        - mojarra
+        - mollie
+        - monoplane flying fish
+        - moonfish
+        - moray
+        - mosquitofish
+        - mouthbreeder
+        - mudskipper
+        - mullet
+        - mulloway
+        - mummichog
+        - muskellunge
+        - mutton snapper
+        - needlefish
+        - northern pike
+        - northern sea robin
+        - northern snakehead
+        - northern whiting
+        - nurse shark
+        - oarfish
+        - ocean pout
+        - ocean sunfish
+        - oilfish
+        - opah
+        - osteostracan
+        - ostracoderm
+        - oyster fish
+        - paddlefish
+        - painted greenling
+        - palometa
+        - parr
+        - parrotfish
+        - pearlfish
+        - pearly razorfish
+        - perch
+        - percoid fish
+        - permit
+        - pickerel
+        - pigfish
+        - pike
+        - pike-perch
+        - pikeblenny
+        - pilchard
+        - pilotfish
+        - pinfish
+        - pipefish
+        - piranha
+        - placoderm
+        - plaice
+        - platy
+        - plectognath
+        - plumed scorpionfish
+        - poacher
+        - pogge
+        - pollack
+        - pomfret
+        - pompano
+        - pompon
+        - porbeagle
+        - porcupinefish
+        - porgy
+        - porkfish
+        - prickleback
+        - puddingwife
+        - puffer
+        - pumpkinseed
+        - queen triggerfish
+        - rabbitfish
+        - rainbow runner
+        - rainbow seaperch
+        - rainbow smelt
+        - rainbow trout
+        - ray
+        - razor fish
+        - red drum
+        - red goatfish
+        - red porgy
+        - red rockfish
+        - red snapper
+        - redfin pickerel
+        - redfish
+        - redhorse
+        - reef squirrelfish
+        - remora
+        - requiem shark
+        - ribbonfish
+        - righteye flounder
+        - river shad
+        - rivulus
+        - roach
+        - robalo
+        - rock bass
+        - rock beauty
+        - rock gunnel
+        - rock hind
+        - rock sea bass
+        - rockfish
+        - rosefish
+        - rough fish
+        - roughtail stingray
+        - round scad
+        - round whitefish
+        - rudd
+        - rudderfish
+        - runner
+        - sailfish
+        - sailor's-choice
+        - salmon
+        - salmonid
+        - sand dab
+        - sand lance
+        - sand sole
+        - sand stargazer
+        - sand tiger
+        - sandbar shark
+        - sandfish
+        - sardine
+        - sargassum fish
+        - saury
+        - sawfish
+        - scad
+        - schoolmaster
+        - sciaenid fish
+        - scombroid
+        - scorpaenid
+        - scorpaenoid
+        - scorpionfish
+        - scrod
+        - sculpin
+        - scup
+        - sea bass
+        - sea bream
+        - sea catfish
+        - sea chub
+        - sea lamprey
+        - sea raven
+        - sea robin
+        - sea trout
+        - seahorse
+        - sergeant major
+        - serranid fish
+        - shad
+        - shanny
+        - shark
+        - sharksucker
+        - sharptail mola
+        - sheepshead
+        - sheepshead porgy
+        - shiner
+        - shortfin mako
+        - shovelhead
+        - shrimpfish
+        - sierra
+        - sild
+        - silurid
+        - silver hake
+        - silver jenny
+        - silver perch
+        - silver whiting
+        - silverfish
+        - silversides
+        - skate
+        - skillet fish
+        - skipjack
+        - sleeper
+        - slippery dick
+        - smalleye hammerhead
+        - smallmouth
+        - smalltooth sawfish
+        - smelt
+        - smooth dogfish
+        - smooth hammerhead
+        - smoothhound
+        - snail darter
+        - snailfish
+        - snake mackerel
+        - snakeblenny
+        - snapper
+        - snipefish
+        - snook
+        - soapfish
+        - sockeye
+        - soft-finned fish
+        - soldierfish
+        - sole
+        - soupfin shark
+        - southern flounder
+        - spadefish
+        - sparid
+        - sparling
+        - spawner
+        - spearfish
+        - spiny dogfish
+        - spiny puffer
+        - spiny-finned fish
+        - spotted eagle ray
+        - spotted sunfish
+        - spotted weakfish
+        - squaretail
+        - squirrelfish
+        - stargazer
+        - stickleback
+        - stingray
+        - stone bass
+        - stonefish
+        - striped bass
+        - striped drum
+        - striped killifish
+        - striped marlin
+        - striped mullet
+        - sturgeon
+        - sucker
+        - summer flounder
+        - sunfish
+        - surfperch
+        - surgeonfish
+        - sweeper
+        - swordfish
+        - swordtail
+        - tarpon
+        - tautog
+        - teleost fish
+        - ten-spined stickleback
+        - tench
+        - tetra
+        - thorny skate
+        - threadfin
+        - threadfish
+        - three-spined stickleback
+        - thresher
+        - tiger shark
+        - tilefish
+        - timucu
+        - toadfish
+        - tomtate
+        - tonguefish
+        - topminnow
+        - triggerfish
+        - tripletail
+        - trout
+        - trumpetfish
+        - tub gurnard
+        - tuna
+        - turbot
+        - vermillion rockfish
+        - viviparous eelpout
+        - wahoo
+        - walleye
+        - weakfish
+        - whale shark
+        - whale sucker
+        - whiff
+        - white crappie
+        - white croaker
+        - white marlin
+        - white mullet
+        - white perch
+        - whitebait
+        - whitefish
+        - whitetip shark
+        - whiting
+        - windowpane
+        - winter flounder
+        - wolffish
+        - worm fish
+        - wrasse
+        - wrymouth
+        - yellow bass
+        - yellow goatfish
+        - yellow jack
+        - yellow perch
+        - yellowfin
+        - yellowfin croaker
+        - yellowfin mojarra
+        - yellowtail
+        - yellowtail flounder
+        - young fish
+      gnathostome: # instruction: a vertebrate animal possessing true jaws
+        - gnathostome
+      mammal: # instruction: any warm-blooded vertebrate having the skin more or less covered with hair; young are born alive except for the small subclass of monotremes and nourished with milk
+        - Aberdeen Angus
+        - Abyssinian
+        - Aegyptopithecus
+        - Afghan hound
+        - African elephant
+        - African hunting dog
+        - African wild ass
+        - Africander
+        - Airedale
+        - Alaska fur seal
+        - Alaskan brown bear
+        - Algeripithecus minutus
+        - American Staffordshire terrier
+        - American badger
+        - American bison
+        - American black bear
+        - American flying squirrel
+        - American foxhound
+        - American harvest mouse
+        - American marten
+        - American mastodon
+        - American mink
+        - American red squirrel
+        - American saddle horse
+        - American shrew mole
+        - American water shrew
+        - American water spaniel
+        - Angora
+        - Appaloosa
+        - Appenzeller
+        - Arabian
+        - Arabian camel
+        - Arctic fox
+        - Arctic ground squirrel
+        - Asian wild ox
+        - Asiatic black bear
+        - Asiatic flying squirrel
+        - Asiatic shrew mole
+        - Atlantic bottlenose dolphin
+        - Atlantic walrus
+        - Australian sea lion
+        - Australian terrier
+        - Australopithecus afarensis
+        - Australopithecus africanus
+        - Australopithecus boisei
+        - Australopithecus robustus
+        - Ayrshire
+        - Bactrian camel
+        - Barbary ape
+        - Bedlington terrier
+        - Belgian hare
+        - Belgian sheepdog
+        - Bengal tiger
+        - Bernese mountain dog
+        - Blenheim spaniel
+        - Border collie
+        - Border terrier
+        - Boskop man
+        - Boston bull
+        - Bouvier des Flandres
+        - Brabancon griffon
+        - Brahman
+        - Brittany spaniel
+        - Brown Swiss
+        - Burmese cat
+        - California sea lion
+        - Canada lynx
+        - Canada porcupine
+        - Cape buffalo
+        - Cardigan
+        - Cashmere goat
+        - Charolais
+        - Chesapeake Bay retriever
+        - Cheviot
+        - Chiacoan peccary
+        - Chihuahua
+        - Clydesdale
+        - Clydesdale terrier
+        - Cotswold
+        - Cro-magnon
+        - Cryptoprocta
+        - Cynocephalus variegatus
+        - Cynopterus sphinx
+        - Dall sheep
+        - Damaraland mole rat
+        - Dandie Dinmont
+        - Desmodus rotundus
+        - Devon
+        - Doberman
+        - Duplicidentata
+        - Durham
+        - Egyptian cat
+        - English foxhound
+        - English setter
+        - English springer
+        - English toy spaniel
+        - EntleBucher
+        - Eskimo dog
+        - Eurasian badger
+        - Eurasian hamster
+        - Eurasian otter
+        - European hare
+        - European lemming
+        - European rabbit
+        - European water shrew
+        - European wildcat
+        - European wood mouse
+        - Exmoor
+        - Fissipedia
+        - French bulldog
+        - Friesian
+        - Galloway
+        - Gazella subgutturosa
+        - German shepherd
+        - German short-haired pointer
+        - Gordon setter
+        - Great Dane
+        - Great Pyrenees
+        - Greater Swiss Mountain dog
+        - Guernsey
+        - Hampshire
+        - Hereford
+        - Homo erectus
+        - Homo habilis
+        - Homo sapiens
+        - Homo sapiens sapiens
+        - Homo soloensis
+        - Hudson bay collared lemming
+        - Ibizan hound
+        - Indian buffalo
+        - Indian elephant
+        - Indian mongoose
+        - Indian rhinoceros
+        - Irish setter
+        - Irish terrier
+        - Irish water spaniel
+        - Irish wolfhound
+        - Italian greyhound
+        - Jaculus jaculus
+        - Japanese deer
+        - Japanese spaniel
+        - Java man
+        - Javanthropus
+        - Jersey
+        - Kerry blue terrier
+        - King Charles spaniel
+        - Labrador retriever
+        - Lakeland terrier
+        - Leonberg
+        - Lhasa
+        - Lincoln
+        - Lippizan
+        - Madagascar cat
+        - Malayan tapir
+        - Maltese
+        - Maltese dog
+        - Manchester terrier
+        - Manx
+        - Marco Polo sheep
+        - Mediterranean water shrew
+        - Mexican hairless
+        - Mexican pocket mouse
+        - Morgan
+        - Neandertal man
+        - New World beaver
+        - New World least weasel
+        - New World monkey
+        - New World mouse
+        - New World porcupine
+        - New World tapir
+        - Newfoundland
+        - Norfolk terrier
+        - Norwegian elkhound
+        - Norwich terrier
+        - Old English sheepdog
+        - Old World beaver
+        - Old World buffalo
+        - Old World least weasel
+        - Old World monkey
+        - Old World porcupine
+        - Ord kangaroo rat
+        - Pacific bottlenose dolphin
+        - Pacific walrus
+        - Paranthropus
+        - Pekinese
+        - Peking man
+        - Pembroke
+        - Percheron
+        - Persian cat
+        - Phyllostomus hastatus
+        - Pithecanthropus
+        - Plott hound
+        - Pomeranian
+        - Przewalski's horse
+        - Pteropus capestratus
+        - Pteropus hypomelanus
+        - Rambouillet
+        - Reynard
+        - Rhodesian man
+        - Rhodesian ridgeback
+        - Rottweiler
+        - Saint Bernard
+        - Saluki
+        - Samoyed
+        - Santa Gertrudis
+        - Scotch terrier
+        - Scottish deerhound
+        - Sealyham terrier
+        - Seeing Eye dog
+        - Sennenhunde
+        - Shetland pony
+        - Shetland sheepdog
+        - Shih-Tzu
+        - Siamese cat
+        - Siberian husky
+        - Sinanthropus
+        - Sivapithecus
+        - Skye terrier
+        - Smiledon californicus
+        - Solo man
+        - South American sea lion
+        - Staffordshire bullterrier
+        - Steller sea lion
+        - Steller's sea cow
+        - Sussex spaniel
+        - Syrian bear
+        - Tarsius glis
+        - Tarsius syrichta
+        - Tasmanian devil
+        - Tennessee walker
+        - Thomson's gazelle
+        - Tibetan mastiff
+        - Tibetan terrier
+        - Unguiculata
+        - Ungulata
+        - Virginia deer
+        - Walker hound
+        - Weimaraner
+        - Welsh
+        - Welsh pony
+        - Welsh springer spaniel
+        - Welsh terrier
+        - West Highland white terrier
+        - Yorkshire terrier
+        - Zinjanthropus
+        - aardvark
+        - aardwolf
+        - abrocome
+        - addax
+        - affenpinscher
+        - agouti
+        - alley cat
+        - alpaca
+        - angwantibo
+        - anoa
+        - ant bear
+        - anteater
+        - antelope
+        - antelope squirrel
+        - anthropoid
+        - anthropoid ape
+        - aoudad
+        - apar
+        - ape
+        - aperea
+        - aquatic mammal
+        - argali
+        - armadillo
+        - ass
+        - attack dog
+        - aurochs
+        - australopithecine
+        - aye-aye
+        - babirusa
+        - baboon
+        - badger
+        - baleen whale
+        - banded palm civet
+        - bandicoot
+        - bandicoot rat
+        - banteng
+        - baronduki
+        - barren ground caribou
+        - basenji
+        - bassarisk
+        - basset
+        - bat
+        - bay
+        - beagle
+        - beaked whale
+        - bear
+        - bear cub
+        - bearded seal
+        - beaver
+        - beaver rat
+        - beef
+        - bellwether
+        - bettong
+        - bezoar goat
+        - big brown bat
+        - big cat
+        - big-eared bat
+        - bighorn
+        - billy
+        - binturong
+        - bird dog
+        - bison
+        - bitch
+        - black fox
+        - black rat
+        - black rhinoceros
+        - black sheep
+        - black squirrel
+        - black-and-tan coonhound
+        - black-footed ferret
+        - black-tailed deer
+        - blackbuck
+        - blacktail jackrabbit
+        - blacktail prairie dog
+        - bloodhound
+        - blue fox
+        - blue point Siamese
+        - blue whale
+        - bluetick
+        - boar
+        - boarhound
+        - bobcat
+        - bongo
+        - bonnet macaque
+        - borzoi
+        - bottle-nosed whale
+        - bottlenose dolphin
+        - bovid
+        - bovine
+        - bowhead
+        - boxer
+        - brewer's mole
+        - briard
+        - broadtail
+        - brocket
+        - bronco
+        - brood bitch
+        - broodmare
+        - brown bat
+        - brown bear
+        - brown hyena
+        - brown lemming
+        - brown rat
+        - bruin
+        - brush-tailed phalanger
+        - brush-tailed porcupine
+        - buck
+        - bucking bronco
+        - buckskin
+        - bull
+        - bull mastiff
+        - bulldog
+        - bullock
+        - bullterrier
+        - bunny
+        - burro
+        - bushbuck
+        - cactus mouse
+        - cairn
+        - camel
+        - canine
+        - capuchin
+        - capybara
+        - carabao
+        - caracal
+        - caribou
+        - carnivore
+        - carnivorous bat
+        - carthorse
+        - cat
+        - cattalo
+        - cattle
+        - cavalry horse
+        - cave myotis
+        - cavy
+        - cayuse
+        - central chimpanzee
+        - cetacean
+        - chacma
+        - chamois
+        - charger
+        - cheetah
+        - chestnut
+        - chevrotain
+        - chickeree
+        - chigetai
+        - chimpanzee
+        - chinchilla
+        - chipmunk
+        - chow
+        - cinnamon bear
+        - civet
+        - clumber
+        - coach horse
+        - coati
+        - cob
+        - cocker spaniel
+        - collared peccary
+        - collared pika
+        - collie
+        - colobus
+        - columbian mammoth
+        - common dolphin
+        - common eland
+        - common lynx
+        - common opossum
+        - common raccoon
+        - common shrew
+        - common wallaby
+        - common zebra
+        - coondog
+        - coonhound
+        - corgi
+        - cotton mouse
+        - cotton rat
+        - cougar
+        - courser
+        - cow
+        - cow pony
+        - coydog
+        - coyote
+        - coypu
+        - crab-eating dog
+        - crab-eating macaque
+        - crab-eating opossum
+        - crab-eating raccoon
+        - crabeater seal
+        - crowbait
+        - cur
+        - curly-coated retriever
+        - cuscus
+        - dachshund
+        - dairy cattle
+        - dalmatian
+        - dark horse
+        - dasyure
+        - dasyurid marsupial
+        - deer
+        - deer mouse
+        - dhole
+        - digitigrade mammal
+        - dik-dik
+        - dingo
+        - dinoceras
+        - dinocerate
+        - doe
+        - dog
+        - dolphin
+        - domestic ass
+        - domestic cat
+        - domestic goat
+        - domestic llama
+        - domestic sheep
+        - dormouse
+        - douroucouli
+        - draft horse
+        - drill
+        - dryopithecine
+        - dugong
+        - dun
+        - dusky-footed wood rat
+        - dusky-footed woodrat
+        - dwarf sperm whale
+        - eared seal
+        - earless seal
+        - eastern chimpanzee
+        - eastern chipmunk
+        - eastern cottontail
+        - eastern dasyure
+        - eastern grey squirrel
+        - eastern lowland gorilla
+        - eastern pipistrel
+        - eastern woodrat
+        - echidna
+        - edentate
+        - eland
+        - elephant
+        - elephant seal
+        - elk
+        - entellus
+        - eohippus
+        - equine
+        - ermine
+        - even-toed ungulate
+        - ewe
+        - fallow deer
+        - false saber-toothed tiger
+        - false vampire
+        - fanaloka
+        - farm horse
+        - fawn
+        - feist
+        - feline
+        - female mammal
+        - ferret
+        - ferret badger
+        - field mouse
+        - field spaniel
+        - finback
+        - fisher
+        - fissiped mammal
+        - flat-coated retriever
+        - flickertail
+        - flying fox
+        - flying lemur
+        - flying mouse
+        - flying phalanger
+        - forest goat
+        - fossa
+        - fossorial mammal
+        - fox
+        - fox squirrel
+        - fox terrier
+        - foxhound
+        - freetail
+        - frosted bat
+        - fruit bat
+        - fur seal
+        - galago
+        - gaur
+        - gayal
+        - gazelle
+        - gee-gee
+        - gelding
+        - gemsbok
+        - genet
+        - gerbil
+        - gerenuk
+        - giant armadillo
+        - giant eland
+        - giant kangaroo
+        - giant panda
+        - giant schnauzer
+        - gib
+        - gibbon
+        - giraffe
+        - glutton
+        - gnu
+        - goat
+        - goat antelope
+        - golden hamster
+        - golden mole
+        - golden retriever
+        - gomphothere
+        - gopher
+        - goral
+        - gorilla
+        - grade
+        - grampus
+        - grasshopper mouse
+        - great ape
+        - greater kudu
+        - greater pichiciego
+        - green monkey
+        - grevy's zebra
+        - grey
+        - grey fox
+        - grey lemming
+        - grey whale
+        - greyhound
+        - griffon
+        - grison
+        - grivet
+        - grizzly
+        - groenendael
+        - ground sloth
+        - ground squirrel
+        - groundhog
+        - guadalupe fur seal
+        - guanaco
+        - guano bat
+        - guenon
+        - guereza
+        - guide dog
+        - guinea pig
+        - hack
+        - hackney
+        - hairy-legged vampire bat
+        - hamster
+        - harbor porpoise
+        - harbor seal
+        - hare
+        - hare wallaby
+        - harness horse
+        - harnessed antelope
+        - harp seal
+        - harpy
+        - harrier
+        - hart
+        - hartebeest
+        - harvest mouse
+        - hazel mouse
+        - hearing dog
+        - hedgehog
+        - heifer
+        - hind
+        - hinny
+        - hippopotamus
+        - hispid pocket mouse
+        - hoary marmot
+        - hog
+        - hog badger
+        - hog-nosed skunk
+        - hognose bat
+        - hominid
+        - hominoid
+        - homo
+        - hooded seal
+        - hooded skunk
+        - horse
+        - horseshoe bat
+        - hound
+        - house mouse
+        - housedog
+        - howler monkey
+        - humpback
+        - hunting dog
+        - hyena
+        - hyrax
+        - ibex
+        - ice bear
+        - ichneumon
+        - impala
+        - imperial mammoth
+        - indri
+        - insectivore
+        - jack
+        - jackal
+        - jackass bat
+        - jackrabbit
+        - jaguar
+        - jaguarundi
+        - jennet
+        - jerboa
+        - jerboa kangaroo
+        - jerboa rat
+        - jird
+        - jumping mouse
+        - jungle cat
+        - kaffir cat
+        - kanchil
+        - kangaroo
+        - kangaroo mouse
+        - kangaroo rat
+        - keeshond
+        - kelpie
+        - kiang
+        - kid
+        - killer whale
+        - kinkajou
+        - kit fox
+        - kitty
+        - koala
+        - kob
+        - komondor
+        - kudu
+        - kuvasz
+        - lagomorph
+        - langur
+        - lapdog
+        - lapin
+        - large civet
+        - large poodle
+        - leafnose bat
+        - least shrew
+        - lechwe
+        - lemming
+        - lemur
+        - leopard
+        - leopard cat
+        - leopardess
+        - leporid
+        - lerot
+        - lesser ape
+        - lesser kudu
+        - lesser panda
+        - lesser rorqual
+        - leveret
+        - liger
+        - lion
+        - lion cub
+        - lioness
+        - lionet
+        - little brown bat
+        - little chief hare
+        - liver chestnut
+        - liver-spotted dalmatian
+        - livestock
+        - llama
+        - loir
+        - long-eared bat
+        - long-tailed porcupine
+        - longhorn
+        - longtail weasel
+        - longwool
+        - lynx
+        - macaque
+        - macrotus
+        - malamute
+        - male horse
+        - malinois
+        - mammoth
+        - manatee
+        - mandrill
+        - mangabey
+        - mantled ground squirrel
+        - manul
+        - mapinguari
+        - mara
+        - mare
+        - margay
+        - markhor
+        - marmoset
+        - marmot
+        - marsh hare
+        - marsupial
+        - marten
+        - masked shrew
+        - mastiff
+        - mastiff bat
+        - mastodon
+        - meadow jumping mouse
+        - meadow vole
+        - meerkat
+        - megatherian
+        - merino
+        - mesohippus
+        - metatherian
+        - milking shorthorn
+        - miniature pinscher
+        - miniature poodle
+        - miniature schnauzer
+        - mink
+        - moke
+        - mole
+        - mole rat
+        - mongoose
+        - monkey
+        - monotreme
+        - mouflon
+        - mountain beaver
+        - mountain chinchilla
+        - mountain goat
+        - mountain gorilla
+        - mountain nyala
+        - mountain paca
+        - mountain sheep
+        - mountain zebra
+        - mouse
+        - mouse-eared bat
+        - mouser
+        - mudder
+        - muishond
+        - mule
+        - mule deer
+        - muntjac
+        - murine
+        - musk deer
+        - musk kangaroo
+        - musk ox
+        - muskrat
+        - mustang
+        - musteline mammal
+        - mylodon
+        - mylodontid
+        - nail-tailed wallaby
+        - naked mole rat
+        - nanny
+        - napu
+        - narwhal
+        - native cat
+        - nilgai
+        - nonstarter
+        - northern bog lemming
+        - northern flying squirrel
+        - northern pocket gopher
+        - nude mouse
+        - numbat
+        - nyala
+        - ocelot
+        - odd-toed ungulate
+        - okapi
+        - onager
+        - opossum
+        - opossum rat
+        - orange bat
+        - orangutan
+        - oryx
+        - otter
+        - otter shrew
+        - otterhound
+        - ox
+        - paca
+        - pacer
+        - pachyderm
+        - packhorse
+        - packrat
+        - pademelon
+        - palfrey
+        - pallid bat
+        - palm cat
+        - palomino
+        - pangolin
+        - panther
+        - papillon
+        - pariah dog
+        - patas
+        - peba
+        - peccary
+        - peludo
+        - pentail
+        - pere david's deer
+        - phalanger
+        - phenacomys
+        - pichiciago
+        - pied lemming
+        - pika
+        - pilot whale
+        - pinche
+        - pine marten
+        - pine vole
+        - pinniped mammal
+        - pinscher
+        - pinto
+        - pipistrelle
+        - placental
+        - plains pocket gopher
+        - plains pocket mouse
+        - plantigrade mammal
+        - platypus
+        - plow horse
+        - pocket mouse
+        - pocket rat
+        - pocketed bat
+        - pointer
+        - polar hare
+        - pole horse
+        - polecat
+        - police dog
+        - pollard
+        - polo pony
+        - pony
+        - pooch
+        - poodle
+        - porcupine
+        - porker
+        - porpoise
+        - post horse
+        - potoroo
+        - potto
+        - pouched mole
+        - pouched mouse
+        - prairie dog
+        - prairie vole
+        - prancer
+        - pricket
+        - primate
+        - proboscidean
+        - proboscis monkey
+        - proconsul
+        - procyonid
+        - pronghorn
+        - prosimian
+        - protohippus
+        - prototherian
+        - pug
+        - puku
+        - puppy
+        - pygmy chimpanzee
+        - pygmy marmoset
+        - pygmy mouse
+        - pygmy sperm whale
+        - quagga
+        - quarter horse
+        - queen
+        - rabbit
+        - rabbit ears
+        - rabbit-eared bandicoot
+        - raccoon
+        - raccoon dog
+        - racehorse
+        - ram
+        - rat
+        - rat kangaroo
+        - rat terrier
+        - ratel
+        - razorback
+        - red bat
+        - red deer
+        - red fox
+        - red poll
+        - red squirrel
+        - red wolf
+        - red-backed mouse
+        - redbone
+        - remount
+        - retriever
+        - rhesus
+        - rhinoceros
+        - rice rat
+        - right whale
+        - river dolphin
+        - river otter
+        - roan
+        - rock hyrax
+        - rock squirrel
+        - rock wallaby
+        - rodent
+        - roe deer
+        - roebuck
+        - rogue elephant
+        - rorqual
+        - round-tailed muskrat
+        - royal
+        - rudapithecus
+        - ruminant
+        - saber-toothed tiger
+        - sable
+        - sable antelope
+        - saddle horse
+        - saiga
+        - saki
+        - sambar
+        - sand cat
+        - sand rat
+        - sassaby
+        - sausage dog
+        - schipperke
+        - schnauzer
+        - sea cow
+        - sea lion
+        - sea otter
+        - seal
+        - sei whale
+        - seizure-alert dog
+        - serotine
+        - serow
+        - serval
+        - setter
+        - sewer rat
+        - sheep
+        - shepherd dog
+        - shire
+        - short-tailed shrew
+        - shrew
+        - shrew mole
+        - siamang
+        - silky anteater
+        - silky pocket mouse
+        - silky tamarin
+        - silky terrier
+        - silver fox
+        - silverback
+        - simian
+        - skunk
+        - sled dog
+        - slender loris
+        - slender-tailed meerkat
+        - sloth
+        - sloth bear
+        - slow loris
+        - small civet
+        - smooth-haired fox terrier
+        - snake muishond
+        - snow leopard
+        - snowshoe hare
+        - soft-coated wheaten terrier
+        - sorrel
+        - southeastern pocket gopher
+        - southern bog lemming
+        - southern flying squirrel
+        - sow
+        - spaniel
+        - spearnose bat
+        - sperm whale
+        - spider monkey
+        - spitz
+        - sporting dog
+        - spotted hyena
+        - spotted lynx
+        - spotted skunk
+        - spouter
+        - springbok
+        - springer
+        - springer spaniel
+        - squirrel
+        - squirrel monkey
+        - stablemate
+        - stag
+        - staghound
+        - stalking-horse
+        - stallion
+        - standard poodle
+        - standard schnauzer
+        - starnose mole
+        - steed
+        - steenbok
+        - steeplechaser
+        - stepper
+        - stirk
+        - stoat
+        - stone marten
+        - striped hyena
+        - striped muishond
+        - striped skunk
+        - stud
+        - suricate
+        - suslik
+        - swamp rabbit
+        - swine
+        - tabby
+        - taguan
+        - tailless tenrec
+        - takin
+        - talapoin
+        - tamandua
+        - tamarau
+        - tamarin
+        - tamarisk gerbil
+        - tapir
+        - tarpan
+        - tarsier
+        - tatouay
+        - tayra
+        - tenrec
+        - terrier
+        - thoroughbred
+        - three-toed sloth
+        - three-year-old horse
+        - thylacine
+        - tiger
+        - tiger cat
+        - tiger cub
+        - tiglon
+        - tigress
+        - timber wolf
+        - titi
+        - tom
+        - toothed whale
+        - tortoiseshell
+        - toy Manchester
+        - toy dog
+        - toy poodle
+        - toy spaniel
+        - toy terrier
+        - tree shrew
+        - tree squirrel
+        - tree wallaby
+        - trotting horse
+        - true marmoset
+        - tusker
+        - two-toed sloth
+        - two-year-old horse
+        - typical jerboa
+        - uakari
+        - unguiculate
+        - ungulate
+        - urial
+        - valley pocket gopher
+        - vampire bat
+        - vaquita
+        - vervet
+        - vespertilian bat
+        - vicuna
+        - viscacha
+        - viverrine
+        - vixen
+        - vizsla
+        - vole
+        - wallaby
+        - walrus
+        - wapiti
+        - warhorse
+        - warrigal
+        - warthog
+        - watchdog
+        - water buffalo
+        - water chevrotain
+        - water dog
+        - water rat
+        - water shrew
+        - water spaniel
+        - water vole
+        - waterbuck
+        - weasel
+        - western big-eared bat
+        - western chimpanzee
+        - western grey squirrel
+        - western lowland gorilla
+        - western pipistrel
+        - wether
+        - whale
+        - wharf rat
+        - wheel horse
+        - whippet
+        - white elephant
+        - white rhinoceros
+        - white whale
+        - white wolf
+        - white-footed mouse
+        - white-lipped peccary
+        - white-tailed jackrabbit
+        - whitetail prairie dog
+        - wild ass
+        - wild boar
+        - wild dog
+        - wild goat
+        - wild horse
+        - wild sheep
+        - wildcat
+        - wire-haired fox terrier
+        - wirehair
+        - wisent
+        - wolf
+        - wolf pup
+        - wolfhound
+        - wolverine
+        - wombat
+        - wood mouse
+        - wood rabbit
+        - wood rat
+        - woodland caribou
+        - woolly indris
+        - woolly mammoth
+        - woolly monkey
+        - woolly rhinoceros
+        - workhorse
+        - working dog
+        - world
+        - yak
+        - yearling
+        - yellow-throated marten
+        - yellowbelly marmot
+        - zebra
+        - zebu
+        - zoril
+      fetus: # instruction: an unborn or unhatched vertebrate in the later stages of development showing the main recognizable features of the mature animal
+        - abortus
+        - baby
+        - monster
+  pleurodont: # instruction: an animal having teeth fused with the inner surface of the alveolar ridge without sockets
+    - pleurodont
+  young: # instruction: any immature animal
+    young mammal:  # instruction: any immature mammal
+      lamb:  # instruction: young sheep
+        - Persian lamb
+        - baa-lamb
+        - hog
+        - lambkin
+        - teg
+      foal: # instruction: a young horse
+        - colt
+        - filly
+        - ridgeling
+      calf: # instruction: young of domestic cattle
+        - dogie
+        - maverick
+      wolf pup: # instruction: a young wolf
+        - wolf pup
+      heifer: # instruction: young cow
+        - heifer
+      bullock: # instruction: young bull
+        - bullock
+      piglet: # instruction: a young pig
+        - sucking pig
+      kitten: # instruction: young domestic cat
+        - kitten
+      pup: # instruction: young of any of various canines such as a dog or wolf
+        - puppy
+    young bird: # instruction: a bird that is still young
+      nestling:  # instruction: young bird not yet fledged
+        - nestling
+      chick: # instruction: young bird especially of domestic fowl
+        - chick
+      eaglet: # instruction: a young eagle
+        - eaglet
+      cygnet: # instruction: a young swan
+        - cygnet
+    hatchling: # instruction: any recently hatched animal (especially birds)
+      - hatchling
+    young fish: # instruction: a fish that is young
+      - young fish
+  biped: # instruction: an animal with two feet
+    - biped
+  poikilotherm: # instruction: an animal whose body temperature varies with the temperature of its surroundings; any animal except birds and mammals
+    - poikilotherm
+  stayer: # instruction: a person or other animal having powers of endurance or perseverance
+    - stayer
+  fictional animal: # instruction: animals that exist only in fiction (usually in children's stories)
+    - fictional animal
+  pet: # instruction: a domesticated animal kept for companionship or amusement
+    - pet
+  zooplankton: # instruction: animal constituent of plankton; mainly small crustaceans and fish larvae
+    - zooplankton
+  larva: # instruction: the immature free-living form of most invertebrates and amphibians and fish which at hatching from the egg is fundamentally unlike its parent and must metamorphose
+    caterpillar:  # instruction: a wormlike and often brightly colored and hairy or spiny larva of a butterfly or moth
+      tobacco hornworm:  # instruction: large green white-striped hawkmoth larva that feeds on tobacco and related plants; similar to tomato hornworm
+        - tobacco hornworm
+      corn borer: # instruction: larva of the European corn borer moth; a serious pest of maize
+        - corn borer
+      armyworm: # instruction: noctuid moth larvae that travel in multitudes destroying especially grass and grain
+        - armyworm
+      measuring worm: # instruction: small hairless caterpillar having legs on only its front and rear segments; mostly larvae of moths of the family Geometridae
+        - measuring worm
+      cabbageworm: # instruction: toxic green larva of a cabbage butterfly
+        - cabbageworm
+      potato tuberworm: # instruction: larva of potato moth; mines in leaves and stems of e.g. potatoes and tobacco
+        - potato tuberworm
+      silkworm: # instruction: the commercially bred hairless white caterpillar of the domestic silkworm moth which spins a cocoon that can be processed to yield silk fiber; the principal source of commercial silk
+        - silkworm
+      beet armyworm: # instruction: moth larva that eats foliage of beets and other vegetables
+        - beet armyworm
+      lappet caterpillar: # instruction: larva of a lappet moth
+        - lappet caterpillar
+      tent caterpillar: # instruction: the larvae of moths that build and live in communal silken webs in orchard and shade trees
+        - forest tent caterpillar
+      cutworm: # instruction: North American moth whose larvae feed on young plant stems cutting them off at the ground
+        - army cutworm
+      tussock caterpillar: # instruction: larva of a tussock moth
+        - tussock caterpillar
+      fall armyworm: # instruction: larva of a migratory American noctuid moth; destroys grasses and small grains
+        - fall armyworm
+      cankerworm: # instruction: green caterpillar of a geometrid moth; pest of various fruit and shade trees
+        - fall cankerworm
+        - spring cankerworm
+      woolly bear: # instruction: caterpillar of numerous moths characterized by a dense coat of woolly hairs; feed on plants and some are destructive pests
+        - woolly bear moth
+      bollworm: # instruction: any of various moth caterpillars that destroy cotton bolls
+        - corn earworm
+        - pink bollworm
+      webworm: # instruction: several gregarious moth larvae that spin webs over foliage on which they feed
+        - fall webworm
+        - garden webworm
+      tomato hornworm: # instruction: large green white-striped hawkmoth larva that feeds on tomato and potato plants; similar to tobacco hornworm
+        - tomato hornworm
+    cercaria: # instruction: tadpole-shaped parasitic larva of a trematode worm; tail disappears in adult stage
+      - cercaria
+    mealworm: # instruction: the larva of beetles of the family Tenebrionidae
+      - mealworm
+    bladder worm: # instruction: encysted saclike larva of the tapeworm
+      - bladder worm
+    wireworm: # instruction: wormlike larva of various elaterid beetles; feeds on roots of many crop plants
+      - wireworm
+    ascidian tadpole: # instruction: free-swimming larva of ascidians; they have a tail like a tadpole that contains the notochord
+      - ascidian tadpole
+    caseworm: # instruction: insect larva that constructs a protective case around its body
+      caddisworm:  # instruction: larva of the caddis fly; constructs a case of silk covered with sand or plant debris
+        - caddisworm
+    bot: # instruction: botfly larva; typically develops inside the body of a horse or sheep or human
+      - bot
+    tadpole: # instruction: a larval frog or toad
+      - tadpole
+    aphid lion: # instruction: carnivorous larva of lacewing flies
+      - aphid lion
+    hellgrammiate: # instruction: large brown aquatic larva of the dobsonfly; used as fishing bait
+      - hellgrammiate
+    leptocephalus: # instruction: slender transparent larva of eels and certain fishes
+      - leptocephalus
+  acrodont: # instruction: an animal having teeth consolidated with the summit of the alveolar ridge without sockets
+    - acrodont
+  creepy-crawly: # instruction: an animal that creeps or crawls (such as worms or spiders or insects)
+    - creepy-crawly
+  giant: # instruction: any creature of exceptional size
+    - giant
+  homeotherm: # instruction: an animal that has a body temperature that is relatively constant and independent of the environmental temperature
+    - homeotherm
+  marine animal: # instruction: any of numerous animals inhabiting the sea including e.g. fishes and molluscs and many mammals
+    by-catch:  # instruction: unwanted marine creatures that are caught in the nets while fishing for another species
+      - by-catch
+  male: # instruction: an animal that produces gametes (spermatozoa) that can fertilize female gametes (ova)
+    male horse:  # instruction: the male of species Equus caballus
+      gelding:  # instruction: castrated male horse
+        - gelding
+      stallion: # instruction: uncastrated adult male horse
+        - stud
+    colt: # instruction: a young male horse under the age of four
+      ridgeling:  # instruction: a colt with undescended testicles
+        - ridgeling
+  herbivore: # instruction: any animal that feeds chiefly on grass and other plants
+    - herbivore
+  invertebrate: # instruction: any animal lacking a backbone or notochord; the term is not used as a scientific classification
+    worm:  # instruction: any of numerous relatively small elongated soft-bodied animals especially of the phyla Annelida and Chaetognatha and Nematoda and Nemertea and Platyhelminthes; also many insect larvae
+      flatworm:  # instruction: parasitic or free-living worms having a flattened body
+        - Fasciolopsis buski
+        - echinococcus
+        - fluke
+        - liver fluke
+        - planarian
+        - schistosome
+        - taenia
+        - tapeworm
+      helminth: # instruction: worm that is parasitic on the intestines of vertebrates especially roundworms and tapeworms and flukes
+        - helminth
+      annelid: # instruction: worms with cylindrical bodies segmented both internally and externally
+        - archiannelid
+        - bloodworm
+        - earthworm
+        - horseleech
+        - leech
+        - lugworm
+        - medicinal leech
+        - oligochaete
+        - polychaete
+        - sea mouse
+      arrowworm: # instruction: any worm of the Chaetognatha; transparent marine worm with horizontal lateral and caudal fins and a row of movable curved spines at each side of the mouth
+        - sagitta
+      woodworm: # instruction: a larva of a woodborer
+        - woodworm
+      acanthocephalan: # instruction: any of various worms living parasitically in intestines of vertebrates having a retractile proboscis covered with many hooked spines
+        - acanthocephalan
+      nematode: # instruction: unsegmented worms with elongated rounded body pointed at both ends; mostly free-living but some are parasitic
+        - Guinea worm
+        - chicken roundworm
+        - common roundworm
+        - eelworm
+        - filaria
+        - hookworm
+        - pinworm
+        - trichina
+        - vinegar eel
+        - wheatworm
+      beard worm: # instruction: slender animal with tentacles and a tubelike outer covering; lives on the deep ocean bottom
+        - beard worm
+      ribbon worm: # instruction: soft unsegmented marine worms that have a threadlike proboscis and the ability to stretch and contract
+        - ribbon worm
+    brachiopod: # instruction: marine animal with bivalve shell having a pair of arms bearing tentacles for capturing food; found worldwide
+      - brachiopod
+    echinoderm: # instruction: marine invertebrates with tube feet and five-part radially symmetrical bodies
+      basket star:  # instruction: any starfish-like animal of the genera Euryale or Astrophyton or Gorgonocephalus having slender complexly branched interlacing arms radiating from a central disc
+        - Astrophyton muricatum
+      brittle star: # instruction: an animal resembling a starfish with fragile whiplike arms radiating from a small central disc
+        - brittle star
+      crinoid: # instruction: primitive echinoderms having five or more feathery arms radiating from a central disk
+        - feather star
+        - sea lily
+      sea cucumber: # instruction: echinoderm having a flexible sausage-shaped body, tentacles surrounding the mouth and tube feet; free-living mud feeders
+        - trepang
+      sea urchin: # instruction: shallow-water echinoderms having soft bodies enclosed in thin spiny globular shells
+        - edible sea urchin
+        - heart urchin
+        - sand dollar
+      starfish: # instruction: echinoderms characterized by five arms extending from a central disk
+        - starfish
+    ectoproct: # instruction: sessile mossy aquatic animal having the anus of the polyp outside the crown of tentacles
+      - ectoproct
+    ctenophore: # instruction: biradially symmetrical hermaphroditic solitary marine animals resembling jellyfishes having for locomotion eight rows of cilia arranged like teeth in a comb
+      Venus's girdle:  # instruction: ctenophore having a ribbon-shaped iridescent gelatinous body
+        - Venus's girdle
+      beroe: # instruction: delicately iridescent thimble-shaped ctenophores
+        - beroe
+      sea gooseberry: # instruction: ctenophore having a rounded body with longitudinal rows of cilia
+        - sea gooseberry
+      platyctenean: # instruction: ctenophore have long tentacles and flattened body
+        - platyctenean
+    arthropod: # instruction: invertebrate having jointed limbs and a segmented body with an exoskeleton made of chitin
+      horseshoe crab:  # instruction: large marine arthropod of the Atlantic coast of North America having a domed carapace that is shaped like a horseshoe and a stiff pointed tail; a living fossil related to the wood louse
+        - horseshoe crab
+      trilobite: # instruction: an extinct arthropod that was abundant in Paleozoic times; had an exoskeleton divided into three parts
+        - trilobite
+      tardigrade: # instruction: an arthropod of the division Tardigrada
+        - tardigrade
+      centipede: # instruction: chiefly nocturnal predacious arthropod having a flattened body of 15 to 173 segments each with a pair of legs, the foremost pair being modified as prehensors
+        - house centipede
+      sea spider: # instruction: any of various small spiderlike marine arthropods having small thin bodies and long slender legs
+        - sea spider
+      Asian horseshoe crab: # instruction: horseshoe crab of the coast of eastern Asia
+        - Asian horseshoe crab
+      crustacean: # instruction: any mainly aquatic arthropod usually having a segmented body and chitinous exoskeleton
+        - American crayfish
+        - American lady crab
+        - American lobster
+        - Cape lobster
+        - Dungeness crab
+        - English lady crab
+        - Euphausia pacifica
+        - European lobster
+        - European spider crab
+        - Jonah crab
+        - Norway lobster
+        - Old World crayfish
+        - acorn barnacle
+        - amphipod
+        - barnacle
+        - beach flea
+        - blue crab
+        - brachyuran
+        - branchiopod crustacean
+        - brine shrimp
+        - brit
+        - copepod
+        - crab
+        - crayfish
+        - cyclops
+        - daphnia
+        - decapod crustacean
+        - fairy shrimp
+        - fiddler crab
+        - fish louse
+        - giant crab
+        - goose barnacle
+        - hard-shell crab
+        - hermit crab
+        - isopod
+        - king crab
+        - krill
+        - lobster
+        - long-clawed prawn
+        - malacostracan crustacean
+        - mantis shrimp
+        - opossum shrimp
+        - oyster crab
+        - pea crab
+        - pill bug
+        - prawn
+        - rock crab
+        - sea louse
+        - seed shrimp
+        - shrimp
+        - skeleton shrimp
+        - snapping shrimp
+        - soft-shell crab
+        - sow bug
+        - spider crab
+        - spiny lobster
+        - squilla
+        - stomatopod
+        - stone crab
+        - swimming crab
+        - tadpole shrimp
+        - tropical prawn
+        - true lobster
+        - whale louse
+        - woodlouse
+      Merostomata: # instruction: used in some classifications; includes the orders Xiphosura and Eurypterida
+        - Merostomata
+      garden centipede: # instruction: minute arthropod often infesting the underground parts of truck-garden and greenhouse crops
+        - garden centipede
+      eurypterid: # instruction: large extinct scorpion-like arthropod considered related to horseshoe crabs
+        - eurypterid
+      onychophoran: # instruction: any of numerous velvety-skinned wormlike carnivorous animals common in tropical forests having characteristics of both arthropods and annelid worms
+        - Plicatoperipatus jamaicensis
+      instar: # instruction: an insect or other arthropod between molts
+        - instar
+      arachnid: # instruction: air-breathing arthropods characterized by simple eyes and four pairs of legs
+        - European wolf spider
+        - Ixodes dammini
+        - Ixodes dentatus
+        - Ixodes neotomae
+        - Ixodes pacificus
+        - Ixodes persulcatus
+        - Ixodes scapularis
+        - Ixodes spinipalpis
+        - acarid
+        - acarine
+        - acarus
+        - barn spider
+        - black and gold garden spider
+        - black widow
+        - book scorpion
+        - comb-footed spider
+        - false scorpion
+        - garden spider
+        - hard tick
+        - harvest mite
+        - harvestman
+        - itch mite
+        - mite
+        - orb-weaving spider
+        - red spider
+        - rust mite
+        - scorpion
+        - sheep-tick
+        - soft tick
+        - spider
+        - spider mite
+        - tarantula
+        - tick
+        - trap-door spider
+        - trombiculid
+        - trombidiid
+        - vinegarroon
+        - web-spinning mite
+        - whip-scorpion
+        - wolf spider
+        - wood tick
+      myriapod: # instruction: general term for any terrestrial arthropod having an elongated body composed of many similar segments: e.g. centipedes and millipedes
+        - myriapod
+      millipede: # instruction: any of numerous herbivorous nonpoisonous arthropods having a cylindrical body of 20 to 100 or more segments most with two pairs of legs
+        - millipede
+      insect: # instruction: small air-breathing arthropod
+        - Africanized bee
+        - Alsophila pometaria
+        - Amazon ant
+        - American cockroach
+        - American copper
+        - Asian longhorned beetle
+        - Asian tiger mosquito
+        - Australian cockroach
+        - Carniolan bee
+        - Colorado potato beetle
+        - Comstock mealybug
+        - Culex quinquefasciatus
+        - Dutch-elm beetle
+        - European house cricket
+        - Formica fusca
+        - Gelechia gossypiella
+        - German cockroach
+        - Hessian fly
+        - Hippodamia convergens
+        - Hyphantria cunea
+        - Italian bee
+        - Japanese beetle
+        - June beetle
+        - Loxostege similalis
+        - Manduca quinquemaculata
+        - Manduca sexta
+        - Mastotermes darwiniensis
+        - Mastotermes electrodominicus
+        - Mastotermes electromexicus
+        - Mediterranean flour moth
+        - Mediterranean fruit fly
+        - Mexican bean beetle
+        - Mutillidae
+        - Nomia melanderi
+        - Oriental beetle
+        - Paleacrita vernata
+        - Plectophera
+        - Polistes annularis
+        - Pulex irritans
+        - Reticulitermes flanipes
+        - Reticulitermes lucifugus
+        - San Jose scale
+        - Saratoga spittlebug
+        - Spanish fly
+        - Spodoptera exigua
+        - Spodoptera frugiperda
+        - Strymon melinus
+        - adelgid
+        - admiral
+        - alderfly
+        - almond moth
+        - andrena
+        - anglewing
+        - angoumois moth
+        - anopheline
+        - ant
+        - ant cow
+        - ant lion
+        - antler moth
+        - aphid
+        - apple aphid
+        - apple maggot
+        - arctiid
+        - armored scale
+        - army ant
+        - armyworm
+        - assassin bug
+        - atlas moth
+        - backswimmer
+        - bald-faced hornet
+        - balsam woolly aphid
+        - banded purple
+        - bark beetle
+        - bark-louse
+        - bean weevil
+        - bedbug
+        - bee
+        - bee beetle
+        - bee fly
+        - bee moth
+        - beetle
+        - birch leaf miner
+        - bird louse
+        - black bee
+        - black carpet beetle
+        - blackfly
+        - blister beetle
+        - blowfly
+        - blue
+        - bluebottle
+        - body louse
+        - boll weevil
+        - bombardier beetle
+        - bombycid
+        - booklouse
+        - botfly
+        - bristletail
+        - brown lacewing
+        - brown soft scale
+        - browntail
+        - buffalo carpet beetle
+        - bug
+        - bulldog ant
+        - bumblebee
+        - butterfly
+        - cabbage butterfly
+        - caddis fly
+        - calosoma
+        - carpenter ant
+        - carpenter bee
+        - carpet beetle
+        - carpet moth
+        - casemaking clothes moth
+        - cat flea
+        - cecropia
+        - chalcid fly
+        - chalcis fly
+        - chicken louse
+        - chigoe
+        - chinch bug
+        - chrysalis
+        - cicada
+        - cicada killer
+        - cinnabar
+        - citrophilous mealybug
+        - citrus mealybug
+        - citrus whitefly
+        - clerid beetle
+        - click beetle
+        - clothes moth
+        - coccid insect
+        - cochineal insect
+        - cockchafer
+        - cockroach
+        - codling moth
+        - collembolan
+        - comma
+        - common European earwig
+        - common booklouse
+        - common louse
+        - common mosquito
+        - common pond-skater
+        - common wasp
+        - conenose
+        - copper
+        - coreid bug
+        - corn borer
+        - cotton stainer
+        - cotton strain
+        - crab louse
+        - crane fly
+        - cricket
+        - cuckoo-bumblebee
+        - cynthia moth
+        - damselfly
+        - danaid
+        - darkling beetle
+        - death's-head moth
+        - deathwatch beetle
+        - defoliator
+        - diapheromera
+        - dictyopterous insect
+        - digger wasp
+        - dipterous insect
+        - dobson
+        - dog flea
+        - dog-day cicada
+        - domestic silkworm moth
+        - dorbeetle
+        - dragonfly
+        - drone
+        - drosophila
+        - dry-wood termite
+        - dung beetle
+        - earwig
+        - eggar
+        - elaterid beetle
+        - emperor
+        - emperor butterfly
+        - ephemerid
+        - ephemeron
+        - field cricket
+        - fire ant
+        - firebrat
+        - firebug
+        - firefly
+        - fish fly
+        - flea
+        - flea beetle
+        - flesh fly
+        - flour beetle
+        - fly
+        - four-lined plant bug
+        - fritillary
+        - froghopper
+        - fruit fly
+        - fungus gnat
+        - gadfly
+        - gall midge
+        - gall wasp
+        - gallfly
+        - gelechiid
+        - geometrid
+        - giant cockroach
+        - giant hornet
+        - giant silkworm moth
+        - giant water bug
+        - glowworm
+        - gnat
+        - gold-tail moth
+        - goldeneye
+        - gracilariid
+        - grain moth
+        - grape louse
+        - grasshopper
+        - green June beetle
+        - green lacewing
+        - green peach aphid
+        - greenbottle
+        - greenfly
+        - greenhouse whitefly
+        - ground beetle
+        - gypsy moth
+        - hairstreak
+        - hanging fly
+        - hawkmoth
+        - head louse
+        - heliothis moth
+        - hemipterous insect
+        - heteropterous insect
+        - holometabola
+        - homopterous insect
+        - honeybee
+        - horn fly
+        - hornet
+        - horse botfly
+        - horse tick
+        - horsefly
+        - housefly
+        - human botfly
+        - hymenopterous insect
+        - ichneumon fly
+        - imago
+        - imperial moth
+        - io moth
+        - jassid
+        - jumping bristletail
+        - jumping plant louse
+        - katydid
+        - lace bug
+        - lacewing
+        - ladybug
+        - lamellicorn beetle
+        - lantern fly
+        - lappet
+        - large white
+        - lasiocampid
+        - leaf beetle
+        - leaf bug
+        - leaf miner
+        - leaf roller
+        - leaf-cutting bee
+        - leaf-footed bug
+        - leafhopper
+        - lepidopterous insect
+        - little black ant
+        - locust
+        - long-horned beetle
+        - long-horned grasshopper
+        - louse
+        - louse fly
+        - luna moth
+        - lycaenid
+        - lygaeid
+        - lygus bug
+        - lymantriid
+        - malarial mosquito
+        - mantis
+        - mantispid
+        - mason bee
+        - mason wasp
+        - mayfly
+        - meadow spittlebug
+        - mealybug
+        - mecopteran
+        - melolonthid beetle
+        - midge
+        - migratory grasshopper
+        - migratory locust
+        - mirid bug
+        - mole cricket
+        - monarch
+        - mormon cricket
+        - mosquito
+        - moth
+        - moth miller
+        - mourning cloak
+        - mud dauber
+        - neuropteron
+        - noctuid moth
+        - nymphalid
+        - oak blight
+        - odonate
+        - oil beetle
+        - onion thrips
+        - orange tortrix
+        - oriental cockroach
+        - orthopterous insect
+        - painted beauty
+        - pale chrysanthemum aphid
+        - paper wasp
+        - pea weevil
+        - peacock
+        - pernyi moth
+        - pharaoh ant
+        - phasmid
+        - pierid
+        - pine leaf aphid
+        - pine sawyer
+        - pine spittlebug
+        - plant hopper
+        - plant louse
+        - pollinator
+        - polyphemus moth
+        - potato moth
+        - potter bee
+        - potter wasp
+        - powder-post termite
+        - praying mantis
+        - proturan
+        - psocid
+        - psocopterous insect
+        - psychodid
+        - punkie
+        - pupa
+        - purple emperor
+        - pyralid
+        - queen
+        - queen bee
+        - raisin moth
+        - red admiral
+        - red underwing
+        - red-spotted purple
+        - rhinoceros beetle
+        - rice weevil
+        - ringlet
+        - robber fly
+        - rose chafer
+        - rove beetle
+        - sand cricket
+        - sand fly
+        - sanguinary ant
+        - saturniid
+        - sawfly
+        - sawyer
+        - scale insect
+        - scarab
+        - scarabaeid beetle
+        - scorpion fly
+        - searcher
+        - seed beetle
+        - seventeen-year locust
+        - sheep botfly
+        - sheep ked
+        - short-horned grasshopper
+        - silverfish
+        - silverspot
+        - slave ant
+        - slave-making ant
+        - small white
+        - snakefly
+        - snout beetle
+        - snowy tree cricket
+        - social insect
+        - soft scale
+        - soldier
+        - southern cabbage butterfly
+        - sphecoid wasp
+        - spittle insect
+        - spongefly
+        - spruce bark beetle
+        - spruce gall aphid
+        - squash bug
+        - stag beetle
+        - sticktight
+        - stonefly
+        - sulphur butterfly
+        - superbug
+        - sweet-potato whitefly
+        - tachina fly
+        - tarnished plant bug
+        - tea tortrix
+        - tent-caterpillar moth
+        - termite
+        - thrips
+        - thysanopter
+        - thysanuran insect
+        - tiger beetle
+        - tiger moth
+        - tineid
+        - tineoid
+        - tobacco moth
+        - tobacco thrips
+        - tortoiseshell
+        - tortricid
+        - tree cricket
+        - treehopper
+        - trichopterous insect
+        - true bug
+        - tsetse fly
+        - tumblebug
+        - tussah
+        - two-spotted ladybug
+        - underwing
+        - vedalia
+        - velvet ant
+        - vespid
+        - viceroy
+        - vinegar fly
+        - walking leaf
+        - walking stick
+        - warble fly
+        - wasp
+        - water beetle
+        - water boatman
+        - water bug
+        - water scorpion
+        - water strider
+        - wax insect
+        - web spinner
+        - webbing clothes moth
+        - webworm moth
+        - weevil
+        - wheel bug
+        - whirligig beetle
+        - white admiral
+        - whitefly
+        - wood ant
+        - woolly adelgid
+        - woolly alder aphid
+        - woolly aphid
+        - woolly apple aphid
+        - worker
+        - worker bee
+        - yellow jacket
+        - yellow-fever mosquito
+      tongue worm: # instruction: wormlike arthropod having two pairs of hooks at the sides of the mouth; parasitic in nasal sinuses of mammals
+        - tongue worm
+    woodborer: # instruction: any of various insects or larvae or mollusks that bore into wood
+      - woodborer
+    entoproct: # instruction: any of various moss-like aquatic animals usually forming branching colonies; each polyp having a both mouth and anus within a closed ring of tentacles
+      - entoproct
+    mollusk: # instruction: invertebrate having a soft unsegmented body usually enclosed in a shell
+      gastropod:  # instruction: a class of mollusks typically having a one-piece coiled shell and flattened muscular foot with a head bearing stalked eyes
+        - Helix hortensis
+        - Hermissenda crassicornis
+        - abalone
+        - bleeding tooth
+        - brown snail
+        - bubble shell
+        - common limpet
+        - conch
+        - cowrie
+        - edible snail
+        - garden snail
+        - giant conch
+        - keyhole limpet
+        - limpet
+        - money cowrie
+        - moon shell
+        - nerita
+        - neritid
+        - neritina
+        - ormer
+        - periwinkle
+        - physa
+        - river limpet
+        - scorpion shell
+        - sea hare
+        - sea slug
+        - seasnail
+        - slug
+        - snail
+        - solenogaster
+        - tiger cowrie
+        - triton
+        - whelk
+      cephalopod: # instruction: marine mollusk characterized by well-developed head and eyes and sucker-bearing tentacles
+        - architeuthis
+        - chambered nautilus
+        - cuttlefish
+        - decapod
+        - dibranchiate
+        - loligo
+        - octopod
+        - octopus
+        - ommastrephes
+        - paper nautilus
+        - spirula
+        - squid
+      bivalve: # instruction: marine or freshwater mollusks having a soft body with platelike gills enclosed within two shells hinged together
+        - Japanese oyster
+        - Virginia oyster
+        - ark shell
+        - bay scallop
+        - blood clam
+        - bluepoint
+        - cherrystone
+        - clam
+        - cockle
+        - edible cockle
+        - edible mussel
+        - freshwater mussel
+        - geoduck
+        - giant clam
+        - giant northwest shipworm
+        - littleneck
+        - marine mussel
+        - mussel
+        - oyster
+        - pearl oyster
+        - pearly-shelled mussel
+        - piddock
+        - quahog
+        - razor clam
+        - saddle oyster
+        - scallop
+        - sea scallop
+        - seed oyster
+        - shipworm
+        - soft-shell clam
+        - teredo
+        - thin-shelled mussel
+        - window oyster
+        - zebra mussel
+      scaphopod: # instruction: burrowing marine mollusk
+        - tooth shell
+    coelenterate: # instruction: radially symmetrical animals having saclike bodies with only one opening and tentacles with stinging structures; they occur in polyp and medusa forms
+      hydrozoan:  # instruction: colonial coelenterates having the polyp phase dominant
+        - Portuguese man-of-war
+        - apolemia
+        - hydra
+        - nanomia
+        - planula
+        - praya
+        - sertularian
+        - siphonophore
+      anthozoan: # instruction: sessile marine coelenterates including solitary and colonial polyps; the medusoid phase is entirely suppressed
+        - actinia
+        - brain coral
+        - coral
+        - gorgonian
+        - mushroom coral
+        - red coral
+        - sea anemone
+        - sea fan
+        - sea feather
+        - sea pen
+        - staghorn coral
+        - stony coral
+      scyphozoan: # instruction: any of various usually free-swimming marine coelenterates having a gelatinous medusoid stage as the dominant phase of its life cycle
+        - scyphozoan
+    phoronid: # instruction: hermaphrodite wormlike animal living in mud of the sea bottom
+      - phoronid
+    zoophyte: # instruction: any of various invertebrate animals resembling a plant such as a sea anemone or coral or sponge
+      - zoophyte
+    rotifer: # instruction: minute aquatic multicellular organisms having a ciliated wheel-like organ for feeding and locomotion; constituents of freshwater plankton
+      - rotifer
+    peanut worm: # instruction: small unsegmented marine worm that when disturbed retracts its anterior portion into the body giving the appearance of a peanut
+      - peanut worm
+    Symbion pandora: # instruction: only known species of Cycliophora; lives symbiotically attached to a lobster's lip by an adhesive disk and feeding by means of a hairy mouth ring; its complex life cycle includes asexual and sexual phases
+      - Symbion pandora
+    bryozoan: # instruction: sessile aquatic animal forming mossy colonies of small polyps each having a curved or circular ridge bearing tentacles; attach to stones or seaweed and reproduce by budding
+      - bryozoan
+  domestic animal: # instruction: any of various animals that have been tamed and made fit for a human environment
+    feeder:  # instruction: an animal being fattened or suitable for fattening
+      - feeder
+    stocker: # instruction: a domestic animal (especially a young steer or heifer) kept as stock until fattened or matured and suitable for a breeding establishment
+      - stocker
+    domestic cat: # instruction: any domesticated member of the genus Felis
+      Siamese cat:  # instruction: a slender short-haired blue-eyed breed of cat having a pale coat with dark ears paws face and tail tip
+        - blue point Siamese
+      mouser: # instruction: a cat proficient at mousing
+        - mouser
+      alley cat: # instruction: a homeless cat
+        - alley cat
+      Persian cat: # instruction: a long-haired breed of cat
+        - Persian cat
+      Egyptian cat: # instruction: a domestic cat of Egypt
+        - Egyptian cat
+      Abyssinian: # instruction: a small slender short-haired breed of African origin having brownish fur with a reddish undercoat
+        - Abyssinian
+      Burmese cat: # instruction: a short-haired breed with body similar to the Siamese cat but having a solid dark brown or grey coat
+        - Burmese cat
+      tabby: # instruction: a cat with a grey or tawny coat mottled with black
+        - tabby
+    stray: # instruction: an animal that has strayed (especially a domestic animal)
+      - stray
+    dog: # instruction: a member of the genus Canis (probably descended from the common wolf) that has been domesticated by man since prehistoric times; occurs in many breeds
+      Newfoundland:  # instruction: a breed of very large heavy dogs with a thick coarse usually black coat; highly intelligent dogs and vigorous swimmers; developed in Newfoundland
+        - Newfoundland
+      poodle: # instruction: an intelligent dog with a heavy curly solid-colored coat that is usually clipped; an old breed sometimes trained as sporting dogs or as performing dogs
+        - large poodle
+        - miniature poodle
+        - standard poodle
+        - toy poodle
+      pug: # instruction: small compact smooth-coated breed of Asiatic origin having a tightly curled tail and broad flat wrinkled muzzle
+        - pug
+      corgi: # instruction: either of two Welsh breeds of long-bodied short-legged dogs with erect ears and a fox-like head
+        - Cardigan
+        - Pembroke
+      cur: # instruction: an inferior dog or one of mixed breed
+        - feist
+        - pariah dog
+      pooch: # instruction: informal terms for dogs
+        - pooch
+      lapdog: # instruction: a dog small and tame enough to be held in the lap
+        - lapdog
+      spitz: # instruction: any of various stocky heavy-coated breeds of dogs native to northern regions having pointed muzzles and erect ears with a curled furry tail
+        - Pomeranian
+        - Samoyed
+        - chow
+        - keeshond
+      toy dog: # instruction: any of several breeds of very small dogs kept purely as pets
+        - Blenheim spaniel
+        - Chihuahua
+        - English toy spaniel
+        - Japanese spaniel
+        - King Charles spaniel
+        - Maltese dog
+        - Pekinese
+        - Shih-Tzu
+        - papillon
+        - toy spaniel
+        - toy terrier
+      basenji: # instruction: small smooth-haired breed of African origin having a tightly curled tail and the inability to bark
+        - basenji
+      puppy: # instruction: a young dog
+        - puppy
+      Mexican hairless: # instruction: any of an old breed of small nearly hairless dogs of Mexico
+        - Mexican hairless
+      Great Pyrenees: # instruction: bred of large heavy-coated white dogs resembling the Newfoundland
+        - Great Pyrenees
+      working dog: # instruction: any of several breeds of usually large powerful dogs bred to work as draft animals and guard and guide dogs
+        - Appenzeller
+        - Belgian sheepdog
+        - Bernese mountain dog
+        - Border collie
+        - Bouvier des Flandres
+        - Doberman
+        - EntleBucher
+        - Eskimo dog
+        - French bulldog
+        - German shepherd
+        - Great Dane
+        - Greater Swiss Mountain dog
+        - Old English sheepdog
+        - Rottweiler
+        - Saint Bernard
+        - Seeing Eye dog
+        - Sennenhunde
+        - Shetland sheepdog
+        - Siberian husky
+        - Tibetan mastiff
+        - affenpinscher
+        - attack dog
+        - boxer
+        - briard
+        - bull mastiff
+        - bulldog
+        - collie
+        - groenendael
+        - guide dog
+        - hearing dog
+        - housedog
+        - kelpie
+        - komondor
+        - kuvasz
+        - malamute
+        - malinois
+        - mastiff
+        - miniature pinscher
+        - pinscher
+        - police dog
+        - schipperke
+        - seizure-alert dog
+        - shepherd dog
+        - sled dog
+        - watchdog
+      hunting dog: # instruction: a dog used in hunting game
+        - Afghan hound
+        - Airedale
+        - American Staffordshire terrier
+        - American foxhound
+        - American water spaniel
+        - Australian terrier
+        - Bedlington terrier
+        - Border terrier
+        - Boston bull
+        - Brittany spaniel
+        - Chesapeake Bay retriever
+        - Clydesdale terrier
+        - Dandie Dinmont
+        - English foxhound
+        - English setter
+        - English springer
+        - German short-haired pointer
+        - Gordon setter
+        - Ibizan hound
+        - Irish setter
+        - Irish terrier
+        - Irish water spaniel
+        - Irish wolfhound
+        - Italian greyhound
+        - Kerry blue terrier
+        - Labrador retriever
+        - Lakeland terrier
+        - Lhasa
+        - Manchester terrier
+        - Norfolk terrier
+        - Norwegian elkhound
+        - Norwich terrier
+        - Plott hound
+        - Rhodesian ridgeback
+        - Saluki
+        - Scotch terrier
+        - Scottish deerhound
+        - Sealyham terrier
+        - Skye terrier
+        - Staffordshire bullterrier
+        - Sussex spaniel
+        - Tibetan terrier
+        - Walker hound
+        - Weimaraner
+        - Welsh springer spaniel
+        - Welsh terrier
+        - West Highland white terrier
+        - Yorkshire terrier
+        - basset
+        - beagle
+        - bird dog
+        - black-and-tan coonhound
+        - bloodhound
+        - bluetick
+        - boarhound
+        - borzoi
+        - bullterrier
+        - cairn
+        - clumber
+        - cocker spaniel
+        - coondog
+        - coonhound
+        - courser
+        - curly-coated retriever
+        - dachshund
+        - field spaniel
+        - flat-coated retriever
+        - fox terrier
+        - foxhound
+        - giant schnauzer
+        - golden retriever
+        - greyhound
+        - griffon
+        - harrier
+        - hound
+        - miniature schnauzer
+        - otterhound
+        - pointer
+        - rat terrier
+        - redbone
+        - retriever
+        - sausage dog
+        - schnauzer
+        - setter
+        - silky terrier
+        - smooth-haired fox terrier
+        - soft-coated wheaten terrier
+        - spaniel
+        - sporting dog
+        - springer spaniel
+        - staghound
+        - standard schnauzer
+        - terrier
+        - toy Manchester
+        - vizsla
+        - water dog
+        - water spaniel
+        - whippet
+        - wire-haired fox terrier
+        - wirehair
+        - wolfhound
+      Leonberg: # instruction: a large dog (usually with a golden coat) produced by crossing a St Bernard and a Newfoundland
+        - Leonberg
+  range animal: # instruction: any animal that lives and grazes in the grassy open land of western North America (especially horses, cattle, sheep)
+    - range animal

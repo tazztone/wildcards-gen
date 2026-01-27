@@ -17,7 +17,9 @@ from typing import Optional
 from .core.structure import StructureManager
 from .core.datasets.imagenet import generate_imagenet_tree, generate_imagenet_from_wnids
 from .core.datasets.coco import generate_coco_hierarchy
+from .core.datasets.coco import generate_coco_hierarchy
 from .core.datasets.openimages import generate_openimages_hierarchy
+from .core.datasets.tencent import generate_tencent_hierarchy
 
 # Configure logging
 logging.basicConfig(
@@ -71,6 +73,18 @@ def cmd_dataset_openimages(args):
     mgr = StructureManager()
     mgr.save_structure(hierarchy, args.output)
     print(f"✓ Saved Open Images hierarchy to {args.output}")
+
+
+def cmd_dataset_tencent(args):
+    """Handle tencent subcommand."""
+    hierarchy = generate_tencent_hierarchy(
+        max_depth=args.depth,
+        with_glosses=not args.no_glosses
+    )
+    
+    mgr = StructureManager()
+    mgr.save_structure(hierarchy, args.output)
+    print(f"✓ Saved Tencent ML-Images hierarchy to {args.output}")
 
 
 def cmd_categorize(args):
@@ -175,6 +189,12 @@ def cmd_enrich(args):
     print(f"✓ Saved enriched hierarchy to {output}")
 
 
+def cmd_gui(args):
+    """Handle gui command."""
+    from .gui import launch_gui
+    launch_gui(share=args.share)
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog='wildcards-gen',
@@ -210,13 +230,20 @@ def main():
     p_oi.add_argument('--no-glosses', action='store_true')
     p_oi.add_argument('-o', '--output', default='output/openimages.yaml')
     p_oi.set_defaults(func=cmd_dataset_openimages)
+
+    # Tencent
+    p_tencent = dataset_sub.add_parser('tencent', help='Tencent ML-Images hierarchy')
+    p_tencent.add_argument('--depth', type=int, default=3)
+    p_tencent.add_argument('--no-glosses', action='store_true')
+    p_tencent.add_argument('-o', '--output', default='output/tencent.yaml')
+    p_tencent.set_defaults(func=cmd_dataset_tencent)
     
     # === CATEGORIZE COMMAND ===
     p_cat = subparsers.add_parser('categorize', help='Categorize flat term list (LLM)')
     p_cat.add_argument('input', help='Input text file with terms')
     p_cat.add_argument('-o', '--output', default='output/categorized.yaml')
     p_cat.add_argument('--api-key', help='OpenRouter API key')
-    p_cat.add_argument('--model', default='openai/gpt-4o-mini')
+    p_cat.add_argument('--model', default='google/gemma-3-27b-it:free')
     p_cat.set_defaults(func=cmd_categorize)
     
     # === CREATE COMMAND ===
@@ -224,7 +251,7 @@ def main():
     p_create.add_argument('--topic', required=True, help='Topic for taxonomy')
     p_create.add_argument('-o', '--output', default='output/taxonomy.yaml')
     p_create.add_argument('--api-key', help='OpenRouter API key')
-    p_create.add_argument('--model', default='openai/gpt-4o-mini')
+    p_create.add_argument('--model', default='google/gemma-3-27b-it:free')
     p_create.set_defaults(func=cmd_create)
     
     # === ENRICH COMMAND ===
@@ -233,8 +260,13 @@ def main():
     p_enrich.add_argument('-o', '--output', help='Output file (default: overwrite input)')
     p_enrich.add_argument('--topic', default='AI image generation wildcards')
     p_enrich.add_argument('--api-key', help='OpenRouter API key')
-    p_enrich.add_argument('--model', default='openai/gpt-4o-mini')
+    p_enrich.add_argument('--model', default='google/gemma-3-27b-it:free')
     p_enrich.set_defaults(func=cmd_enrich)
+    
+    # === GUI COMMAND ===
+    p_gui = subparsers.add_parser('gui', help='Launch Gradio GUI')
+    p_gui.add_argument('--share', action='store_true', help='Create public link')
+    p_gui.set_defaults(func=cmd_gui)
     
     args = parser.parse_args()
     args.func(args)

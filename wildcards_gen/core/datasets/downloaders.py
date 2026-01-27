@@ -5,12 +5,14 @@ Handles downloading and caching of:
 - COCO annotations
 - Open Images hierarchy and class descriptions
 - ImageNet class lists (1k and 21k)
+- Tencent ML-Images hierarchy
 """
 
 import os
 import logging
 import urllib.request
 import zipfile
+import requests
 from typing import Tuple
 from tqdm import tqdm
 
@@ -152,3 +154,36 @@ def ensure_imagenet_21k_data(data_dir: str = None) -> Tuple[str, str]:
     download_file(lemmas_url, lemmas_path)
 
     return ids_path, lemmas_path
+
+
+def download_tencent_hierarchy(data_dir: str = None) -> str:
+    """
+    Download Tencent ML-Images hierarchy file.
+    
+    Returns:
+        Path to hierarchy.txt
+    """
+    data_dir = data_dir or DOWNLOADS_DIR
+    os.makedirs(data_dir, exist_ok=True)
+    
+    url = "https://raw.githubusercontent.com/Tencent/tencent-ml-images/master/data/dictionary_and_semantic_hierarchy.txt"
+    target_path = os.path.join(data_dir, "tencent_hierarchy.txt")
+    
+    if os.path.exists(target_path):
+        return target_path
+        
+    logger.info(f"Downloading Tencent hierarchy from {url}...")
+    response = requests.get(url, stream=True)
+    response.raise_for_status()
+    
+    total_size = int(response.headers.get('content-length', 0))
+    block_size = 1024
+    
+    with open(target_path, 'wb') as f, tqdm(
+        total=total_size, unit='iB', unit_scale=True
+    ) as pbar:
+        for data in response.iter_content(block_size):
+            size = f.write(data)
+            pbar.update(size)
+            
+    return target_path
