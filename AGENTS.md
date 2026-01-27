@@ -11,6 +11,9 @@
 This tool produces **skeletons**: structured YAML files with categories and instructions, but often minimal leaf nodes. These skeletons are imported into the `wildcards-generator` SPA, where the AI populates them with extensive wildcards.
 *   **Goal**: precise structure, helpful context instructions.
 *   **Non-Goal**: generating millions of wildcards (that's the SPA's job).
+*   **Structure**:
+    *   **Categories**: YAML dictionary keys. These receive `# instruction:` comments.
+    *   **Wildcards/Leaves**: YAML list items. These are the actual prompt terms.
 
 ### 2. Strict Comment Preservation
 The `# instruction:` comment is the payload. It tells the downhill AI what a category *means*.
@@ -20,8 +23,24 @@ The `# instruction:` comment is the payload. It tells the downhill AI what a cat
 ### 3. Hybrid Data Sources
 *   **WordNet (Trusted)**: Used for `dataset` commands. We map dataset IDs (WNID, Freebase) to WordNet Synsets to extract definitions.
 *   **LLM (Flexible)**: Used for `categorize/create`. We use a custom `LLMEngine` that handles prompt loading and response cleaning (stripping markdown backticks).
+*   **Prompt Pipeline**: `create` uses a two-phase prompt (Architect -> Mason). Architect defines the core roots; Mason fills in the sub-categories.
 
-## Codebase Organization
+## Data Flow & State
+
+1.  **Input**: raw strings (CLI), text files (categorize), or synset strings (ImageNet).
+2.  **Processing**:
+    *   `dataset_type` -> returns a `CommentedMap`.
+    *   `LLM` -> returns a string, which is then parsed by `StructureManager.from_string()`.
+3.  **Output**: All commands pass through `mgr.save_structure(data, path)` which ensures consistent formatting.
+
+## LLM Logic (API Calls)
+
+The `LLMEngine` interacts with OpenRouter using specific prompt templates located in `wildcards_gen/prompts/`:
+
+*   **Structure Generation**: Takes sample terms and asks the LLM to design a hierarchy that "fits" them.
+*   **Categorization**: Sends the full term list and the skeleton. Uses `response_format={"type": "json_object"}` to ensure the LLM returns a map of terms to categories.
+*   **Enrichment**: A targeted prompt that tells the LLM to "fill in the gaps" for any keys missing an `# instruction:` comment.
+*   **Cleaning**: The tool aggressively strips markdown code blocks (````yaml`, ` ``` `) from responses to prevent YAML parsing errors.
 
 *   **`wildcards_gen/cli.py`**: The single entry point. Defined using `argparse`. Now includes `gui` subcommand.
 *   **`wildcards_gen/gui.py`**: Gradio-based web interface for dataset generation.
@@ -37,6 +56,17 @@ The `# instruction:` comment is the payload. It tells the downhill AI what a cat
 *   **Adding Datasets**: Implement a new module in `core/datasets/` that returns a dictionary. Use `wordnet.py` to fetch glosses.
 *   **Updating Prompts**: Edit text files in `wildcards_gen/prompts/`.
 *   **Testing**: Run `pytest tests/`. Ensure any new LLM logic mimics the `_clean_response` pattern to handle API variances.
+
+## Technical Deep Dive: Trace of Execution
+
+When a command like `wildcards-gen dataset tencent` is run, the backend follows this strictly orchestrated pipeline:
+
+1.  **Orchestration (CLI & Config)**: `cli.py` initializes the `ConfigManager`, merging local/global YAML defaults with CLI overrides. It identifies the command and calls the appropriate generator.
+2.  **Data Acquisition**: The `downloaders.py` module manages local caching. If a dataset (like Tencent's 11k categories) is missing, it streams it from source repositories to the `downloads/` directory.
+3.  **Parsing & Graph Discovery**: Specific dataset modules (e.g., `tencent.py`) parse raw TSV/JSON files into a Directed Graph (mapping IDs, Names, and Parent-Child relationships).
+4.  **Semantic Enrichment**: The builder recurses through the graph. For every node, it queries the local **NLTK WordNet** database via `wordnet.py`. It retrieves the "Gloss" (definition) using the WordNet ID.
+5.  **Inline Structure Building**: We use `ruamel.yaml`'s `CommentedMap`. Instead of a standard dictionary, every key-value pair is created as an object that can hold metadata. The retrieved definition is attached *inline* as an EOL comment: `# instruction: ...`.
+6.  **Serialization**: The final structure is saved via `StructureManager`, ensuring that the complex `CommentedMap` is serialized back to clean YAML while preserving all metadata instructions.
 
 ## Session Takeaways (Jan 2026)
 *   **Open Images Fix**: The original generator produced flat lists. The new port ensures full hierarchy preservation.
