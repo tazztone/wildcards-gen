@@ -44,6 +44,27 @@ class LLMEngine:
         except FileNotFoundError:
             logger.error(f"Prompt file {filename} not found at {path}")
             return ""
+    def _clean_response(self, text: str) -> str:
+        """Strip markdown code blocks from response."""
+        if not text:
+            return ""
+        cleaned = text.strip()
+        
+        # Remove opening fence
+        if cleaned.startswith("```"):
+            # Find first newline to skip language identifier
+            first_newline = cleaned.find("\n")
+            if first_newline != -1:
+                cleaned = cleaned[first_newline+1:].strip()
+            else:
+                # Startswith ``` but no newline? Just strip 3 chars
+                cleaned = cleaned[3:].strip()
+        
+        # Remove closing fence
+        if cleaned.endswith("```"):
+            cleaned = cleaned[:-3].strip()
+            
+        return cleaned
 
     def _call_api(
         self,
@@ -134,11 +155,7 @@ class LLMEngine:
             return None
 
         try:
-            cleaned = response_text.strip()
-            if cleaned.startswith("```json"):
-                cleaned = cleaned[7:]
-            if cleaned.endswith("```"):
-                cleaned = cleaned[:-3]
+            cleaned = self._clean_response(response_text)
             return json.loads(cleaned)
         except json.JSONDecodeError as e:
             logger.error(f"Failed to parse JSON: {e}")
@@ -186,7 +203,9 @@ CategoryName: # instruction: description here
             return None
 
         prompt = roots_prompt.format(topic=topic)
-        roots = self._call_api([{"role": "user", "content": prompt}])
+        response = self._call_api([{"role": "user", "content": prompt}])
+        roots = self._clean_response(response) if response else None
+        
         if not roots:
             logger.error("Phase 0 failed: Could not generate roots")
             return None
@@ -198,7 +217,9 @@ CategoryName: # instruction: description here
             return None
 
         prompt = mason_prompt.format(roots=roots)
-        structure = self._call_api([{"role": "user", "content": prompt}])
+        response = self._call_api([{"role": "user", "content": prompt}])
+        structure = self._clean_response(response) if response else None
+        
         if not structure:
             logger.error("Phase 1 failed: Could not build tree")
             return None
