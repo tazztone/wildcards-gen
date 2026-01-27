@@ -70,18 +70,66 @@ def update_en_filename(topic):
     if not topic: return "enriched.yaml"
     return f"enriched_{clean_filename(topic)[:20]}.yaml"
 
-def generate_dataset_handler(dataset_name, root, depth, output_name):
+def update_dataset_inputs(dataset_name):
+    """Update visibility of inputs based on dataset selection."""
+    is_imagenet = (dataset_name == "ImageNet")
+    can_use_smart = dataset_name in ["ImageNet", "Open Images", "Tencent ML-Images"]
+
+    return [
+        gr.update(visible=is_imagenet),     # ds_root
+        gr.update(visible=is_imagenet),     # ds_presets
+        gr.update(visible=is_imagenet),     # ds_filter
+        gr.update(visible=is_imagenet),     # ds_strict
+        gr.update(visible=is_imagenet),     # ds_blacklist
+        gr.update(visible=can_use_smart),   # smart_accordion
+    ]
+
+def generate_dataset_handler(
+    dataset_name, root, depth, output_name,
+    with_glosses, filter_set, strict_filter, blacklist_abstract,
+    smart, min_depth, min_hyponyms, min_leaf, merge_orphans
+):
     try:
         if dataset_name == "ImageNet":
             if not root:
                 return None, "Error: Root synset required for ImageNet (e.g. animal.n.01)"
-            data = imagenet.generate_imagenet_tree(root, max_depth=int(depth))
+            data = imagenet.generate_imagenet_tree(
+                root,
+                max_depth=int(depth),
+                filter_set=filter_set if filter_set != 'none' else None,
+                with_glosses=with_glosses,
+                strict_filter=strict_filter,
+                blacklist_abstract=blacklist_abstract,
+                smart=smart,
+                min_significance_depth=int(min_depth),
+                min_hyponyms=int(min_hyponyms),
+                min_leaf_size=int(min_leaf),
+                merge_orphans=merge_orphans
+            )
         elif dataset_name == "COCO":
-            data = coco.generate_coco_hierarchy()
+            data = coco.generate_coco_hierarchy(
+                with_glosses=with_glosses
+            )
         elif dataset_name == "Open Images":
-            data = openimages.generate_openimages_hierarchy(max_depth=int(depth))
+            data = openimages.generate_openimages_hierarchy(
+                max_depth=int(depth),
+                with_glosses=with_glosses,
+                smart=smart,
+                min_significance_depth=int(min_depth),
+                min_hyponyms=int(min_hyponyms),
+                min_leaf_size=int(min_leaf),
+                merge_orphans=merge_orphans
+            )
         elif dataset_name == "Tencent ML-Images":
-            data = tencent.generate_tencent_hierarchy(max_depth=int(depth))
+            data = tencent.generate_tencent_hierarchy(
+                max_depth=int(depth),
+                with_glosses=with_glosses,
+                smart=smart,
+                min_significance_depth=int(min_depth),
+                min_hyponyms=int(min_hyponyms),
+                min_leaf_size=int(min_leaf),
+                merge_orphans=merge_orphans
+            )
         else:
             return None, f"Unknown dataset: {dataset_name}"
             
@@ -226,8 +274,75 @@ def launch_gui(share=False):
                             value=update_ds_filename("ImageNet", config.get("datasets.imagenet.root_synset"), config.get("generation.default_depth")),
                             info=f"Saved to: {config.output_dir}"
                         )
+
+                        with gr.Accordion("Advanced Settings", open=False) as adv_group:
+                            ds_glosses = gr.Checkbox(
+                                label="Include Glosses/Instructions",
+                                value=True,
+                                info="Add WordNet definitions as comments to guide the AI."
+                            )
+
+                            # ImageNet specific
+                            ds_filter = gr.Dropdown(
+                                ["none", "1k", "21k"],
+                                label="ImageNet Filter",
+                                value="none",
+                                info="Filter synsets to specific ImageNet subsets.",
+                                visible=True
+                            )
+                            ds_strict = gr.Checkbox(
+                                label="Strict Filtering",
+                                value=True,
+                                info="Only include synsets where the primary definition matches the concept.",
+                                visible=True
+                            )
+                            ds_blacklist = gr.Checkbox(
+                                label="Blacklist Abstract Categories",
+                                value=False,
+                                info="Exclude abstract concepts like 'abstraction', 'group', etc.",
+                                visible=True
+                            )
+
+                            with gr.Accordion("Smart Mode (Semantic Pruning)", open=False, visible=True) as smart_group:
+                                ds_smart = gr.Checkbox(
+                                    label="Enable Smart Mode",
+                                    value=False,
+                                    info="Use semantic significance to prune irrelevant nodes and keep meaningful categories."
+                                )
+                                ds_min_depth = gr.Slider(
+                                    0, 20,
+                                    value=6,
+                                    step=1,
+                                    label="Min Significance Depth",
+                                    info="Nodes shallower than this are always kept as categories."
+                                )
+                                ds_min_hyponyms = gr.Slider(
+                                    0, 500,
+                                    value=10,
+                                    step=5,
+                                    label="Min Hyponyms",
+                                    info="Nodes with more descendants than this are kept as categories."
+                                )
+                                ds_min_leaf = gr.Slider(
+                                    1, 50,
+                                    value=3,
+                                    step=1,
+                                    label="Min Leaf Size",
+                                    info="Minimum items per leaf list. Smaller lists are merged/pruned."
+                                )
+                                ds_merge_orphans = gr.Checkbox(
+                                    label="Merge Orphans",
+                                    value=False,
+                                    info="Merge small pruned lists into parent's 'misc' category instead of keeping them."
+                                )
                         
                         # Link changes
+                        ds_name.change(
+                            update_dataset_inputs,
+                            inputs=[ds_name],
+                            outputs=[ds_root, ds_presets, ds_filter, ds_strict, ds_blacklist, smart_group]
+                        )
+
                         for comp in [ds_name, ds_root, ds_depth]:
                             comp.change(update_ds_filename, inputs=[ds_name, ds_root, ds_depth], outputs=[ds_out])
                         
@@ -248,7 +363,11 @@ def launch_gui(share=False):
                 
                 ds_btn.click(
                     generate_dataset_handler, 
-                    inputs=[ds_name, ds_root, ds_depth, ds_out], 
+                    inputs=[
+                        ds_name, ds_root, ds_depth, ds_out,
+                        ds_glosses, ds_filter, ds_strict, ds_blacklist,
+                        ds_smart, ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_merge_orphans
+                    ],
                     outputs=[ds_file, ds_prev]
                 )
 
