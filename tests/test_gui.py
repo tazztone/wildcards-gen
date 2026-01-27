@@ -20,7 +20,11 @@ def test_generate_dataset_handler_logic():
         mock_mgr.to_string.return_value = "root:\n- child"
         mock_img.return_value = {"root": ["child"]}
         
-        path, content = gui.generate_dataset_handler("ImageNet", "animal.n.01", 3, "out.yaml")
+        path, content = gui.generate_dataset_handler(
+            "ImageNet", "animal.n.01", 3, "out.yaml",
+            True, "none", True, False,
+            False, 6, 10, 3, False
+        )
         
         assert path is not None
         assert "out.yaml" in path
@@ -31,7 +35,11 @@ def test_generate_dataset_handler_error():
     """Test error handling in generation."""
     # We patch inside gui.py's namespace for consistency
     with patch('wildcards_gen.gui.imagenet.generate_imagenet_tree', side_effect=Exception("Boom")):
-        path, content = gui.generate_dataset_handler("ImageNet", "root", 3, "out.yaml")
+        path, content = gui.generate_dataset_handler(
+            "ImageNet", "root", 3, "out.yaml",
+            True, "none", True, False,
+            False, 6, 10, 3, False
+        )
         assert path is None
         assert "Boom" in content
 
