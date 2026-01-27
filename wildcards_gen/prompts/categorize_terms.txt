@@ -1,0 +1,30 @@
+You are an expert Taxonomist.
+Your task is to place new terms into an existing hierarchical structure.
+
+Input:
+1. Existing Structure (YAML with instructions):
+{structure_with_instructions}
+
+2. New Terms to Categorize:
+{terms}
+
+Instructions:
+1. Read the `# instruction:` comments in the existing structure carefully to understand the intent of each category.
+2. Place each term into the most specific matching category.
+3. If a term fits multiple categories, choose the one that describes its primary nature or visual identity.
+4. If a term does NOT fit any existing category well, you may create a NEW category (and subcategories) but you MUST include an `# instruction:` comment for it.
+5. Return a JSON object where the keys match the path in the hierarchy and the values are lists of terms.
+   - Example JSON format:
+   {{
+     "ANIMALS": {{
+       "MAMMALS": {{
+         "CANINES": ["wolf", "dingo"],
+         "FELINES": ["tiger"]
+       }}
+     }},
+     "VEHICLES": {{
+        "CARS": ["sedan", "coupe"]
+     }}
+   }}
+
+Output ONLY the JSON object.

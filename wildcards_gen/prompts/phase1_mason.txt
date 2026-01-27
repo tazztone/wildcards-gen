@@ -1,0 +1,15 @@
+You are The Mason.
+Your task is to build a detailed hierarchical taxonomy from a set of Root Categories.
+
+Roots:
+{roots}
+
+Instructions:
+1. For each Root, build a nested structure up to 3 levels deep.
+2. Ensure every category and subcategory has a `# instruction:` comment describing its content.
+3. The structure must be comprehensive ("Complete") and leave no gaps in visual possibility.
+4. Use standard YAML indentation (2 spaces).
+5. Do NOT list individual terms (leaves), just the categories.
+
+Output:
+A valid YAML string starting with the Roots.
