@@ -92,9 +92,33 @@ wildcards-gen dataset tencent --smart -o output/universal_skeleton.yaml
 #### 🎚️ Tuning Smart Mode
 When using `--smart`, you can fine-tune what becomes a category vs. what gets flattened into a list:
 
-- `--min-depth [6]`: Nodes shallower than this in WordNet (like "animal", "tool") are always kept as categories. **Lower** = fewer, more top-level categories.
-- `--min-hyponyms [10]`: Nodes with more than this many descendants are kept as categories for organization. **Higher** = more items flattened into parent lists.
-- `--min-leaf [3]`: If a subcategory would only contain 1 or 2 items, it's merged into its parent. **Higher** = larger, more diverse leaf lists.
+| Flag | Default | Effect |
+|------|---------|--------|
+| `--min-depth` | `6` | Nodes shallower than this in WordNet are always kept as categories. **Lower = fewer top-level categories** |
+| `--min-hyponyms` | `10` | Nodes with more descendants than this are kept as categories. **Higher = more flattening** |
+| `--min-leaf` | `3` | Minimum items per leaf list. Smaller lists are kept as-is (or merged with `--merge-orphans`) |
+| `--merge-orphans` | off | Merge small pruned lists into parent's `misc:` key instead of keeping them |
+
+##### Practical Examples
+
+```bash
+# Default: Detailed hierarchy (~10k lines, ~2000 categories)
+wildcards-gen dataset tencent --smart -o output/skeleton_detailed.yaml
+
+# Balanced: Good for most use cases (~5k lines, ~500 categories)
+wildcards-gen dataset tencent --smart --min-depth 4 --min-hyponyms 50 -o output/skeleton_balanced.yaml
+
+# Flat: Minimal categories, maximum flattening (~2k lines, ~50 categories)
+wildcards-gen dataset tencent --smart --min-depth 2 --min-hyponyms 500 --merge-orphans -o output/skeleton_flat.yaml
+```
+
+##### Output Comparison
+
+| Preset | `--min-depth` | `--min-hyponyms` | Categories | Lines |
+|--------|---------------|------------------|------------|-------|
+| Detailed | 6 | 10 | ~2000 | ~10k |
+| Balanced | 4 | 50 | ~500 | ~5k |
+| Flat | 2 | 500 | ~50 | ~2k |
 
 > [!TIP]
 > **Smart Mode** is also available for `imagenet` and `openimages` commands!
