@@ -4,6 +4,7 @@ import os
 import yaml
 from wildcards_gen.core.datasets import imagenet, coco, openimages, tencent
 from wildcards_gen.core.structure import StructureManager
+from wildcards_gen.core.config import config
 
 def generate_dataset(dataset_name, root, depth, output_name):
     """Generate dataset and return file path + content."""
@@ -27,7 +28,7 @@ def generate_dataset(dataset_name, root, depth, output_name):
         yaml_str = mgr.to_string(data)
         
         # Save to file
-        output_dir = "output"
+        output_dir = config.output_dir
         os.makedirs(output_dir, exist_ok=True)
         if not output_name.endswith(".yaml"):
             output_name += ".yaml"
@@ -49,8 +50,8 @@ def launch_gui(share=False):
         with gr.Row():
             with gr.Column():
                 dataset = gr.Dropdown(["ImageNet", "COCO", "Open Images", "Tencent ML-Images"], label="Dataset", value="ImageNet")
-                root = gr.Textbox(label="Root Synset (ImageNet only)", value="animal.n.01", placeholder="e.g. musical_instrument.n.01")
-                depth = gr.Slider(minimum=1, maximum=10, value=3, step=1, label="Depth")
+                root = gr.Textbox(label="Root Synset (ImageNet only)", value=config.get("datasets.imagenet.root_synset"), placeholder="e.g. musical_instrument.n.01")
+                depth = gr.Slider(minimum=1, maximum=10, value=config.get("generation.default_depth"), step=1, label="Depth")
                 filename = gr.Textbox(label="Output Filename", value="skeleton.yaml")
                 btn = gr.Button("Generate structure", variant="primary")
                 
@@ -64,4 +65,6 @@ def launch_gui(share=False):
             outputs=[output_file, preview]
         )
         
-    demo.launch(share=share)
+    server_name = config.get("gui.server_name")
+    server_port = config.get("gui.server_port")
+    demo.launch(share=share, server_name=server_name, server_port=server_port)

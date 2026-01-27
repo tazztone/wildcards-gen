@@ -14,6 +14,7 @@ import sys
 import os
 from typing import Optional
 
+from .core.config import config
 from .core.structure import StructureManager
 from .core.datasets.imagenet import generate_imagenet_tree, generate_imagenet_from_wnids
 from .core.datasets.coco import generate_coco_hierarchy
@@ -32,6 +33,8 @@ logger = logging.getLogger(__name__)
 
 def get_api_key() -> Optional[str]:
     """Get API key from environment or config."""
+    if config.api_key:
+        return config.api_key
     return os.environ.get('OPENROUTER_API_KEY')
 
 
@@ -207,51 +210,51 @@ def main():
     dataset_sub = p_dataset.add_subparsers(dest='dataset_type', required=True)
     
     # ImageNet
-    p_imagenet = dataset_sub.add_parser('imagenet', help='ImageNet hierarchy')
-    p_imagenet.add_argument('--root', default='entity.n.01', help='Root synset')
-    p_imagenet.add_argument('--depth', type=int, default=4, help='Max depth')
-    p_imagenet.add_argument('--filter', choices=['1k', '21k', 'none'], default='none')
+    p_imagenet = dataset_sub.add_parser('imagenet', help='ImageNet (WordNet-based) hierarchy')
+    p_imagenet.add_argument('--root', default=config.get("datasets.imagenet.root_synset"), help='Root synset')
+    p_imagenet.add_argument('--depth', type=int, default=config.get("generation.default_depth"), help='Max depth')
+    p_imagenet.add_argument('--filter', choices=['1k', '21k', 'none'], default=config.get("datasets.imagenet.filter") or 'none')
     p_imagenet.add_argument('--no-glosses', action='store_true', help='Skip WordNet glosses')
     p_imagenet.add_argument('--no-strict', action='store_true', help='Disable strict filtering')
     p_imagenet.add_argument('--blacklist', action='store_true', help='Blacklist abstract categories')
-    p_imagenet.add_argument('-o', '--output', default='output/imagenet.yaml')
+    p_imagenet.add_argument('-o', '--output', default=os.path.join(config.output_dir, 'imagenet.yaml'))
     p_imagenet.set_defaults(func=cmd_dataset_imagenet)
     
     # COCO
     p_coco = dataset_sub.add_parser('coco', help='COCO hierarchy')
     p_coco.add_argument('--depth', type=int, default=10)
     p_coco.add_argument('--no-glosses', action='store_true')
-    p_coco.add_argument('-o', '--output', default='output/coco.yaml')
+    p_coco.add_argument('-o', '--output', default=os.path.join(config.output_dir, 'coco.yaml'))
     p_coco.set_defaults(func=cmd_dataset_coco)
     
     # OpenImages
     p_oi = dataset_sub.add_parser('openimages', help='Open Images hierarchy')
-    p_oi.add_argument('--depth', type=int, default=4)
+    p_oi.add_argument('--depth', type=int, default=config.get("generation.default_depth"))
     p_oi.add_argument('--no-glosses', action='store_true')
-    p_oi.add_argument('-o', '--output', default='output/openimages.yaml')
+    p_oi.add_argument('-o', '--output', default=os.path.join(config.output_dir, 'openimages.yaml'))
     p_oi.set_defaults(func=cmd_dataset_openimages)
 
     # Tencent
     p_tencent = dataset_sub.add_parser('tencent', help='Tencent ML-Images hierarchy')
-    p_tencent.add_argument('--depth', type=int, default=3)
+    p_tencent.add_argument('--depth', type=int, default=config.get("generation.default_depth"))
     p_tencent.add_argument('--no-glosses', action='store_true')
-    p_tencent.add_argument('-o', '--output', default='output/tencent.yaml')
+    p_tencent.add_argument('-o', '--output', default=os.path.join(config.output_dir, 'tencent.yaml'))
     p_tencent.set_defaults(func=cmd_dataset_tencent)
     
     # === CATEGORIZE COMMAND ===
     p_cat = subparsers.add_parser('categorize', help='Categorize flat term list (LLM)')
     p_cat.add_argument('input', help='Input text file with terms')
-    p_cat.add_argument('-o', '--output', default='output/categorized.yaml')
+    p_cat.add_argument('-o', '--output', default=os.path.join(config.output_dir, 'categorized.yaml'))
     p_cat.add_argument('--api-key', help='OpenRouter API key')
-    p_cat.add_argument('--model', default='google/gemma-3-27b-it:free')
+    p_cat.add_argument('--model', default=config.model)
     p_cat.set_defaults(func=cmd_categorize)
     
     # === CREATE COMMAND ===
     p_create = subparsers.add_parser('create', help='Generate taxonomy for topic (LLM)')
     p_create.add_argument('--topic', required=True, help='Topic for taxonomy')
-    p_create.add_argument('-o', '--output', default='output/taxonomy.yaml')
+    p_create.add_argument('-o', '--output', default=os.path.join(config.output_dir, 'taxonomy.yaml'))
     p_create.add_argument('--api-key', help='OpenRouter API key')
-    p_create.add_argument('--model', default='google/gemma-3-27b-it:free')
+    p_create.add_argument('--model', default=config.model)
     p_create.set_defaults(func=cmd_create)
     
     # === ENRICH COMMAND ===
@@ -260,12 +263,13 @@ def main():
     p_enrich.add_argument('-o', '--output', help='Output file (default: overwrite input)')
     p_enrich.add_argument('--topic', default='AI image generation wildcards')
     p_enrich.add_argument('--api-key', help='OpenRouter API key')
-    p_enrich.add_argument('--model', default='google/gemma-3-27b-it:free')
+    p_enrich.add_argument('--model', default=config.model)
     p_enrich.set_defaults(func=cmd_enrich)
     
     # === GUI COMMAND ===
     p_gui = subparsers.add_parser('gui', help='Launch Gradio GUI')
-    p_gui.add_argument('--share', action='store_true', help='Create public link')
+    p_gui.add_argument('--share', action='store_true', default=config.get("gui.share"), help='Create public link')
+    p_gui.add_argument('--port', type=int, default=config.get("gui.server_port"))
     p_gui.set_defaults(func=cmd_gui)
     
     args = parser.parse_args()
