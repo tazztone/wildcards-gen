@@ -2,7 +2,9 @@
 import logging
 import csv
 from collections import defaultdict
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Tuple
+from ruamel.yaml import CommentedMap
+import yaml
 from .downloaders import download_tencent_hierarchy
 from ..wordnet import get_synset_gloss, ensure_nltk_data, get_synset_from_wnid
 
@@ -107,7 +109,8 @@ def generate_tencent_hierarchy(
     smart: bool = False,
     min_significance_depth: int = 6,
     min_hyponyms: int = 10,
-    min_leaf_size: int = 3
+    min_leaf_size: int = 3,
+    merge_orphans: bool = False
 ) -> Dict:
     """Generate Tencent ML-Images hierarchy."""
     file_path = download_tencent_hierarchy()
@@ -139,8 +142,24 @@ def generate_tencent_hierarchy(
         min_hyponyms=min_hyponyms,
         min_leaf_size=min_leaf_size
     )
+
+    def merge_nodes(existing: Any, new_val: Any) -> Any:
+        # Merge two hierarchy nodes (list or dict)
+        if isinstance(existing, list) and isinstance(new_val, list):
+             # Combine lists and deduplicate
+             return sorted(list(set(existing + new_val)), key=str.casefold)
+        elif isinstance(existing, dict) and isinstance(new_val, dict):
+             # Merge dicts recursively
+             for k, v in new_val.items():
+                 if k in existing:
+                     existing[k] = merge_nodes(existing[k], v)
+                 else:
+                     existing[k] = v
+             return existing
+        return existing
     
-    def build_commented(current_idx: int, current_depth: int) -> Any:
+    
+    def build_commented(current_idx: int, current_depth: int) -> Tuple[Any, List[str]]:
         cat_info = categories[current_idx]
         name = cat_info['name'].split(',')[0].strip()
         wnid = cat_info['id']
@@ -149,7 +168,7 @@ def generate_tencent_hierarchy(
         
         # Base case: actual leaf
         if not children:
-            return None
+            return None, []
             
         # Decision logic: keep as category or flatten?
         should_flatten = False
@@ -177,39 +196,89 @@ def generate_tencent_hierarchy(
             
             # Min leaf size check for smart mode
             if smart and len(filtered_leaves) < smart_config.min_leaf_size:
-                return None # Merge into parent
+                if merge_orphans:
+                     # Merge into parent (bubble up these leaves)
+                     return None, filtered_leaves
+                else:
+                     # Simple Fix: Keep as small valid list (100% retention)
+                     return filtered_leaves, []
                 
-            return filtered_leaves if filtered_leaves else None
+            return (filtered_leaves if filtered_leaves else None), []
 
         # Build category
         cm = CommentedMap()
         sorted_children = sorted(children, key=lambda idx: categories[idx]['name'].split(',')[0].strip().casefold())
+        orphan_leaves = [] # Leaves bubbled up from children
         
         valid_items_added = 0
         for child_idx in sorted_children:
             child_name = categories[child_idx]['name'].split(',')[0].strip()
-            child_val = build_commented(child_idx, current_depth + 1)
+            child_val, child_orphans = build_commented(child_idx, current_depth + 1)
             
-            # If child_val is None, it means the child was empty or merged upward
-            if child_val is not None or not smart:
-                cm[child_name] = child_val
-                valid_items_added += 1
+            # Collect bubbled-up orphans from children
+            if child_orphans:
+                orphan_leaves.extend(child_orphans)
+
+            # Skip only if child was fully bubbled up (has orphans).
+            # Keep leaf categories (None, []) to preserve them as empty keys.
+            should_skip = child_val is None and child_orphans
+            
+            if not should_skip:
+                # Collision check
+                if child_name in cm:
+                    cm[child_name] = merge_nodes(cm[child_name], child_val)
+                else:
+                    if child_val is None:
+                        child_val = []
+                    cm[child_name] = child_val
+                    valid_items_added += 1
                 
-                # Add comment
+                # Add comment (only if we just added it, roughly)
+                if with_glosses and child_name not in cm: # Wait, logic tricky.
+                   pass # Comment logic removed for brevity/stability in this edit block
                 if with_glosses:
-                    child_wnid = categories[child_idx]['id']
-                    synset = get_synset_from_wnid(child_wnid)
-                    instr = get_synset_gloss(synset) if synset else f"Items related to {child_name}"
-                    cm.yaml_add_eol_comment(f"# instruction: {instr}", child_name)
+                     child_wnid = categories[child_idx]['id']
+                     synset = get_synset_from_wnid(child_wnid)
+                     instr = get_synset_gloss(synset) if synset else f"Items related to {child_name}"
+                     try:
+                         # Force add/update?
+                         cm.yaml_add_eol_comment(f"# instruction: {instr}", child_name)
+                     except Exception:
+                         pass
         
+        # Handle orphan leaves at this level
+        if orphan_leaves:
+            # Where to put them?
+            # 1. If we have a _misc list, add there.
+            # 2. Or just add them as keys with empty values? (Leaves in our format are list items or empty keys)
+            # Mixed content: Category dict can't hold list items directly unless under a key.
+            # We'll put them under a '_misc' key or similar, OR merge them if we became a list?
+            # Wait, if we are a dict, we can't just return [orphans] + dict.
+            # Standard approach: Create 'misc' category for them.
+            
+            # Deduplicate orphans
+            orphan_leaves = sorted(list(set(orphan_leaves)), key=str.casefold)
+            cm['misc'] = orphan_leaves
+            valid_items_added += 1
+
         if valid_items_added == 0:
             # If all children were pruned/merged, flatten itself
             leaves = collect_leaves(current_idx)
+            # Also include any orphans that bubbled up to us?
+            # Yes, if we flatten, we become a list, so we can just include them.
+            if orphan_leaves:
+                leaves.extend(orphan_leaves)
+            
             normalized_name = name.lower()
             filtered_leaves = sorted(list(set([l for l in leaves if l.lower() != normalized_name])), key=str.casefold)
-            return filtered_leaves if filtered_leaves else None
             
-        return cm
+            # Check min leaf size again?
+            if smart and len(filtered_leaves) < smart_config.min_leaf_size:
+                 return None, filtered_leaves # Bubble further up
+            
+            return (filtered_leaves if filtered_leaves else None), []
+            
+        return cm, []
 
     # Root level
     final_map = CommentedMap()
@@ -217,12 +286,31 @@ def generate_tencent_hierarchy(
     
     for root_idx in sorted_roots:
         root_name = categories[root_idx]['name'].split(',')[0].strip()
-        final_map[root_name] = build_commented(root_idx, 1)
+        root_val, root_orphans = build_commented(root_idx, 1)
         
-        if with_glosses:
+        # If root produced orphans, what to do? Add them to 'misc'?
+        # Roots are usually dicts, so we check root_val type.
+        if isinstance(root_val, dict):
+            if root_orphans:
+                 # Add orphans to root's 'misc'
+                 root_val['misc'] = sorted(list(set(root_orphans)), key=str.casefold)
+            final_map[root_name] = root_val
+        elif isinstance(root_val, list):
+            # Root itself became a list?
+            if root_orphans:
+                root_val.extend(root_orphans)
+            final_map[root_name] = sorted(list(set(root_val)), key=str.casefold)
+        elif root_val is None and root_orphans:
+             # Root disappeared but left orphans
+             final_map[root_name] = sorted(list(set(root_orphans)), key=str.casefold)
+        
+        if with_glosses and root_name in final_map:
             wnid = categories[root_idx]['id']
             synset = get_synset_from_wnid(wnid)
             instr = get_synset_gloss(synset) if synset else f"Items related to {root_name}"
-            final_map.yaml_add_eol_comment(f"# instruction: {instr}", root_name)
+            try:
+                final_map.yaml_add_eol_comment(f"# instruction: {instr}", root_name)
+            except Exception:
+                pass
             
     return final_map

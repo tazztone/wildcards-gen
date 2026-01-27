@@ -94,7 +94,8 @@ def cmd_dataset_tencent(args):
         smart=args.smart,
         min_significance_depth=args.min_depth,
         min_hyponyms=args.min_hyponyms,
-        min_leaf_size=args.min_leaf
+        min_leaf_size=args.min_leaf,
+        merge_orphans=args.merge_orphans
     )
     
     mgr = StructureManager()
@@ -259,6 +260,7 @@ def main():
     p_tencent.add_argument('--depth', type=int, default=config.get("generation.default_depth"), help='Max depth (ignored if --smart)')
     p_tencent.add_argument('--no-glosses', action='store_true', help='Skip WordNet glosses')
     add_smart_args(p_tencent)
+    p_tencent.add_argument('--merge-orphans', action='store_true', help='[Smart] If set, small leaf lists are bubbled up to parent category instead of kept as small lists')
     p_tencent.add_argument('-o', '--output', default=os.path.join(config.output_dir, 'tencent.yaml'))
     p_tencent.set_defaults(func=cmd_dataset_tencent)
     
