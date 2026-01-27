@@ -44,6 +44,7 @@ class LLMEngine:
         except FileNotFoundError:
             logger.error(f"Prompt file {filename} not found at {path}")
             return ""
+
     def _clean_response(self, text: str) -> str:
         """Strip markdown code blocks from response."""
         if not text:
@@ -124,7 +125,8 @@ class LLMEngine:
         )
 
         messages = [{"role": "user", "content": prompt}]
-        return self._call_api(messages)
+        response = self._call_api(messages)
+        return self._clean_response(response) if response else None
 
     def categorize_terms(
         self,
@@ -187,7 +189,8 @@ Output ONLY valid YAML with the instructions as end-of-line comments in the form
 CategoryName: # instruction: description here
 """
         messages = [{"role": "user", "content": prompt}]
-        return self._call_api(messages)
+        response = self._call_api(messages)
+        return self._clean_response(response) if response else None
 
     def generate_dynamic_structure(
         self,

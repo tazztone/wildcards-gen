@@ -1,22 +1,25 @@
 
 # Wildcards-Gen
 
-A unified CLI toolkit for generating hierarchical "skeleton" YAML files for AI image generation prompt management.
+**A unified CLI toolkit for generating hierarchical "skeleton" YAML files for AI image generation prompt management.**
 
-Combines the power of **WordNet** (for computer vision datasets) and **LLMs** (for semantic categorization) to produce rich, structured taxonomies with `# instruction:` comments.
+This tool combines the precision of **WordNet** (for computer vision datasets) with the creativity of **LLMs** (for semantic categorization) to produce rich, context-aware taxonomies. It is designed to create the "skeleton" files used by the `wildcards-generator` SPA.
 
-## Features
+## Key Takeaways & Features
 
-- **Unified Tool**: Replaces disparate scripts with a single `wildcards-gen` CLI.
-- **Instruct-Ready Output**: Automatically adds `# instruction:` comments to YAML categories, enabling context-aware AI expansion in downstream tools like `wildcards-generator`.
-- **Hybrid Intelligence**:
-    - **WordNet Mode**: Uses lexical database definitions for standard datasets (ImageNet, COCO, Open Images) - Fast, free, precise.
-    - **LLM Mode**: Uses OpenRouter (e.g., GPT-4o) for arbitrary term lists or instruction enrichment - Creative, flexible, smart.
-- **Structure Preservation**: Uses `ruamel.yaml` to ensure comments and structure are perfectly preserved.
-- **Smart Datasets**:
-    - **ImageNet**: Generate trees from any root synset.
-    - **Open Images**: Full hierarchy support (no more flat lists).
-    - **COCO**: Standardized 80-class hierarchy.
+### 🚀 Unified Workflow
+Replaces disparate scripts (`Wildcard-Hierarchy-Generator`, `wildcards-categorize`) with a single, robust CLI: `wildcards-gen`. One tool for all your taxonomy needs.
+
+### 🧠 Hybrid Intelligence
+*   **Dataset Mode (Deterministic)**: Extracts precise hierarchies from ImageNet, COCO, and Open Images. Uses **WordNet glosses** to automatically generate `# instruction:` comments (e.g., "a living organism characterized by voluntary movement" for *animal*).
+*   **LLM Mode (Generative)**: Uses OpenRouter (e.g., GPT-4o) to categorize messy lists, create taxonomies from scratch, or "enrich" existing skeletons with better descriptions.
+
+### 🛡️ Robust & Verified
+*   **Structure Preservation**: Built on `ruamel.yaml` to ensure `# instruction:` comments are never lost during processing.
+*   **Markdown Cleaning**: Automatically strips markdown backticks from LLM responses, ensuring valid YAML output every time.
+*   **Deep Hierarchies**: Fully supports nested structures. *Note: Open Images generation has been patched to produce proper trees instead of flat lists.*
+
+---
 
 ## Installation
 
@@ -30,58 +33,64 @@ source .venv/bin/activate
 uv pip install -e .
 ```
 
-## Usage
+---
 
-### 1. Generating from Standard Datasets
+## Usage Guide
 
-Generate a skeleton from **COCO** (fastest start):
+### 1. Generating form CV Datasets (WordNet)
+
+Best for creating solid, grounded baselines from massive datasets.
+
+**COCO (Quick Start)**
 ```bash
 wildcards-gen dataset coco -o output/coco.yaml
 ```
 
-Generate from **ImageNet** (deep hierarchy):
+**ImageNet (Deep Custom Trees)**
 ```bash
-# Generate animal taxonomy
-wildcards-gen dataset imagenet --root animal.n.01 --depth 3 -o output/animals.yaml
+# Generate a tree for "musical instrument" (depth 3)
+wildcards-gen dataset imagenet --root musical_instrument.n.01 --depth 3 -o output/instruments.yaml
 ```
 
-Generate from **Open Images**:
+**Open Images (Massive Scale)**
 ```bash
 wildcards-gen dataset openimages -o output/openimages.yaml
 ```
 
-### 2. Categorizing Custom Lists (LLM)
+### 2. LLM-Powered Commands
 
-If you have a flat text file of terms (`input/monsters.txt`):
-```bash
-export OPENROUTER_API_KEY=sk-...
-wildcards-gen categorize input/monsters.txt -o output/monsters.yaml
-```
+Requires `OPENROUTER_API_KEY` environment variable.
 
-### 3. Creating New Taxonomies (LLM)
-
-Create a structure from scratch for a topic:
+**Create from Scratch**
+Generate a full taxonomy for any topic:
 ```bash
 wildcards-gen create --topic "Fantasy RPG Classes" -o output/rpg.yaml
 ```
 
-### 4. Enriching Instructions (LLM)
-
-Improve the `# instruction:` comments in any existing YAML:
+**Categorize a List**
+Turn a flat text file (`input/terms.txt`) into a hierarchy:
 ```bash
-wildcards-gen enrich output/old_structure.yaml
+wildcards-gen categorize input/terms.txt -o output/categorized.yaml
 ```
+
+**Enrich Existing Files**
+Add or improve `# instruction:` comments in any YAML file:
+```bash
+wildcards-gen enrich output/legacy_file.yaml -o output/enriched.yaml
+```
+
+---
 
 ## Output Format
 
-The tool generates YAML compatible with `wildcards-generator`:
+The tool generates YAML perfectly formatted for `wildcards-generator`, with context instructions preserved:
 
 ```yaml
-canines: # instruction: carnivorous mammals of the family Canidae
-  - dog
-  - wolf
-  - fox
-felines: # instruction: mammals of the family Felidae
-  - cat
-  - lion
+animal: # instruction: a living organism characterized by voluntary movement
+  canines: # instruction: carnivorous mammals of the family Canidae
+    - dog
+    - wolf
+  felines: # instruction: mammals of the family Felidae
+    - cat
+    - lion
 ```
