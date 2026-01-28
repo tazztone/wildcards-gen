@@ -5,6 +5,8 @@
 
 `wildcards-gen` is the canonical tool for generating hierarchical wildcard skeletons. It represents a merger and maturity of previous experimental tools.
 
+**🎯 Target Tool:** [wildcards-generator](https://github.com/tazztone/wildcards-generator) — the AI-powered SPA that consumes the skeleton files produced by this CLI.
+
 ## Architectural Principles
 
 ### 1. The "Skeleton" Concept

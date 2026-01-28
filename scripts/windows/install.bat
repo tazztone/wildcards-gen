@@ -1,6 +1,13 @@
 @echo off
 setlocal enabledelayedexpansion
 
+:: Get the directory where the script is located
+set "SCRIPT_DIR=%~dp0"
+:: Project root is two levels up from scripts\windows\
+set "ROOT_DIR=%SCRIPT_DIR%..\.."
+
+cd /d "%ROOT_DIR%"
+
 echo 🚀 Starting installation of wildcards-gen...
 
 :: Check for uv
