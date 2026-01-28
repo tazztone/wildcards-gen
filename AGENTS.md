@@ -91,3 +91,7 @@ When a command like `wildcards-gen dataset tencent` is run, the backend follows 
 *   **Orphan Bubbling (Jan 28)**: Fixed `min_leaf` logic in ImageNet/OpenImages to bubble small lists up to parent `misc:` key (matching Tencent logic) instead of discarding them.
 *   **Dataset Overrides**: GUI now supports per-dataset preset overrides (e.g. OpenImages defaults to `merge_orphans=True` for better structure).
 *   **Usability Improvements**: Implemented case-insensitive alphabetical sorting across all datasets to improve manual navigability.
+*   **Python Versioning (Jan 28)**: Strict requirement for Python `>=3.10` due to `transformers>=4.51.0` dependency in the linter.
+*   **Execution Hygiene**: Always use `uv run python -m wildcards_gen.cli` to ensure proper environment resolution and avoid `ModuleNotFoundError`.
+*   **Analysis Depth**: OpenImages structure requires `smart=True` with permissive thresholds in analysis mode, otherwise it appears as a flat list (depth 1).
+*   **WordNet Polysemy**: Strict filtering can inadvertently prune categories like "canine" (tooth vs mammal). Use `--no-strict` when excluding logical subtrees.
