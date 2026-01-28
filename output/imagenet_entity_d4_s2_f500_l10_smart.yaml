@@ -1,0 +1,7378 @@
+entity:  # instruction: that which is perceived or known or inferred to have its own distinct existence (living or nonliving)
+  physical entity:  # instruction: an entity that has physical existence
+    object:  # instruction: a tangible and visible entity; an entity that can cast a shadow
+      makeweight:  # instruction: anything added to fill out a whole
+        - makeweight
+      ribbon: # instruction: any long object resembling a thin line
+        - blade
+      je ne sais quoi: # instruction: something indescribable
+        - je ne sais quoi
+      geological formation: # instruction: (geology) the geological features of the earth
+        - Alpine glacier
+        - Fountain of Youth
+        - Piedmont glacier
+        - abyssal zone
+        - alp
+        - anthill
+        - aquifer
+        - arete
+        - arroyo
+        - ascent
+        - atoll
+        - bank
+        - bar
+        - barbecue pit
+        - barrier reef
+        - basin
+        - beach
+        - bed
+        - ben
+        - berm
+        - bluff
+        - bonanza
+        - borrow pit
+        - brae
+        - burrow
+        - butte
+        - caldera
+        - canyon
+        - canyonside
+        - cave
+        - cavern
+        - cirque
+        - cliff
+        - coast
+        - collector
+        - continental glacier
+        - continental shelf
+        - continental slope
+        - coral reef
+        - cove
+        - crag
+        - crater
+        - dale
+        - dell
+        - delta
+        - descent
+        - diapir
+        - divot
+        - down
+        - downhill
+        - draw
+        - dune
+        - escarpment
+        - esker
+        - fire pit
+        - folium
+        - foothill
+        - foreshore
+        - geyser
+        - glacier
+        - glen
+        - gopher hole
+        - gorge
+        - grotto
+        - growler
+        - gulch
+        - gully
+        - guyot
+        - highland
+        - hill
+        - hillside
+        - hogback
+        - hole
+        - hollow
+        - hot spring
+        - ice field
+        - ice floe
+        - ice mass
+        - iceberg
+        - icecap
+        - kettle hole
+        - key
+        - knoll
+        - kopje
+        - lake bed
+        - lakefront
+        - lakeside
+        - landfall
+        - landfill
+        - ledge
+        - littoral
+        - lowland
+        - lunar crater
+        - maar
+        - massif
+        - mesa
+        - molehill
+        - monocline
+        - mountain
+        - mountainside
+        - mouth
+        - mull
+        - natural depression
+        - natural elevation
+        - neritic zone
+        - nullah
+        - ocean floor
+        - oceanfront
+        - piedmont
+        - pit
+        - plage
+        - point
+        - polar glacier
+        - pothole
+        - precipice
+        - promontory
+        - quicksand
+        - rabbit burrow
+        - range
+        - ravine
+        - reef
+        - relict
+        - ridge
+        - rift valley
+        - ripple mark
+        - riverbank
+        - riverbed
+        - saltpan
+        - sandbank
+        - sandbar
+        - sandpit
+        - sanitary landfill
+        - sawpit
+        - seamount
+        - seashore
+        - seaside
+        - seif dune
+        - shoal
+        - shore
+        - sinkhole
+        - ski slope
+        - slope
+        - spring
+        - steep
+        - strand
+        - streambed
+        - swale
+        - swell
+        - tableland
+        - talus
+        - tar pit
+        - terrace
+        - tidal basin
+        - tideland
+        - tor
+        - trench
+        - trou-de-loup
+        - trough
+        - twilight zone
+        - uphill
+        - valley
+        - vein
+        - volcanic crater
+        - volcano
+        - wadi
+        - wall
+        - warren
+        - wash
+        - water table
+        - waterside
+        - wormhole
+      vagabond: # instruction: anything that resembles a vagabond in having no fixed place
+        - vagabond
+      fomite: # instruction: any inanimate object (as a towel or money or clothing or dishes or books or toys etc.) that can transmit infectious agents from one person to another
+        - fomite
+      discard: # instruction: anything that is cast aside or discarded
+        - discard
+      curio: # instruction: something unusual -- perhaps worthy of collecting
+        - bric-a-brac
+        - chachka
+        - collectible
+        - collector's item
+        - rariora
+      location: # instruction: a point or extent in space
+        region:  # instruction: the extended spatial location of something
+          - Cuban heel
+          - Eden
+          - French heel
+          - Kuiper belt
+          - Pacinian corpuscle
+          - Papua
+          - Sind
+          - Wight
+          - abdominal wall
+          - aerospace
+          - air
+          - airhead
+          - airspace
+          - arrowhead
+          - asteroid belt
+          - asthenosphere
+          - atmosphere
+          - back of beyond
+          - barb
+          - base
+          - beachhead
+          - beak
+          - beam-ends
+          - bed
+          - bedside
+          - belly
+          - belt
+          - bilge
+          - bilges
+          - biosphere
+          - bitter end
+          - bitthead
+          - black hole
+          - blind side
+          - border
+          - bottom
+          - boundary
+          - boundary line
+          - bourn
+          - bridgehead
+          - brink
+          - buffer zone
+          - cambium
+          - capital
+          - capitulum
+          - celestial sphere
+          - cell wall
+          - chromosphere
+          - circumference
+          - city limit
+          - city line
+          - coal seam
+          - coastline
+          - combat zone
+          - corn snow
+          - county
+          - county line
+          - crown
+          - crud
+          - crust
+          - cusp
+          - danger zone
+          - deep space
+          - demilitarized zone
+          - depth
+          - dermis
+          - desktop
+          - diamond point
+          - distance
+          - district line
+          - dockside
+          - drop zone
+          - earshot
+          - east side
+          - edge
+          - edging
+          - end
+          - end point
+          - epidermis
+          - exosphere
+          - extreme point
+          - extremity
+          - fence line
+          - fingertip
+          - finish
+          - finishing line
+          - floor
+          - fluke
+          - foot
+          - forefront
+          - free nerve ending
+          - fringe
+          - front
+          - frontier
+          - gaff
+          - geological horizon
+          - greenbelt
+          - hairline
+          - half sole
+          - hand
+          - hard palate
+          - hard shoulder
+          - head
+          - heel
+          - heliopause
+          - heliosphere
+          - hell
+          - hem
+          - horizon
+          - horst
+          - hydrosphere
+          - inside
+          - insole
+          - interface
+          - intergalactic space
+          - interplanetary medium
+          - interplanetary space
+          - interstellar medium
+          - interstellar space
+          - ionosphere
+          - kill zone
+          - layer
+          - lee
+          - limb
+          - limit
+          - lithosphere
+          - lower limit
+          - lower mantle
+          - luff
+          - mantle
+          - mare
+          - masthead
+          - maximum
+          - mesosphere
+          - midland
+          - midst
+          - minimum
+          - molding
+          - nape
+          - negative magnetic pole
+          - nerve ending
+          - nib
+          - north side
+          - oil-water interface
+          - ore bed
+          - orphrey
+          - outdoors
+          - outline
+          - outside
+          - outsole
+          - ozone layer
+          - palate
+          - pate
+          - penetralia
+          - photosphere
+          - pike
+          - pinpoint
+          - plate
+          - point
+          - pole
+          - poll
+          - positive pole
+          - property line
+          - proprioceptor
+          - radius
+          - railhead
+          - range
+          - rear
+          - rearward
+          - rifle range
+          - rock bottom
+          - roof peak
+          - rooftop
+          - seam
+          - selvage
+          - shipside
+          - shoreline
+          - shoulder
+          - side
+          - sign of the zodiac
+          - silhouette
+          - skyline
+          - snow
+          - soil horizon
+          - sole
+          - south side
+          - spearhead
+          - spike
+          - spike heel
+          - stacked heel
+          - state line
+          - stratosphere
+          - stratum
+          - stratum corneum
+          - stratum germinativum
+          - stratum granulosum
+          - stratum lucidum
+          - strike zone
+          - substrate
+          - superstrate
+          - surface
+          - tape
+          - telomere
+          - terminus
+          - thermosphere
+          - three-mile limit
+          - tidal zone
+          - tip
+          - tiptoe
+          - tiptop
+          - tonsure
+          - top
+          - tropopause
+          - troposphere
+          - underbelly
+          - upper limit
+          - upper mantle
+          - vacuum
+          - verge
+          - vertex
+          - view
+          - wall
+          - war zone
+          - wave front
+          - wayside
+          - wedge heel
+          - west side
+          - windward
+          - wineglass heel
+          - wire
+          - yardarm
+          - zodiac
+          - zone
+        whereabouts: # instruction: the general location where something is
+          - whereabouts
+        sodom: # instruction: any location known for vice and corruption
+          - sodom
+        jungle: # instruction: a location marked by an intense competition and struggle for survival
+          - concrete jungle
+        here: # instruction: the present location; this place
+          - here
+        somewhere: # instruction: an indefinite or unknown location
+          - somewhere
+        bilocation: # instruction: the ability (said of certain Roman Catholic saints) to exist simultaneously in two locations
+          - bilocation
+        there: # instruction: a location other than here; that place
+          - there
+        outer space: # instruction: any location outside the Earth's atmosphere
+          - outer space
+      commemorative: # instruction: an object (such as a coin or postage stamp) made to mark an event or honor a person
+        - commemorative
+      keepsake: # instruction: something of sentimental value
+        - cracker
+        - love-token
+        - party favor
+      web: # instruction: an intricate network suggesting something that was formed by weaving or interweaving
+        - cobweb
+        - funnel web
+        - orb web
+        - sheet web
+        - spider web
+        - tent
+        - webbing
+      remains: # instruction: any object that is left unused or still extant
+        - ammonite
+        - archeological remains
+        - belemnite
+        - fossil
+        - fucoid
+        - index fossil
+        - microfossil
+        - wormcast
+    causal agent: # instruction: any entity that produces an effect or is responsible for events or results
+      deus ex machina:  # instruction: any active agent who appears unexpectedly to solve an insoluble difficulty
+        - deus ex machina
+      agent: # instruction: an active and efficient cause; capable of producing a certain effect
+        - Arenaviridae
+        - Bunyaviridae
+        - Ebola virus
+        - Epstein-Barr virus
+        - Flaviviridae
+        - Junin virus
+        - Lassa virus
+        - Machupo virus
+        - Marburg virus
+        - Reoviridae
+        - Rhabdoviridae
+        - Togaviridae
+        - West Nile virus
+        - adenovirus
+        - adrenergic
+        - alphavirus
+        - angiotensin
+        - angiotensin I
+        - angiotensin II
+        - animal virus
+        - arbovirus
+        - arenavirus
+        - bacteriophage
+        - biological agent
+        - bunyavirus
+        - carrier
+        - chill
+        - chilliness
+        - coldness
+        - coliphage
+        - cool
+        - cosmid
+        - coxsackievirus
+        - cytomegalovirus
+        - echovirus
+        - eliminator
+        - enterovirus
+        - epinephrine
+        - filovirus
+        - flavivirus
+        - frostiness
+        - hepadnavirus
+        - hepatitis A virus
+        - herpes
+        - herpes simplex
+        - herpes simplex 1
+        - herpes simplex 2
+        - herpes varicella zoster
+        - herpes zoster
+        - human T-cell leukemia virus-1
+        - human immunodeficiency virus
+        - human papilloma virus
+        - impairer
+        - infectious agent
+        - lethal agent
+        - liposomal delivery vector
+        - lymphocytic choriomeningitis virus
+        - lypressin
+        - lyssavirus
+        - motor
+        - mutagen
+        - myxoma virus
+        - myxovirus
+        - naphazoline
+        - nicotine
+        - noradrenaline
+        - obliterator
+        - onion yellow-dwarf virus
+        - orthomyxovirus
+        - papovavirus
+        - parainfluenza virus
+        - paramyxovirus
+        - parvovirus
+        - pathogen
+        - phenylephrine
+        - phenylpropanolamine
+        - picornavirus
+        - plant virus
+        - poliovirus
+        - polyoma
+        - potato yellow-dwarf virus
+        - poxvirus
+        - quickener
+        - relaxer
+        - reovirus
+        - repressor
+        - respiratory syncytial virus
+        - retardant
+        - retrovirus
+        - rhabdovirus
+        - rhinovirus
+        - rotavirus
+        - satisfier
+        - shortener
+        - slow virus
+        - stressor
+        - teratogen
+        - thalidomide
+        - tobacco mosaic virus
+        - transducing vector
+        - tumor virus
+        - typhoid bacteriophage
+        - varicella zoster virus
+        - variola major
+        - variola minor
+        - variola virus
+        - vasoconstrictor
+        - vasopressin
+        - vasopressor
+        - vector
+        - vesiculovirus
+        - viral delivery vector
+        - viroid
+        - virus
+        - weakener
+        - wound tumor virus
+      vital principle: # instruction: a hypothetical force to which the functions and qualities peculiar to living things are sometimes ascribed
+        - ghost
+        - poltergeist
+        - revenant
+        - soul
+        - spirit
+      supernatural: # instruction: supernatural forces and events and beings collectively
+        - supernatural
+      first cause: # instruction: an agent that is the cause of all things but does not itself have a cause
+        - first cause
+      cause of death: # instruction: the causal agent resulting in death
+        - cause of death
+      person: # instruction: a human being
+        repeater:  # instruction: a person who repeats
+          - repeater
+        deaf person: # instruction: a person with a severe auditory impairment
+          - dummy
+          - lip reader
+          - mute
+        perceiver: # instruction: a person who becomes aware (of things or events) through the senses
+          - attester
+          - audile
+          - browser
+          - bystander
+          - cheerer
+          - co-discoverer
+          - eavesdropper
+          - eyeglass wearer
+          - eyewitness
+          - finder
+          - first-nighter
+          - gawker
+          - groundling
+          - hearer
+          - motile
+          - moviegoer
+          - noticer
+          - ogler
+          - onlooker
+          - playgoer
+          - rubberneck
+          - seer
+          - snoop
+          - spectator
+          - spy
+          - starer
+          - tail
+          - tapper
+          - testifier
+          - visualizer
+          - voyeur
+          - witness
+        debtor: # instruction: a person who owes a creditor; someone who has the obligation of paying a debt
+          - deadbeat dad
+          - defaulter
+          - fly-by-night
+          - mortgagor
+        nonperson: # instruction: a person regarded as nonexistent and having no rights; a person whose existence is systematically ignored (especially for ideological or political reasons)
+          - nonperson
+        abomination: # instruction: a person who is loathsome or disgusting
+          - abomination
+        outdoorsman: # instruction: a person who spends time outdoors (e.g., hunting or fishing)
+          - outdoorswoman
+        sentimentalist: # instruction: someone who indulges in excessive sentimentality
+          - sentimentalist
+        nonreligious person: # instruction: a person who does not manifest devotion to a deity
+          - atheist
+          - blasphemer
+          - deist
+          - disbeliever
+          - heathen
+          - idolater
+          - idolatress
+          - irreligionist
+          - logical positivist
+          - materialist
+          - nihilist
+          - paynim
+          - positivist
+          - swearer
+        innocent: # instruction: a person who lacks knowledge of evil
+          - boy scout
+          - lamb
+          - naif
+          - virgin
+        large person: # instruction: a person of greater than average size
+          - fatso
+          - giant
+        nonpartisan: # instruction: a person who is nonpartisan
+          - nonpartisan
+        balker: # instruction: a person who refuses to comply
+          - negativist
+        riser: # instruction: a person who rises (especially from bed)
+          - early bird
+        explorer: # instruction: someone who travels into little known regions (especially for some scientific purpose)
+          - Ponce de Leon
+          - conquistador
+          - deep-sea diver
+          - diver
+          - navigator
+          - pearl diver
+          - potholer
+          - scuba diver
+        winker: # instruction: a person who winks
+          - winker
+        modern: # instruction: a contemporary person
+          - modern
+        squinter: # instruction: a person with strabismus
+          - squinter
+        unfortunate: # instruction: a person who suffers misfortune
+          - Job
+          - Polycarp
+          - abandoned person
+          - alexic
+          - amputee
+          - analysand
+          - anorexic
+          - arthritic
+          - bag lady
+          - bankrupt
+          - bawler
+          - beachcomber
+          - bedlamite
+          - beggar
+          - beggarman
+          - beggarwoman
+          - blubberer
+          - bulimic
+          - castaway
+          - casualty
+          - cataleptic
+          - choker
+          - claustrophobe
+          - consumptive
+          - convalescent
+          - convict
+          - crazy
+          - depressive
+          - derelict
+          - desperate
+          - detainee
+          - diabetic
+          - dosser
+          - down-and-out
+          - dyspeptic
+          - epileptic
+          - failure
+          - flash in the pan
+          - flop
+          - goner
+          - hemophiliac
+          - heretic
+          - homeless
+          - hostage
+          - hunted person
+          - hypertensive
+          - hypochondriac
+          - hypotensive
+          - hysteric
+          - incurable
+          - index case
+          - inpatient
+          - insomniac
+          - internee
+          - invalid
+          - jonah
+          - languisher
+          - leper
+          - lifer
+          - lunatic
+          - madwoman
+          - manic-depressive
+          - maroon
+          - martyr
+          - melancholic
+          - monomaniac
+          - moocher
+          - mourner
+          - muggee
+          - murderee
+          - narcoleptic
+          - neurasthenic
+          - neurotic
+          - nympholept
+          - obsessive
+          - obsessive-compulsive
+          - outcast
+          - outpatient
+          - pallbearer
+          - panhandler
+          - paranoid
+          - patient
+          - pauper
+          - political prisoner
+          - poor devil
+          - poor person
+          - prey
+          - prisoner
+          - prisoner of war
+          - psychotic
+          - punching bag
+          - pursued
+          - pyromaniac
+          - rheumatic
+          - sannyasi
+          - scapegoat
+          - schizophrenic
+          - schlimazel
+          - schnorrer
+          - shaheed
+          - sick person
+          - sociopath
+          - starveling
+          - sundowner
+          - survivor
+          - syphilitic
+          - tramp
+          - trusty
+          - underdog
+          - untouchable
+          - vaccinee
+          - vagrant
+          - valetudinarian
+          - victim
+          - vomiter
+          - wailer
+          - weeper
+          - white trash
+        posturer: # instruction: someone who behaves in a manner calculated to impress or mislead others
+          - posturer
+        nonworker: # instruction: a person who does nothing
+          - camper
+          - clock watcher
+          - couch potato
+          - dallier
+          - dawdler
+          - daydreamer
+          - deadhead
+          - emeritus
+          - escapist
+          - goldbrick
+          - hunger marcher
+          - idler
+          - lazybones
+          - lie-abed
+          - loiterer
+          - loon
+          - lotus-eater
+          - malingerer
+          - plodder
+          - putterer
+          - retiree
+          - scrimshanker
+          - slacker
+          - sluggard
+          - spiv
+          - sport
+          - straggler
+          - striker
+          - summercaters
+          - sunbather
+          - trifler
+          - unemployed person
+          - vacationer
+          - weekender
+          - whittler
+        married: # instruction: a person who is married
+          - married
+        baby boomer: # instruction: a member of the baby boom generation in the 1950s
+          - baby boomer
+        struggler: # instruction: a person who struggles with difficulties or with great effort
+          - struggler
+        powderer: # instruction: someone who applies or scatters powder
+          - powderer
+        Libra: # instruction: (astrology) a person who is born while the sun is in Libra
+          - Libra
+        effecter: # instruction: one who brings about a result or event; one who accomplishes a purpose
+          - effecter
+        sprawler: # instruction: a person who sprawls
+          - sprawler
+        blogger: # instruction: a person who keeps and updates a blog
+          - blogger
+        monolingual: # instruction: a person who knows only one language
+          - monolingual
+        wanter: # instruction: a person who wants or needs something
+          - wanter
+        convert: # instruction: a person who has been converted to another religious or political belief
+          - Converso
+          - Marrano
+          - proselyte
+        debaser: # instruction: a person who lowers the quality or character or value (as by adding cheaper metal to coins)
+          - vulgarizer
+        sniffer: # instruction: a person who sniffs
+          - sniffer
+        disentangler: # instruction: a person who removes tangles; someone who takes something out of a tangled state
+          - disentangler
+        tagger: # instruction: someone who assigns labels to the grammatical constituents of textual matter
+          - tagger
+        Leo: # instruction: (astrology) a person who is born while the sun is in Leo
+          - Leo
+        rester: # instruction: a person who rests
+          - Rip van Winkle
+          - dreamer
+          - sleeper
+          - sleeping beauty
+          - sleepwalker
+          - snorer
+          - somniloquist
+        anti-American: # instruction: a person who is opposed to the United States and its policies
+          - anti-American
+        laugher: # instruction: a person who is laughing or who laughs easily
+          - titterer
+        friend: # instruction: a person you know well and regard with affection and trust
+          - alter ego
+          - amigo
+          - best friend
+          - blind date
+          - brother
+          - buddy
+          - cobber
+          - companion
+          - confidant
+          - confidante
+          - date
+          - flatmate
+          - girlfriend
+          - light
+          - mate
+          - playmate
+          - repository
+          - roommate
+          - schoolfriend
+          - tovarich
+        second-rater: # instruction: a person of second-rate ability or value
+          - second-rater
+        third-rater: # instruction: one who is third-rate or distinctly inferior
+          - third-rater
+        leader: # instruction: a person who rules or guides or inspires others
+          - American Revolutionary leader
+          - Attorney General
+          - Bolshevik
+          - Catholicos
+          - Chancellor of the Exchequer
+          - Chief Secretary
+          - Communist
+          - Comrade
+          - Dalai Lama
+          - Democrat
+          - Director of Central Intelligence
+          - Druid
+          - Earl Marshal
+          - Elector
+          - Evangelist
+          - Fabian
+          - Father
+          - Federalist
+          - Founding Father
+          - Guru
+          - Highness
+          - Home Secretary
+          - Indian chief
+          - Kalon Tripa
+          - Khedive
+          - Knight Templar
+          - Knight of the Round Table
+          - Labourite
+          - Lady
+          - Lord
+          - Lord Chancellor
+          - Lord Privy Seal
+          - Menshevik
+          - Milady
+          - Monsignor
+          - Mugwump
+          - Panchen Lama
+          - Parliamentarian
+          - Potemkin
+          - Prince of Wales
+          - Queen of England
+          - Republican
+          - Rhea Silvia
+          - Secretary General
+          - Secretary of Agriculture
+          - Secretary of Commerce
+          - Secretary of Defense
+          - Secretary of Education
+          - Secretary of Energy
+          - Secretary of Health and Human Services
+          - Secretary of Housing and Urban Development
+          - Secretary of Labor
+          - Secretary of State
+          - Secretary of Transportation
+          - Secretary of Veterans Affairs
+          - Secretary of the Interior
+          - Secretary of the Treasury
+          - Sir
+          - Speaker
+          - Surgeon General
+          - Treasury
+          - Vice President of the United States
+          - Whig
+          - absolver
+          - academic administrator
+          - acolyte
+          - administrator
+          - aggressor
+          - alcalde
+          - altar boy
+          - amora
+          - anagnost
+          - animal trainer
+          - antipope
+          - apparatchik
+          - archbishop
+          - archdeacon
+          - archduchess
+          - archduke
+          - archpriest
+          - aristocrat
+          - armiger
+          - art director
+          - ayatollah
+          - baas
+          - bacchant
+          - bacchante
+          - backbencher
+          - bank commissioner
+          - bank manager
+          - baron
+          - baroness
+          - baronet
+          - baseball coach
+          - basketball coach
+          - batting coach
+          - bell captain
+          - bellwether
+          - better
+          - bey
+          - bishop
+          - boss
+          - brahman
+          - burgomaster
+          - burgrave
+          - cabinet minister
+          - caller
+          - campaigner
+          - canon
+          - cantor
+          - capo
+          - captain
+          - cardinal
+          - carpet knight
+          - cavalier
+          - celebrant
+          - chairman of the board
+          - chaplain
+          - chatelaine
+          - cheerleader
+          - chief executive officer
+          - chief financial officer
+          - choragus
+          - cicerone
+          - civic leader
+          - class act
+          - clergyman
+          - cleric
+          - coach
+          - collectivist
+          - commander
+          - commissioner
+          - communist
+          - conditioner
+          - confessor
+          - congressman
+          - convener
+          - corporate executive
+          - counselor
+          - count
+          - count palatine
+          - countess
+          - crossbencher
+          - crown prince
+          - crown princess
+          - curate
+          - czarina
+          - dark horse
+          - dauphin
+          - deacon
+          - dean
+          - demagogue
+          - demigod
+          - den mother
+          - department head
+          - deputy
+          - diocesan
+          - director
+          - district manager
+          - domestic prelate
+          - dominus
+          - don
+          - doorkeeper
+          - drug baron
+          - duce
+          - duchess
+          - duke
+          - earl
+          - elder statesman
+          - employer
+          - eparch
+          - evangelist
+          - ex-mayor
+          - exarch
+          - executive
+          - executive vice president
+          - father
+          - favorite son
+          - female aristocrat
+          - filibuster
+          - finance minister
+          - flamen
+          - floor leader
+          - football coach
+          - foreign minister
+          - foreman
+          - forewoman
+          - frontbencher
+          - fugleman
+          - galvanizer
+          - ganger
+          - general
+          - general manager
+          - god
+          - governor
+          - governor general
+          - grand dragon
+          - grand duchess
+          - grand duke
+          - grandee
+          - guide
+          - guru
+          - guvnor
+          - head
+          - head of household
+          - headman
+          - hero
+          - hockey coach
+          - hoodoo
+          - hospital chaplain
+          - hotelier
+          - housing commissioner
+          - humdinger
+          - ideal
+          - imam
+          - insider
+          - instigator
+          - internationalist
+          - invigilator
+          - jimdandy
+          - knight
+          - knight bachelor
+          - knight banneret
+          - knight-errant
+          - labor leader
+          - lady-in-waiting
+          - lama
+          - land agent
+          - landgrave
+          - lawgiver
+          - lector
+          - legislator
+          - life peer
+          - line coach
+          - machine politician
+          - magus
+          - maharaja
+          - maharani
+          - majority leader
+          - male aristocrat
+          - malik
+          - manageress
+          - marchioness
+          - margrave
+          - marquess
+          - marquis
+          - master
+          - matriarch
+          - mayor
+          - mayoress
+          - medicine man
+          - mesne lord
+          - metropolitan
+          - military chaplain
+          - military governor
+          - military leader
+          - milord
+          - minister
+          - ministrant
+          - minority leader
+          - misleader
+          - mistress
+          - model
+          - moderator
+          - nationalist leader
+          - nawab
+          - noncandidate
+          - officiant
+          - old man
+          - ordainer
+          - ordinand
+          - ordinary
+          - overseer
+          - oyabun
+          - padrone
+          - palatine
+          - pardoner
+          - park commissioner
+          - party boss
+          - party man
+          - patriarch
+          - peer
+          - peer of the realm
+          - pendragon
+          - pied piper
+          - pinko
+          - pitching coach
+          - pluralist
+          - point man
+          - point woman
+          - police commissioner
+          - politician
+          - pontifex
+          - pope
+          - postmaster
+          - postmistress
+          - postulator
+          - preacher
+          - prebendary
+          - prefect
+          - president
+          - presiding officer
+          - priest
+          - priestess
+          - primus
+          - prince
+          - prince consort
+          - princeling
+          - princess
+          - princess royal
+          - prison chaplain
+          - proconsul
+          - proctor
+          - promulgator
+          - provost
+          - puppet ruler
+          - queen
+          - queen consort
+          - queen dowager
+          - queen mother
+          - queen regent
+          - rabbi
+          - rainmaker
+          - raja
+          - ramrod
+          - rani
+          - registrar
+          - religious leader
+          - rep
+          - research director
+          - revisionist
+          - running mate
+          - sachem
+          - satrap
+          - school superintendent
+          - scoutmaster
+          - secretary
+          - security director
+          - senator
+          - senior vice president
+          - shaman
+          - shepherd
+          - sire
+          - slave driver
+          - socialist
+          - spearhead
+          - spiritual leader
+          - spoiler
+          - spymaster
+          - stage director
+          - stage manager
+          - stalking-horse
+          - standard-bearer
+          - state senator
+          - statesman
+          - stateswoman
+          - stationmaster
+          - straw boss
+          - strike leader
+          - subdeacon
+          - suffragan
+          - superior
+          - supervisor
+          - system administrator
+          - tamer
+          - taskmaster
+          - taskmistress
+          - technocrat
+          - televangelist
+          - tennis coach
+          - thane
+          - thurifer
+          - torchbearer
+          - tour guide
+          - trail boss
+          - trainer
+          - trend-setter
+          - triumvir
+          - undersecretary
+          - vestal virgin
+          - vicar
+          - vicar apostolic
+          - vice chairman
+          - vice chancellor
+          - vice president
+          - viceroy
+          - viscount
+          - viscountess
+          - votary
+          - warlord
+          - whip
+          - write-in candidate
+        supernumerary: # instruction: a person serving no apparent function
+          - supernumerary
+        handicapped person: # instruction: a person who has some condition that markedly restricts their ability to function physically or mentally or socially
+          - amnesic
+          - aphasic
+          - hemiplegic
+          - paralytic
+          - paraplegic
+          - paretic
+          - quadriplegic
+          - spastic
+        showman: # instruction: a person skilled at making effective presentations
+          - showman
+        neighbor: # instruction: a person who lives (or is located) near another
+          - neighbor
+        sounding board: # instruction: a person whose reactions to something serve as an indication of its acceptability
+          - sounding board
+        weakling: # instruction: a person who is physically weak and ineffectual
+          - namby-pamby
+          - softy
+          - wimp
+        cripple: # instruction: someone who is unable to walk normally because of an injury or disability to the legs or back
+          - humpback
+        chameleon: # instruction: a changeable or inconstant person
+          - chameleon
+        contemplative: # instruction: a person devoted to the contemplative life
+          - contemplative
+        worldling: # instruction: a person absorbed by the concerns and interests and pleasures of the present world
+          - worldling
+        nondescript: # instruction: a person is not easily classified and not very interesting
+          - nondescript
+        kneeler: # instruction: a person in a kneeling position
+          - kneeler
+        Aries: # instruction: (astrology) a person who is born while the sun is in Aries
+          - Aries
+        public relations person: # instruction: a person employed to establish and promote a favorable relationship with the public
+          - spin doctor
+        adventurer: # instruction: a person who enjoys taking risks
+          - adventuress
+          - alpinist
+          - argonaut
+          - cowboy
+          - daredevil
+          - gambler
+          - hedger
+          - hotspur
+          - mercenary
+          - mountaineer
+          - ninja
+          - operator
+          - scalper
+          - speculator
+          - tearaway
+          - tout
+          - venture capitalist
+        scientist: # instruction: a person with advanced knowledge of one or more sciences
+          - Egyptologist
+          - Gray
+          - Hebraist
+          - Townes
+          - acoustician
+          - algebraist
+          - anthropologist
+          - archeologist
+          - arithmetician
+          - astronomer
+          - astrophysicist
+          - bacteriologist
+          - behaviorist
+          - bibliotist
+          - bimetallist
+          - biochemist
+          - biologist
+          - biophysicist
+          - boffin
+          - botanist
+          - chemist
+          - cognitive neuroscientist
+          - cognitive scientist
+          - computational linguist
+          - computer scientist
+          - cosmographer
+          - cosmologist
+          - cytogeneticist
+          - cytologist
+          - demographer
+          - ecologist
+          - econometrician
+          - economist
+          - entomologist
+          - enzymologist
+          - epidemiologist
+          - ethnographer
+          - ethnologist
+          - ethologist
+          - etymologist
+          - experimenter
+          - fieldworker
+          - geneticist
+          - geologist
+          - geometer
+          - geophysicist
+          - grammarian
+          - herpetologist
+          - hydrologist
+          - hypnotist
+          - ichthyologist
+          - immunologist
+          - lepidopterist
+          - lexicographer
+          - linguist
+          - lumper
+          - macroeconomist
+          - malacologist
+          - mammalogist
+          - mathematician
+          - medical scientist
+          - microbiologist
+          - microeconomist
+          - microscopist
+          - mineralogist
+          - molecular biologist
+          - monetarist
+          - mycologist
+          - naturalist
+          - neologist
+          - neurobiologist
+          - neurolinguist
+          - neuroscientist
+          - nuclear chemist
+          - nuclear physicist
+          - number theorist
+          - oceanographer
+          - ornithologist
+          - orthoepist
+          - paleographer
+          - paleontologist
+          - parapsychologist
+          - penologist
+          - petroleum geologist
+          - phonetician
+          - phonologist
+          - physicist
+          - physiologist
+          - phytochemist
+          - political scientist
+          - pomologist
+          - postdoc
+          - pothunter
+          - principal investigator
+          - probability theorist
+          - propagator
+          - protozoologist
+          - psephologist
+          - psycholinguist
+          - psychologist
+          - psychophysicist
+          - radiobiologist
+          - radiologic technologist
+          - research worker
+          - ritualist
+          - seismologist
+          - semanticist
+          - serologist
+          - social anthropologist
+          - social scientist
+          - sociobiologist
+          - sociolinguist
+          - sociologist
+          - splitter
+          - statistician
+          - synonymist
+          - taxonomist
+          - toxicologist
+          - transcriber
+          - trigonometrician
+          - virologist
+          - vivisectionist
+          - zoologist
+        unwelcome person: # instruction: a person who for some reason is not wanted or welcome
+          - Big Brother
+          - aggravator
+          - agitator
+          - alienator
+          - anathema
+          - asshole
+          - authoritarian
+          - backscratcher
+          - backseat driver
+          - bag
+          - boarder
+          - bore
+          - bottom feeder
+          - bragger
+          - busybody
+          - buttinsky
+          - cad
+          - carper
+          - carpetbagger
+          - cold fish
+          - cow
+          - crab
+          - creep
+          - critic
+          - cunt
+          - cynic
+          - defamer
+          - demoniac
+          - detractor
+          - disreputable person
+          - disturber
+          - dog in the manger
+          - dragon
+          - egocentric
+          - egomaniac
+          - egotist
+          - exhibitionist
+          - exploiter
+          - fire-eater
+          - flogger
+          - foreigner
+          - frump
+          - gallows bird
+          - gasbag
+          - gatecrasher
+          - grabber
+          - grandstander
+          - grouch
+          - harasser
+          - harridan
+          - hatemonger
+          - heckler
+          - hellhound
+          - hellion
+          - hog
+          - hotdog
+          - hustler
+          - incubus
+          - infiltrator
+          - ingrate
+          - instigator
+          - intruder
+          - invader
+          - joker
+          - junior
+          - kibitzer
+          - know-it-all
+          - kvetch
+          - lion-hunter
+          - litterer
+          - loudmouth
+          - martinet
+          - meanie
+          - meddler
+          - megalomaniac
+          - miles gloriosus
+          - misanthrope
+          - misogynist
+          - monopolist
+          - monster
+          - muckraker
+          - narcissist
+          - nitpicker
+          - nudnik
+          - opportunist
+          - oppressor
+          - pain
+          - pawer
+          - peasant
+          - penetrator
+          - perisher
+          - pest
+          - pharisee
+          - pill
+          - platitudinarian
+          - popinjay
+          - poseur
+          - poseuse
+          - prankster
+          - prima donna
+          - prowler
+          - prude
+          - pusher
+          - ribald
+          - ringleader
+          - rioter
+          - roaster
+          - rogue
+          - rotter
+          - scoffer
+          - scold
+          - selfish person
+          - she-devil
+          - shrew
+          - slattern
+          - slob
+          - sneak
+          - sneerer
+          - snob
+          - snorter
+          - social climber
+          - sourpuss
+          - spoilsport
+          - squatter
+          - stickler
+          - stranger
+          - stuffed shirt
+          - switcher
+          - tantalizer
+          - tease
+          - timeserver
+          - tormentor
+          - torturer
+          - transalpine
+          - troublemaker
+          - undesirable
+          - unpleasant person
+          - unpleasant woman
+          - upstart
+          - villain
+          - villainess
+          - virago
+          - vixen
+          - vulgarian
+          - whiner
+          - wire-puller
+          - wise guy
+          - witch-hunter
+          - worm
+          - worrier
+          - yenta
+        African: # instruction: a native or inhabitant of Africa
+          - Afrikaner
+          - Algerian
+          - Almoravid
+          - Amhara
+          - Angolan
+          - Angolese
+          - Bantu
+          - Basotho
+          - Beninese
+          - Berber
+          - Black African
+          - Burundian
+          - Cairene
+          - Cameroonian
+          - Carthaginian
+          - Chadian
+          - Chewa
+          - Congolese
+          - Copt
+          - Djiboutian
+          - Edo
+          - Egyptian
+          - Eritrean
+          - Ethiopian
+          - Eurafrican
+          - Ewe
+          - Fulani
+          - Gabonese
+          - Gambian
+          - Ghanian
+          - Guinean
+          - Hausa
+          - Herero
+          - Hutu
+          - Igbo
+          - Kenyan
+          - Liberian
+          - Libyan
+          - Luba
+          - Madagascan
+          - Malawian
+          - Malian
+          - Mauritanian
+          - Moroccan
+          - Mozambican
+          - Namibian
+          - Nigerian
+          - Nigerien
+          - Nubian
+          - Riff
+          - Rwandan
+          - Senegalese
+          - Shona
+          - Sierra Leonean
+          - Somalian
+          - Sotho
+          - South African
+          - Sudanese
+          - Swazi
+          - Tanzanian
+          - Theban
+          - Togolese
+          - Tswana
+          - Tuareg
+          - Tunisian
+          - Tutsi
+          - Ugandan
+          - Xhosa
+          - Yoruba
+          - Zairese
+          - Zambian
+          - Zimbabwean
+          - Zulu
+          - kaffir
+        segregate: # instruction: someone who is or has been segregated
+          - segregate
+        lightning rod: # instruction: someone who is a frequent target of negative reactions and serves to distract attention from another
+          - lightning rod
+        romper: # instruction: a person who romps or frolics
+          - romper
+        weasel: # instruction: a person who is regarded as treacherous or sneaky
+          - weasel
+        gambler: # instruction: a person who wagers money on the outcome of games or sporting events
+          - Edwardian
+          - bettor
+          - bookmaker
+          - caller
+          - crapshooter
+          - croupier
+          - ex-gambler
+          - hedger
+          - high roller
+          - loser
+          - odds-maker
+          - operator
+          - prize winner
+          - scalper
+          - shooter
+          - speculator
+          - sporting man
+          - taker
+          - tout
+          - venture capitalist
+          - winner
+        dyslectic: # instruction: a person who has dyslexia
+          - dyslectic
+        knower: # instruction: a person who knows or apprehends
+          - knower
+        bereaved: # instruction: a person who has suffered the death of someone they loved
+          - bereaved
+        Jew: # instruction: a person belonging to the worldwide group claiming descent from Jacob (or converted to it) and connected by cultural or religious ties
+          - Ashkenazi
+          - Conservative Jew
+          - Essene
+          - Hasid
+          - Jewess
+          - Levite
+          - Lubavitcher
+          - Orthodox Jew
+          - Pharisee
+          - Reform Jew
+          - Sadducee
+          - Sephardi
+          - Wandering Jew
+          - Zealot
+          - Zionist
+          - kike
+        bad guy: # instruction: any person who is not on your side
+          - bad guy
+        intellectual: # instruction: a person who uses the mind creatively
+          - Arabist
+          - Cabalist
+          - Calvinist
+          - Church Father
+          - Cynic
+          - Doctor of the Church
+          - Hakham
+          - Huguenot
+          - Islamist
+          - Ivy Leaguer
+          - Latinist
+          - Masorete
+          - Popper
+          - Renaissance man
+          - Scholastic
+          - Schoolman
+          - Shakespearian
+          - Sinologist
+          - Sophist
+          - Stoic
+          - Vedist
+          - academician
+          - alchemist
+          - alumnus
+          - analogist
+          - annalist
+          - anomalist
+          - anticipator
+          - aphorist
+          - art historian
+          - astrologer
+          - augur
+          - bel esprit
+          - bibliographer
+          - bibliophile
+          - bookworm
+          - boy wonder
+          - brainworker
+          - casuist
+          - child prodigy
+          - chronicler
+          - classicist
+          - classifier
+          - clever Dick
+          - coordinator
+          - cryptanalyst
+          - decoder
+          - defeatist
+          - divergent thinker
+          - diviner
+          - doctor
+          - doubting Thomas
+          - eclectic
+          - egalitarian
+          - egghead
+          - elitist
+          - empiricist
+          - epistemologist
+          - eschatologist
+          - esthetician
+          - ethicist
+          - excogitator
+          - existentialist
+          - exponent
+          - expositor
+          - fantast
+          - fatalist
+          - forecaster
+          - fortuneteller
+          - futurist
+          - genius
+          - geomancer
+          - girl wonder
+          - glossarist
+          - goliard
+          - gymnosophist
+          - highbrow
+          - historian
+          - humanist
+          - hydromancer
+          - initiate
+          - libertarian
+          - licentiate
+          - lithomancer
+          - mahatma
+          - man of letters
+          - mandarin
+          - master
+          - mechanist
+          - mentor
+          - moralist
+          - mujtihad
+          - muser
+          - musicologist
+          - nativist
+          - naturalist
+          - necessitarian
+          - necromancer
+          - nominalist
+          - old boy
+          - oneiromancer
+          - onomancer
+          - orderer
+          - organizer
+          - palmist
+          - pedant
+          - pessimist
+          - philologist
+          - philomath
+          - philosopher
+          - philosophizer
+          - pluralist
+          - polymath
+          - postdoc
+          - pragmatist
+          - pre-Socratic
+          - presentist
+          - preterist
+          - problem solver
+          - prodigy
+          - prophet
+          - prophetess
+          - purist
+          - pyromancer
+          - reader
+          - realist
+          - reasoner
+          - rocket scientist
+          - sage
+          - salutatorian
+          - scholar
+          - scholiast
+          - sibyl
+          - skeptic
+          - specifier
+          - speculator
+          - subjectivist
+          - synthesist
+          - theologian
+          - theorist
+          - thinker
+          - transcendentalist
+          - utilitarian
+          - valedictorian
+          - visionary
+          - water witch
+          - wonderer
+          - yogi
+        appreciator: # instruction: a person who is fully aware of something and understands it
+          - enophile
+        toucher: # instruction: a person who causes or allows a part of the body to come in contact with someone or something
+          - toucher
+        unskilled person: # instruction: a person who lacks technical training
+          - abecedarian
+          - aliterate
+          - analphabet
+          - apprentice
+          - bootblack
+          - bungler
+          - cadet
+          - cub
+          - functional illiterate
+          - grunt
+          - hack
+          - ignoramus
+          - illiterate
+          - incompetent
+          - landlubber
+          - midshipman
+          - newcomer
+          - novice
+          - plodder
+          - printer's devil
+          - ragpicker
+          - recruit
+          - slouch
+          - tenderfoot
+          - tinkerer
+          - trainee
+        delayer: # instruction: a person who delays; to put off until later or cause to be late
+          - filibuster
+          - procrastinator
+          - temporizer
+        Victorian: # instruction: a person who lived during the reign of Victoria
+          - Victorian
+        clumsy person: # instruction: a person with poor motor coordination
+          - butterfingers
+          - duffer
+          - lout
+        mutilator: # instruction: a person who mutilates or destroys or disfigures or cripples
+          - mutilator
+        computer user: # instruction: a person who uses computers for work or entertainment or communication or business
+          - UNIX guru
+          - computational linguist
+          - computer expert
+          - computer scientist
+          - cracker
+          - cybernaut
+          - hacker
+          - power user
+          - programmer
+          - system administrator
+        primitive: # instruction: a person who belongs to an early stage of civilization
+          - Aryan
+          - Basket Maker
+          - Heidelberg man
+          - Mound Builder
+          - Piltdown man
+          - Vandal
+          - ape-man
+          - autochthon
+          - cannibal
+          - caveman
+          - headhunter
+          - hunter-gatherer
+          - missing link
+          - savage
+          - wild man
+          - wolf boy
+        small person: # instruction: a person of below average size
+          - Pygmy
+          - Tom Thumb
+          - dwarf
+          - lilliputian
+          - manikin
+          - pituitary dwarf
+          - primordial dwarf
+          - pygmy
+          - runt
+          - wisp
+        grunter: # instruction: a person who grunts
+          - grunter
+        abator: # instruction: a person who abates a nuisance
+          - abator
+        homosexual: # instruction: someone who practices homosexuality; having a sexual attraction to persons of the same sex
+          - butch
+          - closet queen
+          - fagot
+          - gay man
+          - lesbian
+        perspirer: # instruction: a person who perspires
+          - perspirer
+        Aquarius: # instruction: (astrology) a person who is born while the sun is in Aquarius
+          - Aquarius
+        engineer: # instruction: a person who uses scientific knowledge to solve practical problems
+          - aeronautical engineer
+          - aerospace engineer
+          - army engineer
+          - automotive engineer
+          - civil engineer
+          - cracker
+          - electrical engineer
+          - hacker
+          - highway engineer
+          - lineman
+          - locator
+          - marine engineer
+          - mechanical engineer
+          - metallurgist
+          - mining engineer
+          - programmer
+          - rocket engineer
+          - sapper
+          - surveyor
+          - tribologist
+        censor: # instruction: someone who censures or condemns
+          - censor
+        Capricorn: # instruction: (astrology) a person who is born while the sun is in Capricorn
+          - Capricorn
+        ward: # instruction: a person who is under the protection or in the custody of another
+          - ward
+        achiever: # instruction: a person with a record of successes
+          - first lady
+          - great
+          - highflier
+          - natural
+          - sleeper
+        sex object: # instruction: any person regarded simply as an object of sexual gratification
+          - sex object
+        Slav: # instruction: any member of the people of eastern Europe or Asian Russia who speak a Slavonic language
+          - Cossack
+          - Croatian
+          - Serbian
+          - Sorbian
+        jumper: # instruction: a person who jumps
+          - parachutist
+          - skydiver
+        faddist: # instruction: a person who subscribes to a variety of fads
+          - food faddist
+        visually impaired person: # instruction: someone who has inferior vision
+          - aphakic
+          - blind person
+          - hyperope
+          - myope
+          - presbyope
+        heterosexual: # instruction: a heterosexual person; someone having a sexual orientation to persons of the opposite sex
+          - fucker
+        sex symbol: # instruction: a person (especially a celebrity) who is well-known for their sexual attractiveness
+          - sex symbol
+        stifler: # instruction: a person who stifles or smothers or suppresses
+          - stifler
+        outcaste: # instruction: a person belonging to no caste
+          - outcaste
+        sloucher: # instruction: a person who slouches; someone with a drooping carriage
+          - sloucher
+        stigmatic: # instruction: a person whose body is marked by religious stigmata (such as marks resembling the wounds of the crucified Christ)
+          - stigmatic
+        optimist: # instruction: a person disposed to take a favorable view of things
+          - millenarian
+        nonparticipant: # instruction: a person who does not participate
+          - nonparticipant
+        traveler: # instruction: a person who changes location
+          - AWOL
+          - Bedouin
+          - Bushman
+          - Hun
+          - Pilgrim
+          - Saracen
+          - Scythian
+          - abseiler
+          - absentee
+          - advancer
+          - air traveler
+          - arrival
+          - ascender
+          - astronaut
+          - au pair
+          - au pair girl
+          - backpacker
+          - beachcomber
+          - bearer
+          - boarder
+          - boulevardier
+          - bounty hunter
+          - bushman
+          - business traveler
+          - buster
+          - caller
+          - carrier
+          - coaster
+          - commuter
+          - companion
+          - conveyer
+          - cyclist
+          - defaulter
+          - departer
+          - descender
+          - dispatch rider
+          - displaced person
+          - dosser
+          - early bird
+          - emigrant
+          - entrant
+          - evacuee
+          - exile
+          - fare
+          - flier
+          - floater
+          - follower
+          - foreigner
+          - fox hunter
+          - frontiersman
+          - frontierswoman
+          - gatecrasher
+          - gringo
+          - guest
+          - guest of honor
+          - hang glider
+          - herald
+          - hiker
+          - hitchhiker
+          - hitter
+          - hobbler
+          - horseman
+          - horsewoman
+          - hosteller
+          - house guest
+          - immigrant
+          - import
+          - infiltrator
+          - intruder
+          - invader
+          - jaywalker
+          - jockey
+          - jogger
+          - latecomer
+          - lunger
+          - malahini
+          - marcher
+          - messenger
+          - messenger boy
+          - metic
+          - migrant
+          - motorcyclist
+          - mounter
+          - mover
+          - musher
+          - newcomer
+          - nomad
+          - nondriver
+          - nudger
+          - page
+          - passenger
+          - passerby
+          - pedaler
+          - pedestrian
+          - penetrator
+          - peripatetic
+          - picador
+          - pilgrim
+          - pioneer
+          - pivot
+          - postilion
+          - process-server
+          - prowler
+          - puller
+          - pursuer
+          - pusher
+          - raftsman
+          - rambler
+          - refugee
+          - remittance man
+          - rider
+          - roughrider
+          - runner
+          - rusher
+          - saunterer
+          - scourer
+          - scrambler
+          - settler
+          - shadow
+          - shuffler
+          - sightseer
+          - skin-diver
+          - slapper
+          - sourdough
+          - spacewalker
+          - squatter
+          - staggerer
+          - stalker
+          - stamper
+          - stowaway
+          - stranger
+          - straphanger
+          - strider
+          - stumbler
+          - sundowner
+          - surfer
+          - swaggerer
+          - swimmer
+          - tail
+          - tourist
+          - tramp
+          - transalpine
+          - transferer
+          - transferor
+          - transient
+          - traverser
+          - trekker
+          - truant
+          - trudger
+          - unicyclist
+          - vagrant
+          - visiting fireman
+          - visitor
+          - voyager
+          - waddler
+          - walloper
+          - wanderer
+          - wayfarer
+          - wedding guest
+          - wheeler
+          - wrester
+          - yanker
+        immune: # instruction: a person who is immune to a particular infection
+          - carrier
+        chutzpanik: # instruction: (Yiddish) a person characterized by chutzpa
+          - chutzpanik
+        drug user: # instruction: a person who takes drugs
+          - acid head
+          - addict
+          - caffeine addict
+          - cocaine addict
+          - crack addict
+          - drug addict
+          - hash head
+          - head
+          - heroin addict
+          - opium addict
+          - pill head
+          - pothead
+          - speed freak
+          - tripper
+          - withdrawer
+        blond: # instruction: a person with fair skin and hair
+          - peroxide blond
+          - platinum blond
+          - towhead
+        literate: # instruction: a person who can read and write
+          - alphabetizer
+          - decipherer
+          - diarist
+          - map-reader
+          - reader
+          - scrawler
+          - skimmer
+          - speller
+          - transcriber
+          - writer
+        bad person: # instruction: a person who does harm to others
+          - Casanova
+          - Don Juan
+          - Judas
+          - Lothario
+          - Tartuffe
+          - Ted
+          - abettor
+          - absconder
+          - abuser
+          - accessory
+          - accessory after the fact
+          - accessory before the fact
+          - accessory during the fact
+          - adulterer
+          - adulteress
+          - alien absconder
+          - ambusher
+          - annihilator
+          - apache
+          - arsonist
+          - assassin
+          - attacker
+          - avenger
+          - bad egg
+          - bagman
+          - bandit
+          - bank robber
+          - barnburner
+          - barrator
+          - beast
+          - blackmailer
+          - bludgeoner
+          - bluffer
+          - booster
+          - bootlegger
+          - briber
+          - bully
+          - bullyboy
+          - burglar
+          - butcher
+          - cardsharp
+          - claim jumper
+          - clip artist
+          - coiner
+          - collaborator
+          - confederate
+          - confidence man
+          - conspirator
+          - convict
+          - corsair
+          - coyote
+          - criminal
+          - crimp
+          - cutthroat
+          - dacoit
+          - decadent
+          - deceiver
+          - decoy
+          - delinquent
+          - deserter
+          - desperado
+          - destroyer
+          - deviationist
+          - dodger
+          - double-crosser
+          - draft dodger
+          - embezzler
+          - escapee
+          - falsifier
+          - fetishist
+          - fifth columnist
+          - finagler
+          - first offender
+          - flagellant
+          - fondler
+          - footpad
+          - forger
+          - fortune hunter
+          - fratricide
+          - front man
+          - fugitive
+          - gangster
+          - gigolo
+          - gonif
+          - graverobber
+          - gunman
+          - gunrunner
+          - harasser
+          - hatchet man
+          - highbinder
+          - highjacker
+          - holdup man
+          - hood
+          - housebreaker
+          - hypocrite
+          - iconoclast
+          - impersonator
+          - imposter
+          - infanticide
+          - jail bird
+          - kidnapper
+          - larcenist
+          - liar
+          - libertine
+          - lounge lizard
+          - mafioso
+          - magdalen
+          - malfeasant
+          - marauder
+          - masochist
+          - mass murderer
+          - matricide
+          - mimic
+          - misleader
+          - molester
+          - moll
+          - moss-trooper
+          - mountebank
+          - mugger
+          - murderer
+          - murderess
+          - muscleman
+          - name dropper
+          - night rider
+          - no-show
+          - nymphomaniac
+          - obscurantist
+          - panderer
+          - paperhanger
+          - parricide
+          - patricide
+          - pederast
+          - pedophile
+          - perjurer
+          - perpetrator
+          - pervert
+          - phrenologist
+          - pickpocket
+          - pimp
+          - pirate
+          - plagiarist
+          - plunderer
+          - polluter
+          - principal
+          - probationer
+          - procuress
+          - pusher
+          - quack
+          - racketeer
+          - rake
+          - raper
+          - recidivist
+          - renegade
+          - reprobate
+          - ringer
+          - ripper
+          - robber
+          - roper
+          - rumrunner
+          - rustler
+          - saboteur
+          - sadist
+          - sadomasochist
+          - safebreaker
+          - sandbagger
+          - satyr
+          - scalawag
+          - scapegrace
+          - scofflaw
+          - sea king
+          - seducer
+          - seductress
+          - serial killer
+          - sex offender
+          - shanghaier
+          - shark
+          - shedder
+          - shill
+          - shocker
+          - shyster
+          - sinner
+          - skinhead
+          - slasher
+          - slaver
+          - sleeper
+          - smoothie
+          - smuggler
+          - snake
+          - snatcher
+          - sneak thief
+          - sodomite
+          - spree killer
+          - stabber
+          - stoner
+          - storyteller
+          - swindler
+          - swinger
+          - thief
+          - tough guy
+          - traitor
+          - traitress
+          - trampler
+          - transgressor
+          - two-timer
+          - undoer
+          - usurer
+          - usurper
+          - utterer
+          - vandal
+          - vermin
+          - victimizer
+          - violator
+          - walk-in
+          - war criminal
+          - welcher
+          - wencher
+          - wharf rat
+          - white slaver
+          - whited sepulcher
+          - whoremaster
+          - wolf
+          - womanizer
+          - wretch
+          - wrongdoer
+          - yakuza
+          - yardie
+        pansexual: # instruction: a person who participates in (or is open to) sexual activities of many kinds
+          - pansexual
+        enrollee: # instruction: a person who enrolls in (or is enrolled in) a class or course of study
+          - Etonian
+          - Ivy Leaguer
+          - Rhodes scholar
+          - Wykehamist
+          - art student
+          - auditor
+          - catechumen
+          - co-ed
+          - college student
+          - collegian
+          - crammer
+          - freshman
+          - graduate student
+          - junior
+          - law student
+          - lowerclassman
+          - major
+          - matriculate
+          - medical student
+          - nonreader
+          - overachiever
+          - passer
+          - scholar
+          - seminarian
+          - senior
+          - sixth-former
+          - skipper
+          - sophomore
+          - student
+          - student teacher
+          - underachiever
+          - undergraduate
+          - withdrawer
+        commoner: # instruction: a person who holds no title
+          - John Doe
+          - bourgeois
+          - cipher
+          - coon
+          - cotter
+          - countryman
+          - countrywoman
+          - dogsbody
+          - everyman
+          - hillbilly
+          - lay reader
+          - layman
+          - muzhik
+          - peasant
+          - petit bourgeois
+          - philistine
+          - pip-squeak
+          - plebeian
+          - proletarian
+          - redneck
+          - rustic
+          - whippersnapper
+          - woodsman
+          - yokel
+        skidder: # instruction: a person who slips or slides because of loss of traction
+          - snowboarder
+        mother hen: # instruction: a person who cares for the needs of others (especially in an overprotective or interfering way)
+          - mother hen
+        arrogator: # instruction: a person who through conceit makes pretentious claims to rights or advantages that he or she is not entitled to or to qualities that he or she does not possess
+          - arrogator
+        measurer: # instruction: a person who makes measurements
+          - photometrist
+        tiger: # instruction: a fierce or audacious person
+          - tiger
+        fastener: # instruction: a person who fastens or makes fast
+          - fastener
+        middlebrow: # instruction: someone who is neither a highbrow nor a lowbrow
+          - middlebrow
+        peer: # instruction: a person who is of equal standing with another in a group
+          - Areopagite
+          - Beguine
+          - Conservative
+          - Freemason
+          - Knight Templar
+          - Rosicrucian
+          - Rotarian
+          - adducer
+          - adjunct
+          - affiliate
+          - ally
+          - associate
+          - attendant
+          - bedfellow
+          - blood brother
+          - board member
+          - bride
+          - bridge partner
+          - brother
+          - cabalist
+          - charter member
+          - clansman
+          - club member
+          - collaborator
+          - colleague
+          - commissioner
+          - committee member
+          - committeeman
+          - committeewoman
+          - contemporary
+          - conventioneer
+          - council member
+          - councilman
+          - councilwoman
+          - dancing partner
+          - director
+          - discussant
+          - double
+          - fellow
+          - gangsta
+          - groom
+          - homeboy
+          - homegirl
+          - huddler
+          - inductee
+          - joiner
+          - kibbutznik
+          - kolkhoznik
+          - locum tenens
+          - masquerader
+          - member
+          - partaker
+          - participant
+          - partygoer
+          - player
+          - pledge
+          - pooler
+          - raiser
+          - regent
+          - retreatant
+          - shipmate
+          - sister
+          - sodalist
+          - stand-in
+          - successor
+          - surrogate
+          - symposiast
+          - teammate
+          - townsman
+          - tribesman
+        sphinx: # instruction: an inscrutable person who keeps his thoughts and intentions secret
+          - sphinx
+        hater: # instruction: a person who hates
+          - Francophobe
+          - abominator
+          - anglophobe
+          - anti-Semite
+        inhabitant: # instruction: a person who inhabits a particular place
+          - Aborigine
+          - Acadian
+          - Achaean
+          - Aeolian
+          - Afghan
+          - African-American
+          - Alabaman
+          - Alaska Native
+          - Alaskan
+          - Albanian
+          - Alexandrian
+          - Alsatian
+          - Altaic
+          - American
+          - Andorran
+          - Angevin
+          - Angle
+          - Anglo-American
+          - Anglo-Indian
+          - Anglo-Saxon
+          - Anguillan
+          - Antiguan
+          - Appalachian
+          - Arcadian
+          - Argentinian
+          - Argive
+          - Arizonan
+          - Arkansan
+          - Armenian
+          - Asian
+          - Asian American
+          - Assamese
+          - Athenian
+          - Australian
+          - Austrian
+          - Austronesian
+          - Azerbaijani
+          - Badaga
+          - Bahamian
+          - Balkan
+          - Bangladeshi
+          - Barbadian
+          - Basque
+          - Bavarian
+          - Bay Stater
+          - Belgian
+          - Bengali
+          - Berliner
+          - Bermudan
+          - Bhutanese
+          - Bohemian
+          - Bolivian
+          - Bornean
+          - Bostonian
+          - Boxer
+          - Brahui
+          - Brazilian
+          - Breton
+          - Britisher
+          - Briton
+          - Brummie
+          - Bruneian
+          - Bulgarian
+          - Burmese
+          - Byelorussian
+          - Byzantine
+          - Cajun
+          - Californian
+          - Cambodian
+          - Canadian
+          - Cantabrigian
+          - Canuck
+          - Carioca
+          - Carolinian
+          - Castillian
+          - Catalan
+          - Celt
+          - Central American
+          - Chicano
+          - Chilean
+          - Chinese
+          - Chuvash
+          - Cockney
+          - Colombian
+          - Coloradan
+          - Colossian
+          - Confederate
+          - Confederate soldier
+          - Connecticuter
+          - Contra
+          - Corinthian
+          - Cornishman
+          - Cornishwoman
+          - Costa Rican
+          - Creole
+          - Cretan
+          - Cuban
+          - Cypriot
+          - Czech
+          - Czechoslovakian
+          - Dalmatian
+          - Damascene
+          - Dane
+          - Delawarean
+          - Dominican
+          - Dorian
+          - Dravidian
+          - Dubliner
+          - East German
+          - East Indian
+          - East-sider
+          - Ecuadorian
+          - English person
+          - Englishman
+          - Englishwoman
+          - Ephesian
+          - Etruscan
+          - Eurafrican
+          - Eurasian
+          - European
+          - Evenki
+          - Farsi
+          - Federal
+          - Fijian
+          - Finn
+          - Fleming
+          - Florentine
+          - Floridian
+          - Franco-American
+          - Frank
+          - French Canadian
+          - Frenchman
+          - Gadaba
+          - Gael
+          - Galatian
+          - Galilean
+          - Gaul
+          - Genoese
+          - Geordie
+          - Georgian
+          - German
+          - German American
+          - Gibraltarian
+          - Glaswegian
+          - Gond
+          - Goth
+          - Grecian
+          - Greek
+          - Grenadian
+          - Guatemalan
+          - Gujarati
+          - Gurkha
+          - Guyanese
+          - Gypsy
+          - Haitian
+          - Hakka
+          - Hanoverian
+          - Hawaiian
+          - Highlander
+          - Hindu
+          - Hittite
+          - Hmong
+          - Honduran
+          - Hungarian
+          - Iberian
+          - Icelander
+          - Idahoan
+          - Illinoisan
+          - Indian
+          - Indianan
+          - Indonesian
+          - Ionian
+          - Iowan
+          - Irani
+          - Iraqi
+          - Irish person
+          - Irishman
+          - Irishwoman
+          - Israeli
+          - Israelite
+          - Italian
+          - Jacobean
+          - Jamaican
+          - Jap
+          - Japanese
+          - Javanese
+          - Jordanian
+          - Junker
+          - Jute
+          - Kafir
+          - Kanarese
+          - Kansan
+          - Karakalpak
+          - Kashmiri
+          - Kazak
+          - Kazakhstani
+          - Kentuckian
+          - Khalkha
+          - Khmer
+          - Kirghiz
+          - Kolam
+          - Korean
+          - Kota
+          - Kraut
+          - Kshatriya
+          - Kui
+          - Kurd
+          - Kuwaiti
+          - Laconian
+          - Lancastrian
+          - Lao
+          - Lapp
+          - Latin
+          - Latin American
+          - Latvian
+          - Lebanese
+          - Lesbian
+          - Liechtensteiner
+          - Lithuanian
+          - Liverpudlian
+          - Livonian
+          - Lombard
+          - Londoner
+          - Louisianan
+          - Lowlander
+          - Luxemburger
+          - Macedonian
+          - Mackem
+          - Mainer
+          - Malay
+          - Malaysian
+          - Maldivian
+          - Maltese
+          - Malto
+          - Manchu
+          - Mancunian
+          - Maratha
+          - Marylander
+          - Mesoamerican
+          - Mexican
+          - Mexican-American
+          - Michigander
+          - Milanese
+          - Minnesotan
+          - Minoan
+          - Mississippian
+          - Missourian
+          - Monegasque
+          - Mongol
+          - Mongoloid
+          - Montanan
+          - Montserratian
+          - Mycenaen
+          - Native Hawaiian
+          - Nauruan
+          - Nazarene
+          - Neapolitan
+          - Nebraskan
+          - Neopolitan
+          - Nepalese
+          - Netherlander
+          - Nevadan
+          - New Englander
+          - New Hampshirite
+          - New Jerseyan
+          - New Mexican
+          - New Yorker
+          - New Zealander
+          - Nicaraguan
+          - Nisei
+          - Norman
+          - North American
+          - North Carolinian
+          - North Dakotan
+          - North Korean
+          - Northerner
+          - Norwegian
+          - Nova Scotian
+          - Numidian
+          - Occidental
+          - Ohioan
+          - Oklahoman
+          - Oregonian
+          - Oriental
+          - Oriya
+          - Oscan
+          - Ostrogoth
+          - Ottoman
+          - Oxonian
+          - Paddy
+          - Pakistani
+          - Panamanian
+          - Papuan
+          - Paraguayan
+          - Parisian
+          - Parisienne
+          - Parthian
+          - Pathan
+          - Pennsylvanian
+          - Peruvian
+          - Philippian
+          - Philistine
+          - Phrygian
+          - Pole
+          - Polynesian
+          - Portuguese
+          - Prussian
+          - Puerto Rican
+          - Punjabi
+          - Quebecois
+          - Rajput
+          - Rebel
+          - Rhode Islander
+          - Roman
+          - Romanian
+          - Ryukyuan
+          - Sabahan
+          - Sabine
+          - Salian Frank
+          - Salvadoran
+          - Samaritan
+          - Samnite
+          - Samoan
+          - San Marinese
+          - Sarawakian
+          - Sardinian
+          - Sassenach
+          - Savara
+          - Savoyard
+          - Saxon
+          - Scandinavian
+          - Scot
+          - Scotswoman
+          - Sherpa
+          - Shudra
+          - Sicilian
+          - Sindhi
+          - Singaporean
+          - Sinhalese
+          - Slovak
+          - Slovene
+          - Slovenian
+          - South American
+          - South Carolinian
+          - South Dakotan
+          - South Korean
+          - Southerner
+          - Spaniard
+          - Spanish American
+          - Spartan
+          - Sri Lankan
+          - Sumatran
+          - Swede
+          - Syrian
+          - Tahitian
+          - Taiwanese
+          - Tajik
+          - Tamil
+          - Tatar
+          - Telugu
+          - Tennessean
+          - Teuton
+          - Texan
+          - Thai
+          - Theban
+          - Thessalian
+          - Thessalonian
+          - Thracian
+          - Tibetan
+          - Timorese
+          - Tobagonian
+          - Toda
+          - Tongan
+          - Tory
+          - Trinidadian
+          - Trojan
+          - Tulu
+          - Tungus
+          - Tungusic
+          - Turk
+          - Turki
+          - Turkoman
+          - Tuscan
+          - Tyke
+          - Tyrolean
+          - Uighur
+          - Ukranian
+          - Uruguayan
+          - Utahan
+          - Uzbek
+          - Vaisya
+          - Venetian
+          - Venezuelan
+          - Vermonter
+          - Vietnamese
+          - Viking
+          - Virginian
+          - Visigoth
+          - Walloon
+          - Washingtonian
+          - Welshman
+          - West Berliner
+          - West Indian
+          - West Saxon
+          - West Virginian
+          - West-sider
+          - Whig
+          - Wisconsinite
+          - Wyomingite
+          - Yakut
+          - Yankee
+          - Yugoslav
+          - Zealander
+          - berserker
+          - borderer
+          - brahman
+          - burgess
+          - bushwhacker
+          - chink
+          - coaster
+          - colonial
+          - coolie
+          - cottager
+          - criollo
+          - dalesman
+          - easterner
+          - effendi
+          - frog
+          - geisha
+          - gitana
+          - gitano
+          - good old boy
+          - gook
+          - greaser
+          - hajji
+          - housemate
+          - inmate
+          - islander
+          - jawan
+          - landlubber
+          - limey
+          - liver
+          - mafioso
+          - mandarin
+          - marcher
+          - memsahib
+          - metropolitan
+          - outlier
+          - owner-occupier
+          - palatine
+          - patrial
+          - peshmerga
+          - plainsman
+          - polack
+          - pommy
+          - resident
+          - sabra
+          - sahib
+          - shogun
+          - smarta
+          - sojourner
+          - spic
+          - stater
+          - suburbanite
+          - tellurian
+          - tenant
+          - townee
+          - townie
+          - townsman
+          - transmigrante
+          - villager
+          - westerner
+          - wop
+          - yellow man
+          - yellow woman
+        lover: # instruction: a person who loves someone or is loved by someone
+          - Romeo
+          - admirer
+          - animal fancier
+          - beloved
+          - betrothed
+          - bird fancier
+          - boyfriend
+          - cat fancier
+          - chosen
+          - darling
+          - fancier
+          - fiance
+          - fiancee
+          - girlfriend
+          - hero worshiper
+          - horseman
+          - idolizer
+          - inamorata
+          - inamorato
+          - kisser
+          - ladylove
+          - macushla
+          - maniac
+          - mollycoddle
+          - necker
+          - petter
+          - prince charming
+          - soul mate
+          - squeeze
+          - sugar daddy
+          - suitor
+          - sweetheart
+          - teacher's pet
+          - technophile
+          - valentine
+          - worshiper
+        mixed-blood: # instruction: a person whose ancestors belonged to two or more races
+          - Metis
+          - half-breed
+          - half-caste
+          - mulatto
+          - octoroon
+          - quadroon
+        mestizo: # instruction: a person of mixed racial ancestry (especially mixed European and Native American ancestry)
+          - mestizo
+        greeter: # instruction: a person who greets
+          - greeter
+        defecator: # instruction: a person who defecates
+          - defecator
+        learner: # instruction: someone (especially a child) who learns (as from a teacher) or takes up knowledge or beliefs
+          - memorizer
+          - quick study
+          - study
+          - swot
+          - tutee
+        ruler: # instruction: a person who rules or commands
+          - Bourbon
+          - Capetian
+          - Carolingian
+          - Cheops
+          - Hanoverian
+          - Holy Roman Emperor
+          - Huayna Capac
+          - Inca
+          - Kaiser
+          - King of England
+          - King of France
+          - King of the Germans
+          - Merovingian
+          - Mogul
+          - Pharaoh
+          - Roman Emperor
+          - Romanov
+          - Shah
+          - Stuart
+          - Tudor
+          - basileus
+          - caliph
+          - czar
+          - dictator
+          - dynast
+          - emir
+          - emperor
+          - empress
+          - ethnarch
+          - feudal lord
+          - hakim
+          - khan
+          - king
+          - liege
+          - mikado
+          - oligarch
+          - overlord
+          - puppet ruler
+          - regent
+          - sheik
+          - shogun
+          - sovereign
+          - strongman
+          - sultan
+          - tyrant
+        Jat: # instruction: a member of an Indo-European people widely scattered throughout the northwest of the Indian subcontinent and consisting of Muslims and Hindus and Sikhs
+          - Jat
+        Sagittarius: # instruction: (astrology) a person who is born while the sun is in Sagittarius
+          - Sagittarius
+        propositus: # instruction: the person immediately affected by or concerned with an action
+          - propositus
+        fiduciary: # instruction: a person who holds assets in trust for a beneficiary
+          - administrator
+          - chamberlain
+          - conservator
+          - executor
+          - executrix
+          - liquidator
+          - steward
+          - trustee
+        Scorpio: # instruction: (astrology) a person who is born while the sun is in Scorpio
+          - Scorpio
+        agnostic: # instruction: someone who is doubtful or noncommittal about something
+          - agnostic
+        namer: # instruction: a person who gives a name or names
+          - namer
+        nonsmoker: # instruction: a person who does not smoke tobacco
+          - nonsmoker
+        good person: # instruction: a person who is good to other people
+          - Buddha
+          - Indian giver
+          - abnegator
+          - almsgiver
+          - angel
+          - benefactor
+          - benefactress
+          - blood donor
+          - bondsman
+          - brick
+          - dervish
+          - donor
+          - emancipator
+          - fairy godmother
+          - fakir
+          - giver
+          - godfather
+          - godmother
+          - godparent
+          - good Samaritan
+          - good egg
+          - guarantor
+          - humanitarian
+          - liberator
+          - mensch
+          - messiah
+          - obliger
+          - offerer
+          - organ donor
+          - patron
+          - patroness
+          - philanthropist
+          - plaster saint
+          - provider
+          - rock
+          - saint
+          - savior
+          - settlor
+          - sparer
+          - square shooter
+          - subscriber
+          - subsidizer
+          - sweetheart
+          - tipper
+          - tower of strength
+          - trouper
+          - uncle
+          - universal donor
+          - whirling dervish
+        loose cannon: # instruction: a person who is expected to perform a particular task but who is out of control and dangerous
+          - loose cannon
+        celebrant: # instruction: a person who is celebrating
+          - reveler
+          - roisterer
+        withholder: # instruction: a person who refrains from granting
+          - withholder
+        surrenderer: # instruction: a person who yields or surrenders
+          - surrenderer
+        longer: # instruction: a person with a strong desire for something
+          - longer
+        survivalist: # instruction: someone who tries to insure their personal survival or the survival of their group or nation
+          - survivalist
+        namesake: # instruction: a person with the same name as another
+          - namesake
+        communicator: # instruction: a person who communicates with others
+          - Capetian
+          - Carolingian
+          - G-man
+          - Gothic romancer
+          - Holy Roman Emperor
+          - Job's comforter
+          - Kaiser
+          - King of England
+          - King of France
+          - King of the Germans
+          - Merovingian
+          - NOC
+          - President of the United States
+          - Prime Minister
+          - Roman Emperor
+          - Romanov
+          - Shah
+          - Svengali
+          - T-man
+          - abstractor
+          - action officer
+          - actor's agent
+          - advertiser
+          - agent
+          - agent provocateur
+          - agent-in-place
+          - agony aunt
+          - alarmist
+          - alderman
+          - allegorizer
+          - alliterator
+          - anchor
+          - anecdotist
+          - announcer
+          - apostolic delegate
+          - appeaser
+          - articulator
+          - assemblyman
+          - assemblywoman
+          - assenter
+          - asserter
+          - attester
+          - authoress
+          - autobiographer
+          - avower
+          - bailee
+          - bard
+          - bargainer
+          - barker
+          - biographer
+          - booker
+          - bridge agent
+          - broadcast journalist
+          - broadcaster
+          - business agent
+          - caller
+          - case officer
+          - cat
+          - chancellor
+          - chatterer
+          - clapper
+          - coauthor
+          - codetalker
+          - columnist
+          - commentator
+          - compiler
+          - compromiser
+          - conciliator
+          - conferee
+          - conferrer
+          - confessor
+          - contact
+          - contributor
+          - conversationalist
+          - correspondent
+          - counterspy
+          - crier
+          - cross-examiner
+          - cyberpunk
+          - czar
+          - deipnosophist
+          - delegate
+          - deputy
+          - dictator
+          - diplomat
+          - disk jockey
+          - don't-know
+          - double agent
+          - drafter
+          - dragoman
+          - dramatist
+          - drawler
+          - driveller
+          - ejaculator
+          - elegist
+          - elocutionist
+          - emissary
+          - emperor
+          - employment agent
+          - empress
+          - encyclopedist
+          - espionage agent
+          - essayist
+          - etymologist
+          - eulogist
+          - ex-president
+          - examiner
+          - exhibitor
+          - fabulist
+          - fink
+          - folk poet
+          - folk writer
+          - foot
+          - foreign agent
+          - foreign correspondent
+          - framer
+          - freight agent
+          - gagman
+          - gazetteer
+          - ghostwriter
+          - gossip
+          - gossip columnist
+          - government agent
+          - griot
+          - growler
+          - hack
+          - haggler
+          - hagiographer
+          - handler
+          - haranguer
+          - harmonizer
+          - head of state
+          - hedger
+          - hisser
+          - holdout
+          - huckster
+          - infiltrator
+          - informant
+          - informer
+          - inquirer
+          - inquisitor
+          - interlocutor
+          - interpreter
+          - interviewee
+          - interviewer
+          - journalist
+          - king
+          - laudator
+          - leaker
+          - lecturer
+          - legal representative
+          - legate
+          - lexicographer
+          - librettist
+          - lisper
+          - literary agent
+          - lobbyist
+          - lyricist
+          - matchmaker
+          - mediator
+          - mediatrix
+          - mentioner
+          - mikado
+          - mill agent
+          - moderator
+          - modifier
+          - motormouth
+          - muezzin
+          - mutterer
+          - nark
+          - narrator
+          - native speaker
+          - negotiator
+          - negotiatress
+          - neologist
+          - newscaster
+          - newspaper columnist
+          - newspaper critic
+          - newsreader
+          - newswoman
+          - next friend
+          - novelist
+          - odist
+          - orator
+          - organ-grinder
+          - organizer
+          - pamphleteer
+          - paragrapher
+          - parliamentary agent
+          - passer
+          - passive source
+          - pen pal
+          - personal representative
+          - persuader
+          - photojournalist
+          - poet
+          - poet laureate
+          - poetess
+          - polemicist
+          - pollster
+          - popularizer
+          - pornographer
+          - postulator
+          - prattler
+          - presenter
+          - president
+          - press agent
+          - promisee
+          - promiser
+          - promoter
+          - propagandist
+          - propagator
+          - proxy
+          - publicist
+          - purchasing agent
+          - quoter
+          - radio announcer
+          - rambler
+          - ranter
+          - reciter
+          - reporter
+          - representative
+          - resident commissioner
+          - respondent
+          - revenuer
+          - rhymer
+          - roarer
+          - scandalmonger
+          - scaremonger
+          - scenarist
+          - screenwriter
+          - scribe
+          - scriptwriter
+          - second hand
+          - secret agent
+          - sender
+          - sensationalist
+          - settler
+          - shipping agent
+          - shop steward
+          - shopper
+          - showman
+          - signaler
+          - signalman
+          - signer
+          - sleeper
+          - sloganeer
+          - sob sister
+          - sonneteer
+          - sovereign
+          - space writer
+          - spammer
+          - speaker
+          - special agent
+          - speechwriter
+          - spellbinder
+          - sports announcer
+          - sports writer
+          - spy
+          - stammerer
+          - stentor
+          - subvocalizer
+          - supergrass
+          - swearer
+          - symbolist
+          - sympathizer
+          - synonymist
+          - talent agent
+          - talking head
+          - taoiseach
+          - tattletale
+          - telecaster
+          - telepathist
+          - television reporter
+          - testee
+          - testifier
+          - toller
+          - tout
+          - town crier
+          - tragedian
+          - tub-thumper
+          - tv announcer
+          - twaddler
+          - union representative
+          - universal agent
+          - venter
+          - vicegerent
+          - vociferator
+          - voicer
+          - vower
+          - waffler
+          - wailer
+          - walk-in
+          - walking delegate
+          - war correspondent
+          - warner
+          - waver
+          - wheedler
+          - whisperer
+          - whistle blower
+          - whistler
+          - wirer
+          - witness
+          - word-painter
+          - wordmonger
+          - wordsmith
+          - writer
+          - yenta
+        assessee: # instruction: a person (or property) that is assessed
+          - assessee
+        archaist: # instruction: a person who archaizes
+          - archaist
+        extrovert: # instruction: (psychology) a person concerned more with practical realities than with inner thoughts and feelings
+          - extrovert
+        nurser: # instruction: a person who treats something carefully
+          - nurser
+        national: # instruction: a person who owes allegiance to that nation
+          - active citizen
+          - chauvinist
+          - citizen
+          - civilian
+          - compatriot
+          - constituent
+          - countryman
+          - countrywoman
+          - crossover voter
+          - floater
+          - freedman
+          - freeman
+          - patriot
+          - private citizen
+          - repatriate
+          - swing voter
+          - thane
+          - voter
+        advocate: # instruction: a person who pleads for a cause or propounds an idea
+          - American Revolutionary leader
+          - Boswell
+          - Confederate
+          - Confederate soldier
+          - Confucian
+          - Darwinian
+          - Francophile
+          - Gnostic
+          - Jacobite
+          - Jansenist
+          - Klansman
+          - Malthusian
+          - Maoist
+          - Marxist
+          - New Dealer
+          - Platonist
+          - Rebel
+          - Roundhead
+          - Shavian
+          - Thatcherite
+          - Whig
+          - abiogenist
+          - addict
+          - aficionado
+          - ambassador
+          - anglophile
+          - antifeminist
+          - apologist
+          - apostle
+          - backslapper
+          - balletomane
+          - believer
+          - bigot
+          - bleeding heart
+          - bushwhacker
+          - chauvinist
+          - cheerleader
+          - civil libertarian
+          - colonialist
+          - constitutionalist
+          - corporatist
+          - democrat
+          - dogmatist
+          - economic libertarian
+          - enthusiast
+          - evolutionist
+          - fanatic
+          - federalist
+          - fellow traveler
+          - flak catcher
+          - free trader
+          - functionalist
+          - gadgeteer
+          - gym rat
+          - homophobe
+          - humanist
+          - ideologist
+          - imperialist
+          - internationalist
+          - irredentist
+          - isolationist
+          - libertarian
+          - loyalist
+          - male chauvinist
+          - mouthpiece
+          - nationalist
+          - nationalist leader
+          - neoclassicist
+          - neutralist
+          - nullifier
+          - partisan
+          - partitionist
+          - philhellene
+          - pillar
+          - presenter
+          - pro-lifer
+          - protectionist
+          - racist
+          - railbird
+          - republican
+          - ritualist
+          - ruralist
+          - secessionist
+          - seconder
+          - sectarian
+          - secularist
+          - segregator
+          - separatist
+          - shutterbug
+          - spokesman
+          - spokesperson
+          - spokeswoman
+          - sports fan
+          - subscriber
+          - suffragette
+          - suffragist
+          - supporter
+          - supremacist
+          - sympathizer
+          - tallyman
+          - teleologist
+          - toaster
+          - traveling salesman
+          - unilateralist
+          - upholder
+          - vitalist
+          - voucher
+          - white separatist
+          - white supremacist
+        gatherer: # instruction: a person who gathers
+          - gatherer
+        pussycat: # instruction: a person who is regarded as easygoing and agreeable
+          - pussycat
+        brunet: # instruction: a person with dark (brown) hair
+          - brunet
+        creditor: # instruction: a person to whom money is owed by a debtor; someone to whom an obligation exists
+          - mortgagee
+        changer: # instruction: a person who changes something
+          - adulterator
+          - normalizer
+          - standardizer
+        guesser: # instruction: a person who guesses
+          - guesser
+        emotional person: # instruction: a person subject to strong states of emotion
+          - captive
+          - spitfire
+        color-blind person: # instruction: a person unable to distinguish differences in hue
+          - dichromat
+          - monochromat
+          - uniocular dichromat
+        White: # instruction: a member of the Caucasoid race
+          - Abkhaz
+          - Arab
+          - Aramean
+          - Aryan
+          - Assyrian
+          - Babylonian
+          - Bahraini
+          - Bedouin
+          - Canaanite
+          - Chaldean
+          - Circassian
+          - Elamite
+          - Kassite
+          - Omani
+          - Palestinian
+          - Phoenician
+          - Qatari
+          - Saracen
+          - Saudi
+          - Semite
+          - Sumerian
+          - WASP
+          - Yemeni
+          - good old boy
+          - paleface
+          - squaw man
+          - white man
+          - white trash
+          - white woman
+          - whitey
+        coward: # instruction: a person who shows fear or timidity
+          - caitiff
+          - cur
+          - dastard
+          - poltroon
+          - quaker
+          - shy person
+          - sissy
+          - wallflower
+          - waverer
+        spurner: # instruction: a person who rejects (someone or something) with contempt
+          - spurner
+        relative: # instruction: a person related by blood or marriage
+          - Jacob
+          - Junior
+          - Siamese twin
+          - Simeon
+          - adoptive parent
+          - affine
+          - agnate
+          - ancestor
+          - ancestress
+          - antediluvian
+          - army brat
+          - aunt
+          - baby
+          - bastard
+          - battle-ax
+          - benedick
+          - big brother
+          - big sister
+          - bigamist
+          - blood relation
+          - blue baby
+          - bride
+          - brother
+          - brother-in-law
+          - cherub
+          - child
+          - consort
+          - cousin
+          - crown princess
+          - cuckold
+          - dad
+          - daughter
+          - daughter-in-law
+          - descendant
+          - empty nester
+          - enate
+          - family man
+          - father
+          - father-in-law
+          - female offspring
+          - female sibling
+          - filicide
+          - first lady
+          - firstborn
+          - forebear
+          - forefather
+          - foremother
+          - foundling
+          - fraternal twin
+          - genitor
+          - godchild
+          - goddaughter
+          - godson
+          - golf widow
+          - grandchild
+          - granddaughter
+          - grandfather
+          - grandma
+          - grandparent
+          - grandson
+          - great grandchild
+          - great granddaughter
+          - great grandfather
+          - great grandmother
+          - great grandparent
+          - great grandson
+          - great-aunt
+          - great-nephew
+          - great-niece
+          - great-uncle
+          - groom
+          - half blood
+          - half sister
+          - helpmate
+          - honest woman
+          - house husband
+          - housewife
+          - husband
+          - identical twin
+          - in-law
+          - kin
+          - kinsman
+          - kinswoman
+          - kissing cousin
+          - little brother
+          - little sister
+          - liveborn infant
+          - low-birth-weight baby
+          - ma
+          - maiden aunt
+          - male offspring
+          - male sibling
+          - marchioness
+          - mater
+          - matron
+          - mayoress
+          - missus
+          - monogamist
+          - mother
+          - mother's boy
+          - mother's daughter
+          - mother-in-law
+          - nan
+          - neonate
+          - nephew
+          - newlywed
+          - next of kin
+          - niece
+          - nursling
+          - offspring
+          - old lady
+          - old man
+          - papoose
+          - parent
+          - pater
+          - patriarch
+          - polyandrist
+          - polygamist
+          - polygynist
+          - postmature infant
+          - premature baby
+          - primipara
+          - prince consort
+          - progenitor
+          - puerpera
+          - quadripara
+          - quadruplet
+          - quintipara
+          - quintuplet
+          - scion
+          - second cousin
+          - sheika
+          - sibling
+          - signora
+          - sister
+          - sister-in-law
+          - small-for-gestational-age infant
+          - son
+          - son-in-law
+          - spouse
+          - stepbrother
+          - stepchild
+          - stepdaughter
+          - stepfather
+          - stepmother
+          - stepparent
+          - stepson
+          - stillborn infant
+          - successor
+          - supermom
+          - surrogate mother
+          - term infant
+          - test-tube baby
+          - triplet
+          - trophy wife
+          - twin
+          - uncle
+          - uxor
+          - uxoricide
+          - vicereine
+          - viscountess
+          - war baby
+          - war bride
+          - wife
+          - wittol
+        differentiator: # instruction: a person who (or that which) differentiates
+          - differentiator
+        seeder: # instruction: a person who seeds clouds
+          - seeder
+        nonresident: # instruction: someone who does not live in a particular place
+          - nonresident
+        misogamist: # instruction: a person who hates marriage
+          - misogamist
+        first-rater: # instruction: one who is first-rate
+          - first-rater
+        grinner: # instruction: a person who grins
+          - grinner
+        baldhead: # instruction: a person whose head is bald
+          - baldhead
+        killer: # instruction: someone who causes the death of a person or animal
+          - assassin
+          - butcher
+          - cutthroat
+          - electrocutioner
+          - executioner
+          - exterminator
+          - fratricide
+          - garroter
+          - gunman
+          - hangman
+          - hatchet man
+          - headsman
+          - infanticide
+          - mass murderer
+          - matricide
+          - murderer
+          - murderess
+          - parricide
+          - patricide
+          - poisoner
+          - regicide
+          - ripper
+          - serial killer
+          - spree killer
+          - suicide
+        pardoner: # instruction: a person who pardons or forgives or excuses a fault or offense
+          - pardoner
+        gatekeeper: # instruction: someone who controls access to something
+          - gatekeeper
+        pamperer: # instruction: someone who pampers or spoils by excessive indulgence
+          - pamperer
+        Gemini: # instruction: (astrology) a person who is born while the sun is in Gemini
+          - Gemini
+        roundhead: # instruction: a brachycephalic person
+          - roundhead
+        complexifier: # instruction: someone makes things complex
+          - complexifier
+        Elizabethan: # instruction: a person who lived during the reign of Elizabeth I
+          - Elizabethan
+        ouster: # instruction: a person who ousts or supplants someone else
+          - ouster
+        native: # instruction: an indigenous person who was born in a particular place
+          - Cebuan
+          - Chechen
+          - Cheremis
+          - Chukchi
+          - Filipino
+          - Georgian
+          - Great Russian
+          - Ingrian
+          - Karelian
+          - Komi
+          - Levantine
+          - Mauritian
+          - Mordva
+          - Moro
+          - Muscovite
+          - Nganasan
+          - Ostyak
+          - Russian
+          - Samoyed
+          - Selkup
+          - Seychellois
+          - Siberian
+          - Tagalog
+          - Tatar
+          - Udmurt
+          - Veps
+          - Visayan
+          - Vogul
+          - Yeniseian
+        introvert: # instruction: (psychology) a person who tends to shrink from social contacts and to become preoccupied with their own thoughts
+          - introvert
+        person of color: # instruction: (formal) any non-European non-white person
+          - Abnaki
+          - Achomawi
+          - Afghan
+          - Akwa'ala
+          - Alabama
+          - Aleut
+          - Algonkian
+          - Algonquian
+          - Altaic
+          - Amerindian
+          - Anasazi
+          - Apache
+          - Arapaho
+          - Arawak
+          - Arikara
+          - Armenian
+          - Asian
+          - Assamese
+          - Atakapa
+          - Athapaskan
+          - Atsugewi
+          - Azerbaijani
+          - Aztec
+          - Badaga
+          - Bangladeshi
+          - Bengali
+          - Bhutanese
+          - Biloxi
+          - Black
+          - Black man
+          - Black woman
+          - Blackfoot
+          - Bornean
+          - Boxer
+          - Brahui
+          - Brule
+          - Bruneian
+          - Burmese
+          - Byzantine
+          - Caddo
+          - Cahita
+          - Cakchiquel
+          - Cambodian
+          - Carib
+          - Catawba
+          - Cayuga
+          - Cherokee
+          - Cheyenne
+          - Chickasaw
+          - Chimakum
+          - Chimariko
+          - Chinese
+          - Chinook
+          - Chipewyan
+          - Choctaw
+          - Chuvash
+          - Cochimi
+          - Cocopa
+          - Coeur d'Alene
+          - Comanche
+          - Conoy
+          - Costanoan
+          - Cree
+          - Creek
+          - Crow
+          - Dakota
+          - Damascene
+          - Delaware
+          - Dhegiha
+          - Diegueno
+          - Dravidian
+          - East Indian
+          - Erie
+          - Eskimo
+          - Esselen
+          - Eurasian
+          - Evenki
+          - Eyeish
+          - Farsi
+          - Fox
+          - Gadaba
+          - Gond
+          - Guarani
+          - Gujarati
+          - Gurkha
+          - Gypsy
+          - Haida
+          - Hakka
+          - Halchidhoma
+          - Havasupai
+          - Hidatsa
+          - Hindu
+          - Hitchiti
+          - Hmong
+          - Hokan
+          - Hopi
+          - Hunkpapa
+          - Hupa
+          - Iberian
+          - Illinois
+          - Inca
+          - Indian
+          - Indonesian
+          - Iowa
+          - Irani
+          - Iraqi
+          - Iroquois
+          - Israeli
+          - Israelite
+          - Jap
+          - Japanese
+          - Javanese
+          - Jordanian
+          - Kafir
+          - Kalapooia
+          - Kamia
+          - Kanarese
+          - Kansa
+          - Karakalpak
+          - Karok
+          - Kashmiri
+          - Kazak
+          - Kazakhstani
+          - Kekchi
+          - Khalkha
+          - Khmer
+          - Kichai
+          - Kickapoo
+          - Kiliwa
+          - Kiowa
+          - Kirghiz
+          - Koasati
+          - Kolam
+          - Korean
+          - Kota
+          - Kshatriya
+          - Kui
+          - Kurd
+          - Kusan
+          - Kuwaiti
+          - Kwakiutl
+          - Lao
+          - Lebanese
+          - Maidu
+          - Malay
+          - Malaysian
+          - Maldivian
+          - Malecite
+          - Malto
+          - Mam
+          - Manchu
+          - Maraco
+          - Maratha
+          - Maricopa
+          - Massachuset
+          - Mattole
+          - Mayan
+          - Menomini
+          - Miami
+          - Micmac
+          - Miniconju
+          - Missouri
+          - Miwok
+          - Mohave
+          - Mohawk
+          - Mohican
+          - Mongol
+          - Mongoloid
+          - Muskhogean
+          - Muskogee
+          - Nahuatl
+          - Nanticoke
+          - Navaho
+          - Negress
+          - Nepalese
+          - Nez Perce
+          - Nootka
+          - North Korean
+          - Ofo
+          - Oglala
+          - Ojibwa
+          - Olmec
+          - Omaha
+          - Oneida
+          - Onondaga
+          - Oriental
+          - Oriya
+          - Osage
+          - Oto
+          - Ottawa
+          - Ottoman
+          - Paiute
+          - Pakistani
+          - Paleo-American
+          - Pamlico
+          - Papuan
+          - Parthian
+          - Passamaquody
+          - Pathan
+          - Patwin
+          - Pawnee
+          - Penobscot
+          - Penutian
+          - Pima
+          - Plains Indian
+          - Pomo
+          - Ponca
+          - Potawatomi
+          - Powhatan
+          - Pueblo
+          - Punjabi
+          - Quapaw
+          - Quechua
+          - Quiche
+          - Rajput
+          - Redskin
+          - Ryukyuan
+          - Sabahan
+          - Salish
+          - Samaritan
+          - Santee
+          - Sarawakian
+          - Sauk
+          - Savara
+          - Seminole
+          - Seneca
+          - Shahaptian
+          - Shasta
+          - Shawnee
+          - Sherpa
+          - Shoshone
+          - Shudra
+          - Sihasapa
+          - Sindhi
+          - Singaporean
+          - Sinhalese
+          - Sioux
+          - Skagit
+          - South American Indian
+          - South Korean
+          - Sri Lankan
+          - Sumatran
+          - Syrian
+          - Taiwanese
+          - Tajik
+          - Takelma
+          - Tamil
+          - Taos
+          - Taracahitian
+          - Tarahumara
+          - Tatar
+          - Telugu
+          - Teton
+          - Thai
+          - Tibetan
+          - Timorese
+          - Tlingit
+          - Toda
+          - Toltec
+          - Tom
+          - Trojan
+          - Tsimshian
+          - Tulu
+          - Tungus
+          - Tungusic
+          - Tupi
+          - Turk
+          - Turki
+          - Turkoman
+          - Tuscarora
+          - Tutelo
+          - Two Kettle
+          - Uighur
+          - Ute
+          - Uzbek
+          - Vaisya
+          - Vietnamese
+          - Wakashan
+          - Walapai
+          - Wampanoag
+          - Wichita
+          - Winnebago
+          - Wintun
+          - Yahi
+          - Yakut
+          - Yana
+          - Yavapai
+          - Yokuts
+          - Yucatec
+          - Yuma
+          - Zapotec
+          - Zuni
+          - boy
+          - brahman
+          - chink
+          - cliff dweller
+          - colored person
+          - coolie
+          - darky
+          - effendi
+          - geisha
+          - gitana
+          - gitano
+          - gook
+          - hajji
+          - jawan
+          - mandarin
+          - nigger
+          - peshmerga
+          - pickaninny
+          - sabra
+          - sannup
+          - shogun
+          - smarta
+          - soul brother
+          - squaw
+          - wog
+          - yellow man
+          - yellow woman
+        sleepyhead: # instruction: a sleepy person
+          - sleepyhead
+        dissenter: # instruction: a person who dissents from some established policy
+          - NIMBY
+          - beatnik
+          - bohemian
+          - conscientious objector
+          - enfant terrible
+          - heretic
+          - maverick
+          - nonconformist
+          - political dissident
+        follower: # instruction: a person who accepts the leadership of another
+          - Apostle
+          - Aristotelian
+          - Arminian
+          - Bahai
+          - Cartesian
+          - Donatist
+          - Druze
+          - Freudian
+          - Hegelian
+          - Hinayanist
+          - Hussite
+          - Ismaili
+          - Jacksonian
+          - Jainist
+          - Jeffersonian
+          - Jungian
+          - Keynesian
+          - Lamaist
+          - Lamarckian
+          - Lutheran
+          - Machiavellian
+          - Mahayanist
+          - Mahdist
+          - Manichaean
+          - Mendelian
+          - Mithraist
+          - Mohammedan
+          - Monophysite
+          - Neoplatonist
+          - Nestorian
+          - Newtonian
+          - Rastafarian
+          - Satanist
+          - Shintoist
+          - Sikh
+          - Skinnerian
+          - Socinian
+          - Stalinist
+          - Tantrist
+          - Taoist
+          - Trinitarian
+          - Unitarian
+          - Wagnerian
+          - Zen Buddhist
+          - Zoroastrian
+          - absolutist
+          - aerophile
+          - aficionado
+          - amoralist
+          - amorist
+          - animist
+          - antinomian
+          - apple polisher
+          - bacchant
+          - camp follower
+          - clericalist
+          - cultist
+          - disciple
+          - dualist
+          - fan
+          - flatterer
+          - flunky
+          - goody-goody
+          - groupie
+          - inferior
+          - janissary
+          - leech
+          - metalhead
+          - myrmidon
+          - pushover
+          - regular
+          - respecter
+          - satellite
+          - sheep
+          - submitter
+          - sycophant
+          - tagalong
+          - totalitarian
+          - vassal
+          - votary
+        personification: # instruction: a person who represents an abstract quality
+          - deification
+          - embodiment
+          - queen
+          - reincarnation
+        copycat: # instruction: someone who copies the words or behavior of another
+          - epigone
+          - parrot
+        granter: # instruction: a person who grants or gives something
+          - alienor
+          - grantor
+        ectomorph: # instruction: a person with a thin body
+          - ectomorph
+        revenant: # instruction: a person who returns after a lengthy absence
+          - revenant
+        insured: # instruction: a person whose interests are protected by an insurance policy; a person who contracts for an insurance policy that indemnifies him against loss of property or life or health etc.
+          - insured
+        occultist: # instruction: a believer in occultism; someone versed in the occult arts
+          - Chaldean
+          - Circe
+          - clairvoyant
+          - conjurer
+          - enchanter
+          - enchantress
+          - exorcist
+          - magus
+          - medium
+          - psychic
+          - sorcerer
+          - sorceress
+          - spirit rapper
+          - witch doctor
+        religious person: # instruction: a person who manifests devotion to a deity
+          - Adventist
+          - Amish
+          - Anabaptist
+          - Anglican
+          - Anglican Catholic
+          - Apostle
+          - Augustinian
+          - Austin Friar
+          - Baptist
+          - Benedictine
+          - Brother
+          - Buddhist
+          - Carmelite
+          - Carthusian
+          - Catholic
+          - Christian
+          - Christian Scientist
+          - Congregationalist
+          - Copt
+          - Dominican
+          - Dunker
+          - Episcopalian
+          - Franciscan
+          - Friend
+          - Greek Catholic
+          - Guru
+          - Hare Krishna
+          - Hindu
+          - Holy Roller
+          - Islamist
+          - Jehovah's Witness
+          - Jesuit
+          - Jihadist
+          - Latter-Day Saint
+          - Mandaean
+          - Melkite
+          - Mennonite
+          - Methodist
+          - Mon
+          - Moonie
+          - Moor
+          - Mullah
+          - Muslim
+          - Muslimah
+          - Nazarene
+          - Nonconformist
+          - Northern Baptist
+          - Old Catholic
+          - Orangeman
+          - Parsee
+          - Pentecostal
+          - Presbyterian
+          - Protestant
+          - Puritan
+          - Roman Catholic
+          - Sabbatarian
+          - Saracen
+          - Satanist
+          - Shaker
+          - Shaktist
+          - Shiite
+          - Shivaist
+          - Sister
+          - Southern Baptist
+          - Sufi
+          - Sunnite
+          - Tractarian
+          - Trappist
+          - Uniat
+          - Vaishnava
+          - WASP
+          - Wahhabi
+          - Wesleyan
+          - Wiccan
+          - abbe
+          - abbess
+          - abbot
+          - abstainer
+          - agnostic
+          - anchorite
+          - anointer
+          - antipope
+          - arianist
+          - assassin
+          - ayatollah
+          - beadsman
+          - begum
+          - believer
+          - born-again Christian
+          - caliph
+          - celibate
+          - cenobite
+          - chela
+          - churchgoer
+          - communicant
+          - congregant
+          - coreligionist
+          - dervish
+          - devil worshiper
+          - eremite
+          - fakir
+          - flagellant
+          - friar
+          - fundamentalist
+          - gentile
+          - guru
+          - hajji
+          - hakim
+          - imam
+          - missionary
+          - monk
+          - monotheist
+          - mother
+          - mujahid
+          - mujtihad
+          - mystic
+          - niqaabi
+          - non-Catholic
+          - novitiate
+          - numerologist
+          - nun
+          - oblate
+          - pagan
+          - pantheist
+          - papist
+          - parishioner
+          - penitent
+          - pilgrim
+          - polytheist
+          - pope
+          - prayer
+          - prior
+          - prophet
+          - puritan
+          - quietist
+          - religionist
+          - religious
+          - religious leader
+          - sacrificer
+          - sadhu
+          - sannyasi
+          - shegetz
+          - stylite
+          - sun worshiper
+          - superior
+          - swami
+          - theist
+          - theosophist
+          - tritheist
+          - ultramontane
+          - votary
+          - whirling dervish
+        redhead: # instruction: someone who has red hair
+          - redhead
+        captor: # instruction: a person who captures and holds people or animals
+          - crimp
+          - kidnapper
+          - shanghaier
+          - surpriser
+        testator: # instruction: a person who makes a will
+          - devisor
+          - testatrix
+        adjudicator: # instruction: a person who studies and settles conflicts and disputes
+          - Daniel
+          - alcalde
+          - back judge
+          - chief justice
+          - doge
+          - field judge
+          - football official
+          - head linesman
+          - judge
+          - justice of the peace
+          - justiciar
+          - line judge
+          - linesman
+          - magistrate
+          - official
+          - ordinary
+          - praetor
+          - qadi
+          - recorder
+          - referee
+          - scorekeeper
+          - side judge
+          - starter
+          - stipendiary
+          - timekeeper
+          - trial judge
+          - trier
+          - umpire
+        contestant: # instruction: a person who participates in competitions
+          - International Grandmaster
+          - Olympian
+          - acrobat
+          - aerialist
+          - agonist
+          - alpinist
+          - amateur
+          - athlete
+          - back
+          - backstroker
+          - balancer
+          - ball carrier
+          - ball hawk
+          - ballplayer
+          - base runner
+          - basketball player
+          - batter
+          - bench warmer
+          - bidder
+          - billiard player
+          - blocker
+          - bounder
+          - bowler
+          - breaststroker
+          - bridge partner
+          - bridge player
+          - bunter
+          - card player
+          - cardholder
+          - cardsharp
+          - catcher
+          - center
+          - center fielder
+          - champion
+          - chess master
+          - chess player
+          - circus acrobat
+          - climber
+          - closer
+          - comer
+          - contestee
+          - contortionist
+          - contractor
+          - cornerback
+          - cricketer
+          - dart player
+          - dealer
+          - defaulter
+          - designated hitter
+          - diver
+          - dribbler
+          - driver
+          - dropkicker
+          - dunker
+          - eldest hand
+          - end
+          - entrant
+          - escalader
+          - fielder
+          - finalist
+          - first baseman
+          - flanker back
+          - foe
+          - football hero
+          - football player
+          - forward
+          - four-minute man
+          - free agent
+          - front-runner
+          - fullback
+          - funambulist
+          - goalkeeper
+          - golf pro
+          - golfer
+          - grandmaster
+          - guard
+          - gymnast
+          - hacker
+          - halfback
+          - hockey player
+          - hooker
+          - hopper
+          - hurdler
+          - ice-skater
+          - infielder
+          - jumper
+          - kicker
+          - king
+          - lacrosse player
+          - langlaufer
+          - left fielder
+          - left-handed pitcher
+          - letterman
+          - linebacker
+          - lineman
+          - little leaguer
+          - long shot
+          - loser
+          - luger
+          - major leaguer
+          - marathoner
+          - medalist
+          - miler
+          - minor leaguer
+          - mortal enemy
+          - most valuable player
+          - mountaineer
+          - old maid
+          - opposition
+          - outfielder
+          - outsider
+          - passer
+          - patzer
+          - pentathlete
+          - pinch hitter
+          - pitcher
+          - place-kicker
+          - player
+          - playmaker
+          - pool player
+          - pothunter
+          - preemptor
+          - professional
+          - punter
+          - putter
+          - qualifier
+          - quarterback
+          - raiser
+          - receiver
+          - record-breaker
+          - reliever
+          - right fielder
+          - right-handed pitcher
+          - rival
+          - rock climber
+          - roller-skater
+          - rollerblader
+          - ropewalker
+          - runner
+          - runner-up
+          - running back
+          - rusher
+          - scorer
+          - scratch
+          - screwballer
+          - second baseman
+          - seeded player
+          - semifinalist
+          - semiprofessional
+          - server
+          - sharpshooter
+          - shooter
+          - shortstop
+          - shot putter
+          - shuffler
+          - skateboarder
+          - skater
+          - ski jumper
+          - skier
+          - skinny-dipper
+          - slammer
+          - sledder
+          - slicer
+          - soccer player
+          - speedskater
+          - split end
+          - sport
+          - sporting man
+          - sprinter
+          - starter
+          - starting pitcher
+          - street fighter
+          - striker
+          - stringer
+          - substitute
+          - swimmer
+          - swinger
+          - switch-hitter
+          - tackle
+          - tackler
+          - tailback
+          - tennis player
+          - tennis pro
+          - third baseman
+          - tier
+          - tight end
+          - tilter
+          - tobogganist
+          - tumbler
+          - turner
+          - upsetter
+          - utility man
+          - vaulter
+          - volleyball player
+          - walloper
+          - weightlifter
+          - whiffer
+          - wicket-keeper
+          - wing
+          - wingback
+          - winger
+          - winner
+          - withdrawer
+        malcontent: # instruction: a person who is discontented or disgusted
+          - quibbler
+          - sorehead
+          - squabbler
+        dieter: # instruction: a person who diets
+          - dieter
+        sniffler: # instruction: a person who breathes audibly through a congested nose
+          - sniffler
+        anti: # instruction: a person who is opposed (to an action or policy or practice etc.)
+          - anti
+        slave: # instruction: a person who is owned by someone
+          - bond servant
+          - bondman
+          - bondwoman
+          - cotter
+          - creature
+          - galley slave
+          - serf
+          - thrall
+        suspect: # instruction: someone who is under suspicion
+          - murder suspect
+          - rape suspect
+          - robbery suspect
+        walk-in: # instruction: person who walks in without having an appointment
+          - walk-in
+        personage: # instruction: another word for person; a person not meriting identification
+          - personage
+        money handler: # instruction: a person who receives or invests or pays out money
+          - acceptor
+          - banker
+          - bursar
+          - chamberlain
+          - drawee
+          - drawer
+          - exchanger
+          - leaseholder
+          - lodger
+          - payer
+          - paymaster
+          - ratepayer
+          - redeemer
+          - state treasurer
+          - taxpayer
+          - tenant
+          - tither
+          - treasurer
+        six-footer: # instruction: a person who is at least six feet tall
+          - six-footer
+        groaner: # instruction: a person who groans
+          - groaner
+        bluecoat: # instruction: a person dressed all in blue (as a soldier or sailor)
+          - bluecoat
+        socializer: # instruction: a person who takes part in social activities
+          - socializer
+        totemist: # instruction: a person who belongs to a clan or tribe having a totem
+          - totemist
+        termer: # instruction: a person who serves a specified term
+          - termer
+        quitter: # instruction: a person who gives up too easily
+          - abdicator
+          - deserter
+          - dropout
+        demander: # instruction: a person who makes demands
+          - demander
+        vanisher: # instruction: a person who disappears
+          - vanisher
+        enjoyer: # instruction: a person who delights in having or using or experiencing something
+          - enjoyer
+        expert: # instruction: a person with special knowledge or ability who performs skillfully
+          - Coue
+          - Dutch uncle
+          - Germanist
+          - Teutonist
+          - UNIX guru
+          - ace
+          - adder
+          - adjuster
+          - adviser
+          - agronomist
+          - air attache
+          - all-rounder
+          - alleviator
+          - amicus curiae
+          - analyst
+          - anatomist
+          - annotator
+          - antiquary
+          - appraiser
+          - arbiter
+          - archer
+          - army attache
+          - assayer
+          - attache
+          - authority
+          - backroom boy
+          - bank examiner
+          - beauty consultant
+          - black belt
+          - cabalist
+          - calculator
+          - canonist
+          - cartographer
+          - chartist
+          - checker
+          - chiropractor
+          - climatologist
+          - comparative anatomist
+          - computer expert
+          - connoisseur
+          - coroner
+          - cosmetologist
+          - counselor
+          - county agent
+          - credit analyst
+          - criminologist
+          - critic
+          - crystallographer
+          - cultural attache
+          - curandera
+          - curandero
+          - deadeye
+          - detective
+          - dialectician
+          - dietician
+          - educationist
+          - efficiency expert
+          - electrotherapist
+          - enologist
+          - esthete
+          - evaluator
+          - examiner
+          - exegete
+          - fashion consultant
+          - financial analyst
+          - fingerprint expert
+          - foreman
+          - foreperson
+          - forewoman
+          - franc-tireur
+          - gardener
+          - genealogist
+          - geographer
+          - grader
+          - grand mufti
+          - graphic designer
+          - graphologist
+          - gunman
+          - herbalist
+          - high priest
+          - histologist
+          - horticulturist
+          - hotel detective
+          - hunting guide
+          - industry analyst
+          - inquiry agent
+          - intelligence analyst
+          - interior designer
+          - investigator
+          - investment adviser
+          - jurist
+          - juror
+          - lapidary
+          - limnologist
+          - liturgist
+          - logician
+          - longbowman
+          - management consultant
+          - market analyst
+          - marksman
+          - massager
+          - masseur
+          - masseuse
+          - master
+          - media consultant
+          - meteorologist
+          - military adviser
+          - military attache
+          - mnemonist
+          - mufti
+          - mythologist
+          - naprapath
+          - naturopath
+          - naval attache
+          - nerd
+          - number cruncher
+          - observer
+          - oil-industry analyst
+          - ombudsman
+          - optometrist
+          - orientalist
+          - osteologist
+          - osteopath
+          - out-and-outer
+          - panelist
+          - parliamentarian
+          - past master
+          - petit juror
+          - physical therapist
+          - private detective
+          - prosthetist
+          - psychotherapist
+          - pteridologist
+          - racetrack tout
+          - reviewer
+          - rifleman
+          - sangoma
+          - scanner
+          - scout
+          - scrutineer
+          - scrutinizer
+          - security consultant
+          - shark
+          - shot
+          - sleuth
+          - sniper
+          - specialist
+          - speech therapist
+          - starets
+          - statistician
+          - store detective
+          - subtracter
+          - surveyor
+          - syllogist
+          - symbolic logician
+          - systems analyst
+          - talent
+          - taster
+          - technician
+          - technocrat
+          - therapist
+          - third party
+          - tipster
+          - track star
+          - trailblazer
+          - transplanter
+          - trapshooter
+          - tree surgeon
+          - valuer
+          - veteran
+          - weatherman
+          - wine lover
+          - wine taster
+          - wool stapler
+        pisser: # instruction: a person who urinates
+          - bedwetter
+        counterterrorist: # instruction: someone who attempts to prevent terrorism
+          - counterterrorist
+        collector: # instruction: a person who collects things
+          - archivist
+          - conchologist
+          - numismatist
+          - packrat
+          - philatelist
+        dead person: # instruction: someone who is no longer alive
+          - infernal
+          - zombi
+        man jack: # instruction: a single individual
+          - man jack
+        simpleton: # instruction: a person lacking intelligence or common sense
+          - airhead
+          - ass
+          - berk
+          - clown
+          - dimwit
+          - dingbat
+          - dumbbell
+          - dunce
+          - fathead
+          - flibbertigibbet
+          - fool
+          - fucker
+          - idiot
+          - idiot savant
+          - klutz
+          - meshuggeneh
+          - mongoloid
+          - morosoph
+          - nebbish
+          - nincompoop
+          - putz
+          - scatterbrain
+          - schlemiel
+          - schlepper
+          - schnook
+          - sheep
+          - space cadet
+          - square
+          - stupid
+          - subnormal
+          - twerp
+          - wally
+        Amerindian: # instruction: any member of the peoples living in North or South America before the Europeans arrived
+          - Abnaki
+          - Achomawi
+          - Akwa'ala
+          - Alabama
+          - Aleut
+          - Algonkian
+          - Algonquian
+          - Anasazi
+          - Apache
+          - Arapaho
+          - Arawak
+          - Arikara
+          - Atakapa
+          - Athapaskan
+          - Atsugewi
+          - Aztec
+          - Biloxi
+          - Blackfoot
+          - Brule
+          - Caddo
+          - Cahita
+          - Cakchiquel
+          - Carib
+          - Catawba
+          - Cayuga
+          - Cherokee
+          - Cheyenne
+          - Chickasaw
+          - Chimakum
+          - Chimariko
+          - Chinook
+          - Chipewyan
+          - Choctaw
+          - Cochimi
+          - Cocopa
+          - Coeur d'Alene
+          - Comanche
+          - Conoy
+          - Costanoan
+          - Cree
+          - Creek
+          - Crow
+          - Dakota
+          - Delaware
+          - Dhegiha
+          - Diegueno
+          - Erie
+          - Eskimo
+          - Esselen
+          - Eyeish
+          - Fox
+          - Guarani
+          - Haida
+          - Halchidhoma
+          - Havasupai
+          - Hidatsa
+          - Hitchiti
+          - Hokan
+          - Hopi
+          - Hunkpapa
+          - Hupa
+          - Illinois
+          - Inca
+          - Indian
+          - Iowa
+          - Iroquois
+          - Kalapooia
+          - Kamia
+          - Kansa
+          - Karok
+          - Kekchi
+          - Kichai
+          - Kickapoo
+          - Kiliwa
+          - Kiowa
+          - Koasati
+          - Kusan
+          - Kwakiutl
+          - Maidu
+          - Malecite
+          - Mam
+          - Maraco
+          - Maricopa
+          - Massachuset
+          - Mattole
+          - Mayan
+          - Menomini
+          - Miami
+          - Micmac
+          - Miniconju
+          - Missouri
+          - Miwok
+          - Mohave
+          - Mohawk
+          - Mohican
+          - Muskhogean
+          - Muskogee
+          - Nahuatl
+          - Nanticoke
+          - Navaho
+          - Nez Perce
+          - Nootka
+          - Ofo
+          - Oglala
+          - Ojibwa
+          - Olmec
+          - Omaha
+          - Oneida
+          - Onondaga
+          - Osage
+          - Oto
+          - Ottawa
+          - Paiute
+          - Paleo-American
+          - Pamlico
+          - Passamaquody
+          - Patwin
+          - Pawnee
+          - Penobscot
+          - Penutian
+          - Pima
+          - Plains Indian
+          - Pomo
+          - Ponca
+          - Potawatomi
+          - Powhatan
+          - Pueblo
+          - Quapaw
+          - Quechua
+          - Quiche
+          - Redskin
+          - Salish
+          - Santee
+          - Sauk
+          - Seminole
+          - Seneca
+          - Shahaptian
+          - Shasta
+          - Shawnee
+          - Shoshone
+          - Sihasapa
+          - Sioux
+          - Skagit
+          - South American Indian
+          - Takelma
+          - Taos
+          - Taracahitian
+          - Tarahumara
+          - Teton
+          - Tlingit
+          - Toltec
+          - Tsimshian
+          - Tupi
+          - Tuscarora
+          - Tutelo
+          - Two Kettle
+          - Ute
+          - Wakashan
+          - Walapai
+          - Wampanoag
+          - Wichita
+          - Winnebago
+          - Wintun
+          - Yahi
+          - Yana
+          - Yavapai
+          - Yokuts
+          - Yucatec
+          - Yuma
+          - Zapotec
+          - Zuni
+          - cliff dweller
+          - sannup
+          - squaw
+        hoper: # instruction: a person who hopes
+          - hoper
+        baby buster: # instruction: a person born in the generation following the baby boom when the birth rate fell dramatically
+          - baby buster
+        adoptee: # instruction: someone (such as a child) who has been adopted
+          - adoptee
+        worker: # instruction: a person who works at a specific occupation
+          bill poster:  # instruction: someone who pastes up bills or placards on walls or billboards
+            - bill poster
+          hanger: # instruction: a worker who hangs something
+            - hanger
+          nailer: # instruction: a worker who attaches something by nailing it
+            - nailer
+          sheller: # instruction: a worker who removes shells (as of peas or oysters)
+            - sheller
+          bleacher: # instruction: a worker who bleaches (cloth or flour etc.)
+            - bleacher
+          moonlighter: # instruction: a person who holds a second job (usually after hours)
+            - moonlighter
+          charcoal burner: # instruction: a worker whose job is to make charcoal
+            - charcoal burner
+          part-timer: # instruction: someone who works less than the customary or standard time
+            - part-timer
+          scrubber: # instruction: a worker who uses a scrub brush to clean a surface (usually a floor or deck)
+            - scrubber
+          oiler: # instruction: a worker who oils engines or machinery
+            - oiler
+          servant: # instruction: a person working in the service of another (especially in the household)
+            - ayah
+            - body servant
+            - butler
+            - cabin boy
+            - chambermaid
+            - domestic
+            - factotum
+            - familiar
+            - footman
+            - handmaid
+            - home help
+            - housekeeper
+            - lackey
+            - lady's maid
+            - maid
+            - major-domo
+            - manservant
+            - menial
+            - parlormaid
+            - scullion
+            - servant girl
+            - skivvy
+            - valet
+          washer: # instruction: someone who washes things for a living
+            - washerman
+            - washwoman
+            - window washer
+          freelancer: # instruction: a writer or artist who sells services to different employers without a long-term contract with any of them
+            - freelancer
+          quarryman: # instruction: a man who works in a quarry
+            - breaker
+            - stone breaker
+            - stonecutter
+          scab: # instruction: someone who works (or provides workers) during a strike
+            - scab
+          cornhusker: # instruction: a worker who husks corn
+            - cornhusker
+          muzzler: # instruction: someone who muzzles animals
+            - muzzler
+          twiner: # instruction: someone who intertwines (e.g. threads) or forms something by twisting or interlacing
+            - twiner
+          skilled worker: # instruction: a worker who has acquired special skills
+            tuner:  # instruction: someone who tunes pianos
+              - tuner
+            aviator: # instruction: someone who operates an aircraft
+              - aviatrix
+              - barnstormer
+              - captain
+              - combat pilot
+              - copilot
+              - dogfighter
+              - fighter pilot
+              - group captain
+              - kamikaze
+              - pilot
+              - strafer
+              - test pilot
+              - wingman
+            draftsman: # instruction: a skilled worker who draws plans of buildings or machines
+              - draftsman
+            fumigator: # instruction: someone whose job is to fumigate
+              - fumigator
+            laminator: # instruction: a person who makes laminates (especially plastic laminates)
+              - laminator
+            sailor: # instruction: any member of a ship's crew
+              - able seaman
+              - boatswain
+              - coxswain
+              - deckhand
+              - hand
+              - helmsman
+              - lascar
+              - lighterman
+              - mariner
+              - master
+              - mate
+              - officer
+              - pilot
+              - privateer
+              - purser
+              - sailing master
+              - sea lawyer
+              - steward
+              - supercargo
+              - water dog
+              - whaler
+              - yachtsman
+            serviceman: # instruction: someone who serves in the armed forces; a member of a military force
+              - Anzac
+              - Black and Tan
+              - Blucher
+              - Confederate soldier
+              - Green Beret
+              - Gurkha
+              - Highlander
+              - Janissary
+              - Legionnaire
+              - Marine
+              - Minuteman
+              - Navy SEAL
+              - Potemkin
+              - Rebel
+              - Rough Rider
+              - Section Eight
+              - Supreme Allied Commander Atlantic
+              - Supreme Allied Commander Europe
+              - Unknown Soldier
+              - Uriah
+              - Wac
+              - Wave
+              - adjutant
+              - adjutant general
+              - admiral
+              - air force officer
+              - aircraftsman
+              - armorer
+              - army officer
+              - artilleryman
+              - bluejacket
+              - bombardier
+              - brass hat
+              - brigadier
+              - bushwhacker
+              - cannon fodder
+              - captain
+              - carbineer
+              - cavalryman
+              - charge of quarters
+              - chief of staff
+              - chief petty officer
+              - coastguardsman
+              - colonel
+              - color bearer
+              - color sergeant
+              - commander
+              - commander in chief
+              - commanding officer
+              - commando
+              - commissioned military officer
+              - commissioned naval officer
+              - commissioned officer
+              - commodore
+              - corporal
+              - cuirassier
+              - desk officer
+              - doughboy
+              - draftee
+              - dragoon
+              - drill master
+              - enlisted man
+              - enlisted person
+              - enlisted woman
+              - ensign
+              - executive officer
+              - field marshal
+              - field-grade officer
+              - first lieutenant
+              - first sergeant
+              - flag captain
+              - flag officer
+              - flanker
+              - fleet admiral
+              - fusilier
+              - general
+              - general officer
+              - goldbrick
+              - grenadier
+              - guardsman
+              - gunnery sergeant
+              - hussar
+              - infantryman
+              - inspector general
+              - jawan
+              - judge advocate
+              - judge advocate general
+              - kitchen police
+              - lance corporal
+              - lancer
+              - legionnaire
+              - lieutenant
+              - lieutenant colonel
+              - lieutenant commander
+              - lieutenant general
+              - lieutenant junior grade
+              - line officer
+              - major
+              - major-general
+              - man-at-arms
+              - marine
+              - marshal
+              - master sergeant
+              - master-at-arms
+              - military adviser
+              - military officer
+              - militiaman
+              - musketeer
+              - naval commander
+              - naval officer
+              - noncombatant
+              - noncommissioned officer
+              - occupier
+              - orderly
+              - orderly sergeant
+              - paratrooper
+              - peacekeeper
+              - petty officer
+              - pistoleer
+              - poilu
+              - point man
+              - private
+              - quartermaster
+              - quartermaster general
+              - ranker
+              - raw recruit
+              - rear admiral
+              - recruit
+              - recruiting-sergeant
+              - redcoat
+              - regular
+              - reservist
+              - rifleman
+              - second lieutenant
+              - senior chief petty officer
+              - senior master sergeant
+              - sergeant
+              - sergeant major
+              - soldier
+              - sprog
+              - staff officer
+              - staff sergeant
+              - striker
+              - striper
+              - subaltern
+              - sublieutenant
+              - submariner
+              - supply officer
+              - tanker
+              - technical sergeant
+              - territorial
+              - trainbandsman
+              - veteran
+              - vice admiral
+              - volunteer
+              - warrant officer
+              - weekend warrior
+              - wing commander
+              - yard bird
+            plater: # instruction: a skilled worker who coats articles with a film of metal (usually silver or gold)
+              - electroplater
+            mounter: # instruction: a skilled worker who mounts pictures or jewels etc.
+              - mounter
+            refinisher: # instruction: a skilled worker who is employed to restore or refinish buildings or antique furniture
+              - refinisher
+            calligrapher: # instruction: someone skilled in penmanship
+              - calligrapher
+            harpooner: # instruction: someone who launches harpoons
+              - harpooner
+            framer: # instruction: someone who makes frames (as for pictures)
+              - framer
+            lockmaster: # instruction: a worker in charge of a lock (on a canal)
+              - lockmaster
+            dental hygienist: # instruction: someone trained to provide preventive dental service (cleaning teeth or taking x-rays)
+              - dental hygienist
+            projectionist: # instruction: the person who operates the projector in a movie house
+              - projectionist
+            hunter: # instruction: someone who hunts game
+              - bounty hunter
+              - coureur de bois
+              - courser
+              - deer hunter
+              - duck hunter
+              - falconer
+              - fowler
+              - huntress
+              - lion-hunter
+              - pothunter
+              - snarer
+              - stalker
+              - tracker
+              - trapper
+            turtler: # instruction: someone whose occupation is hunting turtles
+              - turtler
+            printer: # instruction: someone whose occupation is printing
+              - compositor
+              - proofreader
+            editor: # instruction: a person responsible for the editorial aspects of publication; the person who determines the final content of a text (especially of a newspaper or magazine)
+              - abridger
+              - anthologist
+              - art editor
+              - business editor
+              - city editor
+              - copy editor
+              - expurgator
+              - managing editor
+              - newspaper editor
+              - redact
+              - sports editor
+              - subeditor
+            riveter: # instruction: a worker who inserts and hammers rivets
+              - riveter
+            router: # instruction: a worker who routes shipments for distribution and delivery
+              - router
+            vulcanizer: # instruction: someone who vulcanizes rubber to improve its strength and resiliency
+              - vulcanizer
+            lobsterman: # instruction: a person whose occupation is catching lobsters
+              - lobsterman
+            official: # instruction: a worker who holds or is invested with an office
+              - Comptroller General
+              - Comptroller of the Currency
+              - Daniel
+              - Federal
+              - Grand Inquisitor
+              - Indian agent
+              - Inquisitor
+              - Kennan
+              - Pilate
+              - agent
+              - alcalde
+              - ambassador
+              - ambassadress
+              - apparatchik
+              - appointee
+              - bailiff
+              - beadle
+              - bean counter
+              - bureaucrat
+              - canvasser
+              - caretaker
+              - censor
+              - census taker
+              - charge d'affaires
+              - chief justice
+              - church officer
+              - churchwarden
+              - city father
+              - civil servant
+              - commissar
+              - consul
+              - coyote
+              - deacon
+              - deaconess
+              - diplomat
+              - district attorney
+              - doge
+              - elder
+              - elected official
+              - envoy
+              - equerry
+              - fire marshall
+              - fire warden
+              - hearing examiner
+              - high commissioner
+              - holdover
+              - incumbent
+              - internuncio
+              - invalidator
+              - judge
+              - justice of the peace
+              - justiciar
+              - lame duck
+              - licenser
+              - lieutenant governor
+              - lister
+              - macebearer
+              - magistrate
+              - mandarin
+              - minister
+              - notary
+              - noticer
+              - nuncio
+              - office-bearer
+              - officeholder
+              - ordinary
+              - paper-pusher
+              - persona grata
+              - persona non grata
+              - placeman
+              - plenipotentiary
+              - postmaster general
+              - praetor
+              - presbyter
+              - probation officer
+              - proconsul
+              - procurator
+              - prosecutor
+              - provincial
+              - qadi
+              - quaestor
+              - rapporteur
+              - recorder
+              - recruiter
+              - recruiting-sergeant
+              - registrar
+              - regulator
+              - returning officer
+              - sealer
+              - searcher
+              - selectman
+              - selectwoman
+              - sergeant at arms
+              - sexton
+              - state's attorney
+              - stipendiary
+              - tax assessor
+              - tax collector
+              - taxer
+              - teller
+              - town clerk
+              - trial judge
+              - trier
+              - trustbuster
+              - usher
+              - verger
+              - vestryman
+              - vestrywoman
+              - vizier
+              - weigher
+            perfecter: # instruction: a skilled worker who perfects something
+              - perfecter
+            plasterer: # instruction: a worker skilled in applying plaster
+              - plasterer
+            refiner: # instruction: one whose work is to refine a specific thing
+              - refiner
+            optician: # instruction: a worker who makes glasses for remedying defects of vision
+              - optician
+            wallpaperer: # instruction: a worker who papers walls
+              - wallpaperer
+            mender: # instruction: a skilled worker who mends or repairs things
+              - automobile mechanic
+              - darner
+              - handyman
+              - repairman
+              - troubleshooter
+            cook: # instruction: someone who cooks food
+              - baster
+              - chef
+              - cookie
+              - cordon bleu
+              - fry cook
+              - pastry cook
+              - preserver
+              - roaster
+              - salter
+              - seasoner
+            esthetician: # instruction: a worker skilled in giving beauty treatments (manicures and facials etc.)
+              - esthetician
+            electrician: # instruction: a person who installs or repairs electrical or telephone lines
+              - gaffer
+            galvanizer: # instruction: a skilled worker who coats iron or steel with zinc
+              - galvanizer
+            power worker: # instruction: a worker at a power station
+              - power worker
+            gilder: # instruction: someone whose occupation is to apply an overlay of gold or gilt
+              - gilder
+            plaiter: # instruction: someone who plaits (hair or fabric etc.)
+              - plaiter
+            indexer: # instruction: someone who provides an index
+              - indexer
+            armorer: # instruction: a worker skilled in making armor or arms
+              - armorer
+            balloonist: # instruction: someone who flies a balloon
+              - balloonist
+            fisherman: # instruction: someone whose occupation is catching fish
+              - angler
+              - trawler
+            technician: # instruction: someone whose occupation involves training in a specific technical process
+              - animator
+              - dental technician
+              - soundman
+              - techie
+              - webmaster
+            dyer: # instruction: someone whose job is to dye cloth
+              - dyer
+            engraver: # instruction: a skilled worker who can inscribe designs or writing onto a surface by carving or etching
+              - lapidary
+            phlebotomist: # instruction: someone who practices phlebotomy
+              - phlebotomist
+            voicer: # instruction: someone who regulates the tone of organ pipes
+              - voicer
+            wireman: # instruction: a worker who installs and repairs electric wiring
+              - wireman
+            mortician: # instruction: one whose business is the management of funerals
+              - embalmer
+          stainer: # instruction: a worker who stains (wood or fabric)
+            - stainer
+          topper: # instruction: a worker who makes or adds the top to something
+            - topper
+          teaser: # instruction: a worker who teases wool
+            - teaser
+          trade unionist: # instruction: a worker who belongs to a trade union
+            - trade unionist
+          assistant: # instruction: a person who contributes to the fulfillment of a need or furtherance of an effort or purpose
+            - accomplice
+            - aide
+            - armiger
+            - artist's model
+            - associate
+            - attendant
+            - baggageman
+            - bat boy
+            - batman
+            - bellboy
+            - best man
+            - bottom dog
+            - bridesmaid
+            - caddie
+            - check girl
+            - checker
+            - coadjutor
+            - cog
+            - color guard
+            - companion
+            - courtier
+            - cover girl
+            - cupbearer
+            - decoy
+            - dental assistant
+            - deputy
+            - dresser
+            - dressmaker's model
+            - equerry
+            - escort
+            - esquire
+            - event planner
+            - executive secretary
+            - facilitator
+            - famulus
+            - flower girl
+            - gillie
+            - girl Friday
+            - groomsman
+            - hatchet man
+            - honor guard
+            - instrument
+            - labor coach
+            - lifeguard
+            - linkboy
+            - loader
+            - man
+            - mannequin
+            - matron of honor
+            - minder
+            - model
+            - nursing aide
+            - orderly
+            - page
+            - paralegal
+            - paramedic
+            - paraprofessional
+            - photographer's model
+            - powder monkey
+            - prompter
+            - racker
+            - receptionist
+            - right-hand man
+            - rocker
+            - roper
+            - second
+            - second fiddle
+            - second-in-command
+            - secretary
+            - servitor
+            - shill
+            - sidesman
+            - social secretary
+            - squire
+            - stenographer
+            - steward
+            - stewardess
+            - stretcher-bearer
+            - subordinate
+            - supermodel
+            - trainbearer
+            - underboss
+            - usher
+            - usherette
+            - vicar-general
+            - vice-regent
+            - waker
+            - water boy
+            - whipper-in
+          employable: # instruction: a person who is qualified and ready to work
+            - employable
+          lamplighter: # instruction: (when gas was used for streetlights) a person who lights and extinguishes streetlights
+            - lamplighter
+          winder: # instruction: a worker who winds (e.g., a winch or clock or other mechanism)
+            - winder
+          shoveler: # instruction: a worker who shovels
+            - shoveler
+          beater: # instruction: a worker who rouses wild game from under cover for a hunter
+            - beater
+          workmate: # instruction: a fellow worker
+            - workmate
+          wallah: # instruction: usually in combination: person in charge of or employed at a particular thing
+            - wallah
+          boatman: # instruction: someone who drives or rides in a boat
+            - Charon
+            - canoeist
+            - ferryman
+            - gondolier
+            - oarsman
+            - oarswoman
+            - punter
+            - sculler
+            - stroke
+          toiler: # instruction: one who works strenuously
+            - toiler
+          working girl: # instruction: a young woman who is employed
+            - working girl
+          seasonal worker: # instruction: a worker who finds employment only in certain seasons
+            - seasonal worker
+          plier: # instruction: someone who plies a trade
+            - plier
+          shelver: # instruction: a worker who puts things (as books) on shelves
+            - shelver
+          shingler: # instruction: a worker who shingles roofs
+            - shingler
+          employee: # instruction: a worker who is hired to perform a job
+            - Luddite
+            - agricultural laborer
+            - almoner
+            - barmaid
+            - bartender
+            - blaster
+            - book agent
+            - bracero
+            - brakeman
+            - breadwinner
+            - bunny
+            - busboy
+            - captain
+            - carhop
+            - carrier
+            - charwoman
+            - chimneysweeper
+            - cleaner
+            - clerk
+            - coal miner
+            - coalman
+            - company man
+            - copyist
+            - copywriter
+            - counterperson
+            - cowboy
+            - cowgirl
+            - crewman
+            - dairymaid
+            - dairyman
+            - day laborer
+            - deliveryman
+            - demonstrator
+            - desk clerk
+            - digger
+            - dining-room attendant
+            - dishwasher
+            - dispatcher
+            - ditch digger
+            - dog catcher
+            - double dipper
+            - drudge
+            - earner
+            - excavator
+            - farmerette
+            - farmhand
+            - fellah
+            - file clerk
+            - floater
+            - floorwalker
+            - forty-niner
+            - fuller
+            - gandy dancer
+            - gardener
+            - garnishee
+            - gas fitter
+            - gasman
+            - gaucho
+            - gleaner
+            - goat herder
+            - gofer
+            - gold miner
+            - gravedigger
+            - grocery boy
+            - groundsman
+            - guest worker
+            - harvester
+            - heaver
+            - hedger
+            - herder
+            - hewer
+            - hire
+            - hired hand
+            - hired help
+            - hireling
+            - hod carrier
+            - horse wrangler
+            - housewrecker
+            - iceman
+            - itinerant
+            - jobholder
+            - kitchen help
+            - knacker
+            - laborer
+            - lacer
+            - lather
+            - line worker
+            - liveryman
+            - lumberman
+            - mailman
+            - midinette
+            - milkman
+            - mill-girl
+            - mill-hand
+            - miner
+            - mover
+            - muleteer
+            - office boy
+            - organization man
+            - packer
+            - paper-pusher
+            - paperboy
+            - paster
+            - peasant
+            - penpusher
+            - picker
+            - pitchman
+            - placer miner
+            - platelayer
+            - plotter
+            - plowman
+            - porter
+            - postal clerk
+            - potboy
+            - property man
+            - prospector
+            - public servant
+            - publican
+            - rail-splitter
+            - ranch hand
+            - rat-catcher
+            - redcap
+            - registrar
+            - remover
+            - roadman
+            - room clerk
+            - roper
+            - roundsman
+            - salesclerk
+            - salesgirl
+            - salesman
+            - salesperson
+            - sandwichman
+            - sawyer
+            - sceneshifter
+            - scorer
+            - scourer
+            - scratcher
+            - section hand
+            - settler
+            - sharecropper
+            - shearer
+            - sheepherder
+            - shepherdess
+            - shipping clerk
+            - shop boy
+            - shop girl
+            - signalman
+            - skycap
+            - social worker
+            - soda jerk
+            - sommelier
+            - sorter
+            - sourdough
+            - sponger
+            - spotter
+            - sprayer
+            - stableman
+            - stacker
+            - staff member
+            - stagehand
+            - stamper
+            - steeplejack
+            - stevedore
+            - stocktaker
+            - stoker
+            - street cleaner
+            - strip miner
+            - swagman
+            - sweeper
+            - swineherd
+            - tallyman
+            - tapster
+            - timekeeper
+            - tinker
+            - tollkeeper
+            - touch-typist
+            - trainman
+            - traveling salesman
+            - trencher
+            - turncock
+            - typist
+            - utility man
+            - vaquero
+            - vintager
+            - waiter
+            - waitress
+            - warehouser
+            - waterer
+            - weeder
+            - wetter
+            - window cleaner
+            - woodcutter
+            - workman
+            - wrecker
+            - yardman
+            - yardmaster
+          temp: # instruction: a worker (especially in an office) hired on a temporary basis
+            - temp
+          wiper: # instruction: a worker who wipes
+            - wiper
+          mopper: # instruction: a worker who uses a mop to clean a surface
+            - mopper
+          pruner: # instruction: a worker who thins out and trims trees and shrubs
+            - pruner
+          comber: # instruction: a person who separates and straightens the fibers of cotton or wool
+            - comber
+          throwster: # instruction: a person who twists silk or rayon filaments into a thread or yarn
+            - throwster
+          ragsorter: # instruction: a worker who sorts rags and old clothing for new uses (as in papermaking)
+            - ragsorter
+          tacker: # instruction: a worker who fastens things by tacking them (as with tacks or by spotwelding)
+            - tacker
+          melter: # instruction: a worker who melts substances (metal or wax etc.)
+            - melter
+          caster: # instruction: a worker who casts molten metal into finished products
+            - caster
+          solderer: # instruction: a worker who joins or mends with solder
+            - solderer
+          tiler: # instruction: a worker who lays tile
+            - tiler
+          splitter: # instruction: a worker who splits fish and removes the backbone
+            - splitter
+        nonmember: # instruction: a person who is not a member
+          - nonmember
+        bodybuilder: # instruction: someone who does special exercises to develop a brawny musculature
+          - bodybuilder
+        closer: # instruction: a person who closes something
+          - closer
+        masturbator: # instruction: a person who practices masturbation
+          - frotteur
+          - tosser
+        smasher: # instruction: a person who smashes something
+          - smasher
+        registrant: # instruction: a person who is formally entered (along with others) in a register (and who obtains certain rights thereby)
+          - registrant
+        affiant: # instruction: a person who makes an affidavit
+          - affiant
+        neglecter: # instruction: a person who is neglectful and gives little attention or respect to people or responsibilities
+          - neglecter
+        spitter: # instruction: a person who spits (ejects saliva or phlegm from the mouth)
+          - spitter
+        juvenile: # instruction: a young person, not fully developed
+          - adolescent
+          - bairn
+          - blade
+          - boarder
+          - buster
+          - changeling
+          - chebab
+          - child
+          - child prodigy
+          - day boarder
+          - dayboy
+          - daygirl
+          - foster-child
+          - foster-daughter
+          - foster-son
+          - gamine
+          - hobbledehoy
+          - imp
+          - ingenue
+          - kiddy
+          - latchkey child
+          - mod
+          - orphan
+          - pachuco
+          - peanut
+          - pickaninny
+          - poster boy
+          - poster child
+          - poster girl
+          - preschooler
+          - preteen
+          - punk rocker
+          - puppy
+          - ragamuffin
+          - rocker
+          - schoolboy
+          - schoolchild
+          - silly
+          - slip
+          - sprog
+          - street arab
+          - street urchin
+          - terror
+          - toddler
+          - urchin
+          - waif
+          - young buck
+          - young person
+        warrior: # instruction: someone engaged in or experienced in warfare
+          - Crusader
+          - Maquis
+          - brave
+          - centurion
+          - guerrilla
+          - samurai
+          - urban guerrilla
+        domestic partner: # instruction: a person (not necessarily a spouse) with whom you cohabit and share a long-term sexual relationship
+          - battle-ax
+          - benedick
+          - bigamist
+          - bride
+          - concubine
+          - consort
+          - crown princess
+          - cuckold
+          - family man
+          - fancy man
+          - first lady
+          - golf widow
+          - groom
+          - helpmate
+          - honest woman
+          - house husband
+          - housewife
+          - husband
+          - lover
+          - man
+          - marchioness
+          - matron
+          - mayoress
+          - missus
+          - mistress
+          - monogamist
+          - newlywed
+          - odalisque
+          - old lady
+          - polyandrist
+          - polygamist
+          - polygynist
+          - prince consort
+          - sheika
+          - signora
+          - spouse
+          - trophy wife
+          - uxor
+          - uxoricide
+          - vicereine
+          - viscountess
+          - war bride
+          - wife
+          - wittol
+        advisee: # instruction: someone who receives advice
+          - advisee
+        thin person: # instruction: a person who is unusually thin and scrawny
+          - spindlelegs
+        gainer: # instruction: a person who gains weight
+          - gainer
+        compulsive: # instruction: a person with a compulsive disposition; someone who feels compelled to do certain things
+          - control freak
+          - exhibitionist
+          - perfectionist
+          - streaker
+          - workaholic
+        entertainer: # instruction: a person who tries to please or amuse
+          - Lord of Misrule
+          - Savoyard
+          - accompanist
+          - accordionist
+          - actor
+          - actress
+          - alto
+          - alto saxophonist
+          - artiste
+          - ballerina
+          - ballet dancer
+          - ballet master
+          - ballet mistress
+          - bandsman
+          - baritone
+          - barnstormer
+          - bass
+          - bassist
+          - bassoonist
+          - baton twirler
+          - bell ringer
+          - belly dancer
+          - bombshell
+          - bugler
+          - busker
+          - canary
+          - caricaturist
+          - carillonneur
+          - caroler
+          - castrato
+          - cellist
+          - character actor
+          - choirboy
+          - chorister
+          - chorus girl
+          - clarinetist
+          - clown
+          - co-star
+          - coloratura
+          - comedian
+          - comedienne
+          - compere
+          - contralto
+          - countertenor
+          - cowboy
+          - crooner
+          - cymbalist
+          - dancer
+          - dancing-master
+          - danseur
+          - drawing card
+          - drum majorette
+          - drummer
+          - end man
+          - escapologist
+          - executant
+          - film star
+          - fire walker
+          - fire-eater
+          - flutist
+          - folk singer
+          - gagman
+          - gambist
+          - geek
+          - guitarist
+          - ham
+          - harlequin
+          - harmonizer
+          - harpist
+          - harpsichordist
+          - headliner
+          - heartthrob
+          - heavy
+          - hoofer
+          - hornist
+          - hummer
+          - humorist
+          - idol
+          - ingenue
+          - interlocutor
+          - jazz musician
+          - jester
+          - joker
+          - juggler
+          - kachina
+          - keyboardist
+          - koto player
+          - leading lady
+          - leading man
+          - lieder singer
+          - lutist
+          - madrigalist
+          - magician
+          - master of ceremonies
+          - mezzo-soprano
+          - mime
+          - mind reader
+          - minstrel
+          - monologist
+          - musician
+          - nautch girl
+          - oboist
+          - opera star
+          - organist
+          - parodist
+          - percussionist
+          - performer
+          - pianist
+          - pipe major
+          - piper
+          - plant
+          - pleaser
+          - prima ballerina
+          - prima donna
+          - punster
+          - puppeteer
+          - question master
+          - rapper
+          - recitalist
+          - recorder player
+          - reenactor
+          - rhythm and blues musician
+          - ringmaster
+          - rock star
+          - rocker
+          - satirist
+          - saxophonist
+          - scene-stealer
+          - screen actor
+          - sightreader
+          - singer
+          - sitar player
+          - snake charmer
+          - soloist
+          - songster
+          - songstress
+          - soprano
+          - star
+          - starlet
+          - straight man
+          - stripper
+          - strongman
+          - supernumerary
+          - syncopator
+          - tap dancer
+          - taxi dancer
+          - television star
+          - tenor
+          - tenor saxophonist
+          - thrush
+          - toast mistress
+          - toastmaster
+          - top banana
+          - torch singer
+          - tragedian
+          - tragedienne
+          - trombonist
+          - trumpeter
+          - tympanist
+          - understudy
+          - upstager
+          - vaudevillian
+          - ventriloquist
+          - vibist
+          - violinist
+          - violist
+          - voice
+          - wag
+          - walk-on
+          - warbler
+          - whiteface
+          - xylophonist
+          - yodeller
+          - zany
+        hugger: # instruction: a person who hugs
+          - hugger
+        rich person: # instruction: a person who possesses great material wealth
+          - Croesus
+          - affluent
+          - billionaire
+          - fat cat
+          - man of means
+          - millionaire
+          - millionairess
+          - multi-billionaire
+          - nabob
+          - plutocrat
+          - toff
+        seeker: # instruction: someone making a search or inquiry
+          - finder
+          - forager
+          - gadabout
+          - hunter
+        planner: # instruction: a person who makes plans
+          - angler
+          - designer
+          - maneuverer
+          - market strategist
+          - politician
+          - schemer
+          - strategist
+          - tactician
+        acquirer: # instruction: a person who acquires something (usually permanently)
+          - Nobelist
+          - academician
+          - addressee
+          - alienee
+          - annuitant
+          - appropriator
+          - assignee
+          - beneficiary
+          - borrower
+          - charge
+          - co-beneficiary
+          - conferee
+          - consignee
+          - dependant
+          - devisee
+          - freeloader
+          - grantee
+          - heir
+          - heir apparent
+          - heir presumptive
+          - heir-at-law
+          - heiress
+          - honoree
+          - host
+          - kleptomaniac
+          - laureate
+          - legatee
+          - mandatary
+          - minion
+          - old-age pensioner
+          - payee
+          - pensioner
+          - poacher
+          - poet laureate
+          - preemptor
+          - procurer
+          - protege
+          - protegee
+          - recipient
+          - sendee
+          - transferee
+          - warrantee
+        applicant: # instruction: a person who requests or seeks something such as assistance or employment or admission
+          - Pretender
+          - aspirant
+          - besieger
+          - bidder
+          - claimant
+          - fundraiser
+          - job candidate
+          - material
+          - petitioner
+          - possible
+          - postulant
+          - probable
+          - solicitor
+          - submitter
+        amateur: # instruction: someone who pursues a study or sport as a pastime
+          - bird watcher
+          - dabbler
+          - hobbyist
+        sensualist: # instruction: a person who enjoys sensuality
+          - bisexual
+          - cocksucker
+          - epicure
+          - erotic
+          - hedonist
+          - hermaphrodite
+          - light-o'-love
+          - playboy
+          - pseudohermaphrodite
+          - switch-hitter
+          - voluptuary
+          - wanton
+        autodidact: # instruction: a person who has taught himself
+          - autodidact
+        tempter: # instruction: a person who tempts others
+          - tempter
+        snuffler: # instruction: a person who breathes noisily (as through a nose blocked by mucus)
+          - snuffler
+        neutral: # instruction: one who does not side with any party in a war or dispute
+          - fence-sitter
+          - stakeholder
+        abjurer: # instruction: a person who abjures
+          - abjurer
+        biter: # instruction: someone who bites
+          - nibbler
+        individualist: # instruction: a person who pursues independent thought or action
+          - dropout
+          - hermit
+          - loner
+          - mugwump
+          - night owl
+          - nudist
+          - withdrawer
+        bullfighter: # instruction: someone who fights bulls
+          - banderillero
+          - matador
+          - novillero
+          - picador
+          - torero
+        transvestite: # instruction: someone who adopts the dress or manner or sexual role of the opposite sex
+          - transvestite
+        adversary: # instruction: someone who offers opposition
+          - Luddite
+          - besieger
+          - dueler
+          - enemy
+          - withstander
+        wiggler: # instruction: one who can't stay still (especially a child)
+          - wiggler
+        yawner: # instruction: a person who yawns
+          - yawner
+        sneezer: # instruction: a person who sneezes
+          - sneezer
+        user: # instruction: a person who makes use of a thing; someone who uses or employs something
+          - alcoholic
+          - bar fly
+          - bargain hunter
+          - beer drinker
+          - big spender
+          - buyer
+          - chain-smoker
+          - chewer
+          - cigar smoker
+          - cigarette smoker
+          - concert-goer
+          - consumer
+          - customer
+          - customer agent
+          - cutter
+          - devourer
+          - diner
+          - drinker
+          - drunk
+          - drunk-and-disorderly
+          - drunkard
+          - drunken reveler
+          - dunker
+          - eater
+          - end user
+          - glutton
+          - gobbler
+          - guest
+          - gulper
+          - guzzler
+          - home buyer
+          - luncher
+          - moderationist
+          - mouth
+          - muncher
+          - mycophagist
+          - no-show
+          - nosher
+          - omnivore
+          - operagoer
+          - orderer
+          - overnighter
+          - patron
+          - picnicker
+          - pipe smoker
+          - policyholder
+          - prodigal
+          - quaffer
+          - regular
+          - scoffer
+          - shopaholic
+          - shopper
+          - sipper
+          - smoker
+          - snuffer
+          - spender
+          - spendthrift
+          - subscriber
+          - sucker
+          - tablemate
+          - taker
+          - tippler
+          - usufructuary
+          - utilizer
+          - vegan
+          - vegetarian
+          - warrantee
+          - wassailer
+          - wastrel
+          - wearer
+          - whoremaster
+        smiler: # instruction: a person who smiles
+          - simperer
+          - smirker
+        adult: # instruction: a fully developed person from maturity onward
+          - B-girl
+          - Bahai
+          - Black man
+          - Black woman
+          - Blackshirt
+          - Bourbon
+          - Brownshirt
+          - Casanova
+          - Cavalier
+          - Cinderella
+          - Colonel Blimp
+          - Counsel to the Crown
+          - Cyril
+          - Don
+          - Don Juan
+          - ENT man
+          - English teacher
+          - Esquire
+          - Excellency
+          - French teacher
+          - Gibson girl
+          - Gongorist
+          - Herr
+          - Hooray Henry
+          - Jack of all trades
+          - King's Counsel
+          - Lolita
+          - Lothario
+          - May queen
+          - Monsieur
+          - Nazi
+          - Orleanist
+          - Peter Pan
+          - Queen's Counsel
+          - Regius professor
+          - Rip van Winkle
+          - Senhor
+          - Surgeon General
+          - Tarzan
+          - Tory
+          - Wac
+          - Wave
+          - Whig
+          - abortionist
+          - academician
+          - adonis
+          - advocate
+          - alienist
+          - allergist
+          - amazon
+          - ambulance chaser
+          - amputator
+          - analyst
+          - ancient
+          - anesthesiologist
+          - angiologist
+          - armchair liberal
+          - art critic
+          - art teacher
+          - assistant professor
+          - associate professor
+          - babu
+          - baby
+          - baby doctor
+          - bachelor
+          - bachelor girl
+          - baggage
+          - ball-buster
+          - barrister
+          - battle-ax
+          - begum
+          - beldam
+          - belle
+          - bey
+          - big shot
+          - bimbo
+          - bluestocking
+          - bobbysoxer
+          - bonesetter
+          - boy
+          - boyfriend
+          - brachycephalic
+          - bridesmaid
+          - broad
+          - broth of a boy
+          - bull
+          - call girl
+          - camp follower
+          - capitalist
+          - cardiologist
+          - career girl
+          - career man
+          - careerist
+          - caregiver
+          - cat
+          - cataloger
+          - catch
+          - catechist
+          - celebrity
+          - centenarian
+          - centrist
+          - chachka
+          - chancellor
+          - character
+          - chiropodist
+          - chit
+          - city slicker
+          - clinician
+          - coach
+          - codger
+          - colleen
+          - colossus
+          - comfort woman
+          - concubine
+          - conformist
+          - conservative
+          - conveyancer
+          - coquette
+          - cosmetic surgeon
+          - cosmopolitan
+          - country doctor
+          - coxcomb
+          - craftsman
+          - crammer
+          - critic
+          - crown princess
+          - curmudgeon
+          - dame
+          - damsel
+          - dancing-master
+          - dandy
+          - dean
+          - debutante
+          - defense attorney
+          - demimondaine
+          - demonstrator
+          - dental surgeon
+          - dentist
+          - dermatologist
+          - diagnostician
+          - diplomate
+          - dirty old man
+          - district attorney
+          - divorce lawyer
+          - divorcee
+          - docent
+          - doctor
+          - dodderer
+          - dodo
+          - dolichocephalic
+          - dominatrix
+          - donna
+          - dotard
+          - dove
+          - dowager
+          - doyenne
+          - drama critic
+          - dry nurse
+          - ear doctor
+          - educator
+          - ejaculator
+          - elder
+          - elder statesman
+          - electrologist
+          - embryologist
+          - eminence grise
+          - enchantress
+          - endocrinologist
+          - endodontist
+          - etiologist
+          - eunuch
+          - ex-boyfriend
+          - ex-husband
+          - ex-spouse
+          - ex-wife
+          - exodontist
+          - extern
+          - eyeful
+          - falangist
+          - family doctor
+          - fascist
+          - fascista
+          - father figure
+          - father-figure
+          - fellow
+          - first lady
+          - fixer
+          - flapper
+          - flight surgeon
+          - foster-father
+          - foster-nurse
+          - fuddy-duddy
+          - full professor
+          - gal
+          - galoot
+          - games-master
+          - gamine
+          - gastroenterologist
+          - geezer
+          - geisha
+          - general practitioner
+          - gent
+          - gentleman
+          - gentleman-at-arms
+          - geometry teacher
+          - gerontologist
+          - girl
+          - girlfriend
+          - globetrotter
+          - gold digger
+          - golf widow
+          - good old boy
+          - governess
+          - graduate nurse
+          - grande dame
+          - granny
+          - grass widower
+          - gravida
+          - guy
+          - gynecologist
+          - hag
+          - hakim
+          - hardliner
+          - has-been
+          - hawk
+          - head nurse
+          - headmaster
+          - headmistress
+          - health professional
+          - heavy hitter
+          - hematologist
+          - heroine
+          - hierarch
+          - high-muck-a-muck
+          - homeopath
+          - honest woman
+          - horse doctor
+          - host
+          - hostess
+          - house physician
+          - housefather
+          - housemaster
+          - housewife
+          - hunk
+          - hygienist
+          - immortal
+          - important person
+          - inamorata
+          - inamorato
+          - inoculator
+          - instructress
+          - intern
+          - internist
+          - iron man
+          - ironside
+          - jezebel
+          - jilt
+          - kingmaker
+          - kingpin
+          - knocker
+          - lady
+          - lass
+          - latitudinarian
+          - law agent
+          - lawyer
+          - lector
+          - liberal
+          - librarian
+          - licensed practical nurse
+          - lion
+          - literary critic
+          - luminary
+          - macaroni
+          - madame
+          - maenad
+          - magnifico
+          - maid
+          - mammy
+          - man
+          - marchioness
+          - math teacher
+          - matriarch
+          - matron
+          - mayoress
+          - medical assistant
+          - medical officer
+          - medical practitioner
+          - mestiza
+          - middle-aged man
+          - midwife
+          - militarist
+          - mill-girl
+          - minimalist
+          - missionary
+          - missus
+          - mistress
+          - monarchist
+          - mossback
+          - mother
+          - mother figure
+          - music critic
+          - music teacher
+          - name
+          - nanny
+          - neoconservative
+          - neoliberal
+          - nepotist
+          - neurologist
+          - neurosurgeon
+          - newspaper critic
+          - nonagenarian
+          - nullipara
+          - nurse
+          - nurse practitioner
+          - nurse-midwife
+          - nymph
+          - nymphet
+          - obstetrician
+          - octogenarian
+          - odalisque
+          - old boy
+          - old lady
+          - old man
+          - old woman
+          - old-timer
+          - oldster
+          - oncologist
+          - one of the boys
+          - ophthalmologist
+          - orthodontist
+          - orthopedist
+          - orthoptist
+          - pacifist
+          - party girl
+          - patriarch
+          - patrician
+          - pawnbroker
+          - pedodontist
+          - peri
+          - perinatologist
+          - periodontist
+          - personality
+          - pharmacist
+          - pharmacologist
+          - piano teacher
+          - pledgee
+          - pledger
+          - pluralist
+          - policy maker
+          - ponce
+          - posseman
+          - power broker
+          - practitioner
+          - preceptor
+          - primary care physician
+          - primigravida
+          - principal
+          - probationer
+          - proctologist
+          - professional
+          - professor
+          - prosecutor
+          - prosthodontist
+          - prostitute
+          - psychiatrist
+          - public defender
+          - publisher
+          - quack
+          - radiographer
+          - radiologist
+          - reactionary
+          - reading teacher
+          - referee
+          - registered nurse
+          - rheumatologist
+          - riding master
+          - rightist
+          - ring girl
+          - rosebud
+          - sacred cow
+          - schoolmarm
+          - schoolmaster
+          - schoolteacher
+          - science teacher
+          - scrub nurse
+          - section man
+          - secundigravida
+          - septuagenarian
+          - serjeant-at-law
+          - sex kitten
+          - sexagenarian
+          - shaver
+          - sheika
+          - shiksa
+          - shop girl
+          - signor
+          - signora
+          - signore
+          - signorina
+          - sir
+          - sirdar
+          - slicker
+          - smasher
+          - sobersides
+          - socialite
+          - sod
+          - solicitor
+          - sophisticate
+          - soubrette
+          - soul brother
+          - specialist
+          - spinster
+          - square
+          - squaw man
+          - state's attorney
+          - stay-at-home
+          - stepfather
+          - stiff
+          - stoic
+          - storm trooper
+          - streetwalker
+          - stud
+          - sun
+          - supremo
+          - surgeon
+          - sweater girl
+          - sylph
+          - teacher
+          - teaching fellow
+          - tertigravida
+          - thoroughbred
+          - toast
+          - tomboy
+          - traditionalist
+          - trial attorney
+          - trophy wife
+          - unmarried woman
+          - urologist
+          - uxor
+          - valley girl
+          - very important person
+          - vestal
+          - veterinarian
+          - vicereine
+          - viscountess
+          - visiting nurse
+          - visiting professor
+          - war widow
+          - wet nurse
+          - white man
+          - white slave
+          - white woman
+          - widow
+          - widower
+          - wife
+          - wolf
+          - woman
+          - womanizer
+          - wonder boy
+          - wonder woman
+          - working girl
+          - worthy
+          - yellow man
+          - yellow woman
+          - young buck
+          - yuppie
+        percher: # instruction: a person situated on a perch
+          - percher
+        ostrich: # instruction: a person who refuses to face reality or recognize the truth (a reference to the popular notion that the ostrich hides from danger by burying its head in the sand)
+          - ostrich
+        picker: # instruction: a person who chooses or selects out
+          - picker
+        loved one: # instruction: a person who you love, usually a member of your family
+          - loved one
+        asthmatic: # instruction: a person suffering from asthma
+          - asthmatic
+        miracle man: # instruction: a person who claims or is alleged to perform miracles
+          - miracle man
+        disputant: # instruction: a person who disputes; who is good at or enjoys controversy
+          - Black Muslim
+          - Black Panther
+          - Chartist
+          - Green
+          - Utopian
+          - Young Turk
+          - abolitionist
+          - accuser
+          - birth-control campaigner
+          - civil rights leader
+          - contester
+          - counterdemonstrator
+          - debater
+          - demonstrator
+          - denier
+          - devil's advocate
+          - dry
+          - environmentalist
+          - feminist
+          - freedom rider
+          - hairsplitter
+          - hippie
+          - insurgent
+          - logomach
+          - militant
+          - mutineer
+          - naysayer
+          - non-resistant
+          - obstructionist
+          - picket
+          - preservationist
+          - quarreler
+          - rebutter
+          - reformer
+          - stonewaller
+          - suffragette
+          - technophobe
+          - tree hugger
+          - wrangler
+        shaker: # instruction: a person who wields power and influence
+          - shaker
+        visionary: # instruction: a person given to fanciful speculations and enthusiasms with little regard for what is actually possible
+          - Don Quixote
+          - idealist
+          - romantic
+        combatant: # instruction: someone who fights (or is fighting)
+          - bantamweight
+          - boxer
+          - brawler
+          - butter
+          - conqueror
+          - defender
+          - featherweight
+          - fencer
+          - flyweight
+          - gladiator
+          - gouger
+          - heavyweight
+          - hell-kite
+          - junior featherweight
+          - junior lightweight
+          - junior middleweight
+          - junior welterweight
+          - light flyweight
+          - light heavyweight
+          - light middleweight
+          - light welterweight
+          - lightweight
+          - mauler
+          - middleweight
+          - prizefighter
+          - puncher
+          - skirmisher
+          - slugger
+          - sparring partner
+          - street fighter
+          - stumblebum
+          - subjugator
+          - sumo wrestler
+          - super heavyweight
+          - victor
+          - welterweight
+          - wrestler
+        Virgo: # instruction: (astrology) a person who is born while the sun is in Virgo
+          - Virgo
+        fugitive: # instruction: someone who flees from an uncongenial situation
+          - fugitive
+        good guy: # instruction: any person who is on your side
+          - good guy
+        endomorph: # instruction: a heavy person with a soft and rounded body
+          - pudge
+        ethnic: # instruction: a person who is a member of an ethnic group
+          - ethnic
+        mesomorph: # instruction: a person with a well-developed muscular body
+          - mesomorph
+      theurgy: # instruction: the effect of supernatural or divine intervention in human affairs
+        - theurgy
