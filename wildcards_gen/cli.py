@@ -38,8 +38,35 @@ def get_api_key() -> Optional[str]:
     return os.environ.get('OPENROUTER_API_KEY')
 
 
+# Smart presets: (min_depth, min_hyponyms, min_leaf, merge_orphans)
+SMART_PRESETS = {
+    "ultra-detailed": (8, 5, 1, False),
+    "detailed": (6, 10, 3, False),
+    "balanced": (4, 50, 5, False),
+    "compact": (3, 100, 8, True),
+    "flat": (2, 500, 10, True),
+    "ultra-flat": (1, 1000, 20, True),
+}
+
+
+def apply_smart_preset(args):
+    """Apply preset values to args, with explicit flags taking precedence."""
+    preset_name = getattr(args, 'preset', None)
+    defaults = SMART_PRESETS.get(preset_name, SMART_PRESETS['balanced'])
+    
+    if getattr(args, 'min_depth', None) is None:
+        args.min_depth = defaults[0]
+    if getattr(args, 'min_hyponyms', None) is None:
+        args.min_hyponyms = defaults[1]
+    if getattr(args, 'min_leaf', None) is None:
+        args.min_leaf = defaults[2]
+    if getattr(args, 'merge_orphans', None) is None:
+        args.merge_orphans = defaults[3]
+
+
 def cmd_dataset_imagenet(args):
     """Handle imagenet subcommand."""
+    apply_smart_preset(args)
     hierarchy = generate_imagenet_tree(
         root_synset_str=args.root,
         max_depth=args.depth,
@@ -73,6 +100,7 @@ def cmd_dataset_coco(args):
 
 def cmd_dataset_openimages(args):
     """Handle openimages subcommand."""
+    apply_smart_preset(args)
     hierarchy = generate_openimages_hierarchy(
         max_depth=args.depth,
         with_glosses=not args.no_glosses,
@@ -91,6 +119,7 @@ def cmd_dataset_openimages(args):
 
 def cmd_dataset_tencent(args):
     """Handle tencent subcommand."""
+    apply_smart_preset(args)
     hierarchy = generate_tencent_hierarchy(
         max_depth=args.depth,
         with_glosses=not args.no_glosses,
@@ -227,10 +256,12 @@ def main():
     
     def add_smart_args(parser):
         parser.add_argument('--smart', action='store_true', help='Use semantic significance pruning (ignoring --depth)')
-        parser.add_argument('--min-depth', type=int, default=6, help='[Smart] Max WordNet depth for significance (lower = more fundamental categories)')
-        parser.add_argument('--min-hyponyms', type=int, default=10, help='[Smart] Min descendants to keep as category (higher = fewer, larger categories)')
-        parser.add_argument('--min-leaf', type=int, default=3, help='[Smart] Min items per leaf list (smaller lists are merged upward)')
-        parser.add_argument('--merge-orphans', action='store_true', help='[Smart] Merge small pruned lists into parent misc category')
+        parser.add_argument('--preset', choices=list(SMART_PRESETS.keys()), default=None,
+                            help='Smart tuning preset (sets defaults for other smart args)')
+        parser.add_argument('--min-depth', type=int, default=None, help='[Smart] Max WordNet depth for significance (lower = more fundamental categories)')
+        parser.add_argument('--min-hyponyms', type=int, default=None, help='[Smart] Min descendants to keep as category (higher = fewer, larger categories)')
+        parser.add_argument('--min-leaf', type=int, default=None, help='[Smart] Min items per leaf list (smaller lists are merged upward)')
+        parser.add_argument('--merge-orphans', action='store_true', default=None, help='[Smart] Merge small pruned lists into parent misc category')
 
     # ImageNet
     p_imagenet = dataset_sub.add_parser('imagenet', help='ImageNet (WordNet-based) hierarchy')

@@ -79,21 +79,24 @@ def build_tree_recursive(
     strict_filter: bool = True,
     blacklist_abstract: bool = False,
     smart_config: Any = None
-) -> bool:
+) -> tuple:
     """
     Recursively build hierarchy tree from a synset.
+    
+    Returns:
+        Tuple[bool, List[str]]: (success, orphans_to_bubble_up)
     """
     name = get_synset_name(synset)
     
     # Blacklist check
     if blacklist_abstract and is_abstract_category(synset):
-        return False
+        return (False, [])
     
     # Strict primary synset check
     if strict_filter:
         primary = get_primary_synset(name)
         if primary and primary != synset:
-            return False
+            return (False, [])
             
     # Get instruction from gloss
     instruction = get_synset_gloss(synset) if with_glosses else None
@@ -122,46 +125,55 @@ def build_tree_recursive(
     if should_flatten:
         descendants = get_all_descendants(synset, valid_wnids)
         if descendants:
-            # Smart Mode: Min leaf size check
+            # Smart Mode: Min leaf size check with orphan bubbling
             if smart_config and smart_config.enabled:
                 if len(descendants) < smart_config.min_leaf_size:
-                    # Merge upward (return False to indicate no category created here)
-                    # Use add_leaf_list logic but return False?
-                    # Wait, if we return False, the parent sees no children.
-                    # BUT we want to pass the leaves up.
-                    # StructureManager doesn't support "passing up".
-                    # We have to just skip creating *this* category, 
-                    # but we can't easily merge 20 items into parent's other items in this recursive structure.
-                    # Compromise: If heavily pruned, just don't output it?
-                    # Or treat it as a leaf node with values.
-                    pass
+                    if smart_config.merge_orphans:
+                        # Bubble up as orphans
+                        return (False, descendants)
+                    # Otherwise, keep as small list (100% retention)
             
             structure_mgr.add_leaf_list(parent, name, descendants, instruction)
-            return True
+            return (True, [])
         elif valid_wnids is None or is_in_valid_set(synset, valid_wnids):
             structure_mgr.add_leaf_list(parent, name, [name], instruction)
-            return True
-        return False
+            return (True, [])
+        return (False, [])
     
     # Branch Logic (Not Flattened)
     if not children:
         # Leaf node
         if valid_wnids is None or is_in_valid_set(synset, valid_wnids):
             structure_mgr.add_leaf_list(parent, name, [name], instruction)
-            return True
-        return False
+            return (True, [])
+        return (False, [])
     
     # Create category for this node
     child_map = CommentedMap()
     has_valid_children = False
+    collected_orphans = []
     
     for child in children:
-        if build_tree_recursive(
+        success, orphans = build_tree_recursive(
             child, structure_mgr, child_map, valid_wnids,
             depth + 1, max_depth, with_glosses, strict_filter, blacklist_abstract,
             smart_config
-        ):
+        )
+        if success:
             has_valid_children = True
+        if orphans:
+            collected_orphans.extend(orphans)
+    
+    # Handle collected orphans - add to misc key
+    if collected_orphans and smart_config and smart_config.merge_orphans:
+        collected_orphans = sorted(list(set(collected_orphans)))
+        if 'misc' in child_map:
+            # Merge with existing misc
+            existing = list(child_map['misc']) if child_map['misc'] else []
+            child_map['misc'] = sorted(list(set(existing + collected_orphans)))
+        else:
+            child_map['misc'] = collected_orphans
+        has_valid_children = True
     
     if has_valid_children:
         parent[name] = child_map
@@ -170,12 +182,12 @@ def build_tree_recursive(
                 parent.yaml_add_eol_comment(f"instruction: {instruction}", name)
             except Exception:
                 pass
-        return True
+        return (True, [])
     elif valid_wnids is None or is_in_valid_set(synset, valid_wnids):
         structure_mgr.add_leaf_list(parent, name, [name], instruction)
-        return True
+        return (True, [])
     
-    return False
+    return (False, [])
 
 
 def generate_imagenet_tree(
