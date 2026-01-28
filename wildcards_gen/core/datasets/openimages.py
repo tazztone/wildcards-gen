@@ -137,6 +137,7 @@ def build_wordnet_hierarchy(
 
         # Recursive function to convert synset_tree to CommentedMap
         def build_recursive(wnid, parent_map, depth):
+            """Returns (success, orphans) tuple."""
             node = synset_tree[wnid]
             synset = node['synset']
             name = get_synset_name(synset) if synset else wnid.capitalize()
@@ -163,29 +164,54 @@ def build_wordnet_hierarchy(
                 collect_labels(wnid)
                 
                 if all_labels:
-                    structure_mgr.add_leaf_list(parent_map, name, sorted(list(set(all_labels))), instruction)
+                    unique_labels = sorted(list(set(all_labels)))
+                    # Min leaf size check with orphan bubbling
+                    if len(unique_labels) < smart_config.min_leaf_size:
+                        if smart_config.merge_orphans:
+                            return (False, unique_labels)
+                        # Otherwise keep as small list
+                    structure_mgr.add_leaf_list(parent_map, name, unique_labels, instruction)
+                    return (True, [])
+                return (False, [])
             else:
                 # Create category
                 child_map = CommentedMap()
+                collected_orphans = []
                 # Sort children by name
                 sorted_children = sorted(list(node['children']), key=lambda w: get_synset_name(synset_tree[w]['synset']) if synset_tree[w]['synset'] else w)
                 
+                has_valid_children = False
                 for child_wnid in sorted_children:
-                    build_recursive(child_wnid, child_map, depth + 1)
+                    success, orphans = build_recursive(child_wnid, child_map, depth + 1)
+                    if success:
+                        has_valid_children = True
+                    if orphans:
+                        collected_orphans.extend(orphans)
                 
-                # Add labels directly attached to this synset as a "Misc" or similar?
-                # Actually, in WordNet, labels are usually at the leaves.
-                # If there are labels here, add them.
+                # Handle collected orphans - add to misc key
+                if collected_orphans and smart_config.merge_orphans:
+                    collected_orphans = sorted(list(set(collected_orphans)))
+                    if 'misc' in child_map:
+                        existing = list(child_map['misc']) if child_map['misc'] else []
+                        child_map['misc'] = sorted(list(set(existing + collected_orphans)))
+                    else:
+                        child_map['misc'] = collected_orphans
+                    has_valid_children = True
+                
+                # Add labels directly attached to this synset
                 if node['labels']:
                     structure_mgr.add_leaf_list(child_map, f"Other {name}", sorted(node['labels']), f"Additional {name} items")
+                    has_valid_children = True
                 
-                if child_map:
+                if has_valid_children and child_map:
                     parent_map[name] = child_map
                     if instruction:
                         try:
                             parent_map.yaml_add_eol_comment(f"instruction: {instruction}", name)
                         except Exception:
                             pass
+                    return (True, [])
+                return (False, [])
         
         # Start from roots (nodes with parent None)
         roots = [wnid for wnid, n in synset_tree.items() if n['parent'] is None]
@@ -222,9 +248,12 @@ def parse_hierarchy_node(
     max_depth: int,
     with_glosses: bool = True,
     smart_config: Any = None
-) -> None:
+) -> tuple:
     """
     Recursively parse an Open Images hierarchy node.
+    
+    Returns:
+        Tuple[bool, List[str]]: (success, orphans_to_bubble_up)
     """
     label_id = node.get('LabelName')
     name = id_to_name.get(label_id, label_id)
@@ -276,49 +305,65 @@ def parse_hierarchy_node(
     if sub_key and not should_flatten:
         # Has children - create nested structure
         child_map = CommentedMap()
+        collected_orphans = []
         
-        valid_children_count = 0
+        has_valid_children = False
         for subcat in child_nodes:
-            parse_hierarchy_node(
+            success, orphans = parse_hierarchy_node(
                 subcat, id_to_name, structure_mgr, child_map,
                 depth + 1, max_depth, with_glosses, smart_config
             )
-            valid_children_count += 1
+            if success:
+                has_valid_children = True
+            if orphans:
+                collected_orphans.extend(orphans)
         
-        # If all children were pruned away/merged, we might become empty.
-        # But StructureManager logic in sub-calls handles adding to our child_map.
+        # Handle collected orphans - add to misc key
+        if collected_orphans and smart_config and smart_config.merge_orphans:
+            collected_orphans = sorted(list(set(collected_orphans)))
+            if 'misc' in child_map:
+                existing = list(child_map['misc']) if child_map['misc'] else []
+                child_map['misc'] = sorted(list(set(existing + collected_orphans)))
+            else:
+                child_map['misc'] = collected_orphans
+            has_valid_children = True
         
-        if child_map:
+        if has_valid_children and child_map:
             parent[name] = child_map
             if instruction:
                 try:
                     parent.yaml_add_eol_comment(f"instruction: {instruction}", name)
                 except Exception:
                     pass
+            return (True, [])
         else:
-            # If we became empty (e.g. all children filtered), enforce leaf rule?
-            # OpenImages is explicit, so we usually just fallback to treating self as leaf.
+            # If we became empty, treat self as leaf
             structure_mgr.add_leaf_list(parent, name, [name], instruction)
+            return (True, [])
             
     # Branch 2: Flatten / Prune
     elif sub_key and should_flatten:
         # Flatten all descendants
         leaves = collect_leaves_from_node(node, id_to_name)
         
-        # Smart Mode: Min leaf check
+        # Smart Mode: Min leaf check with orphan bubbling
         if smart_config and smart_config.enabled:
-             if len(leaves) < smart_config.min_leaf_size:
-                 return # Skip entirely (merge up)
+            if len(leaves) < smart_config.min_leaf_size:
+                if smart_config.merge_orphans:
+                    return (False, leaves)
+                # Otherwise keep as small list
         
         if leaves:
             structure_mgr.add_leaf_list(parent, name, leaves, instruction)
         else:
             structure_mgr.add_leaf_list(parent, name, [name], instruction)
+        return (True, [])
     
     # Branch 3: Leaf Node
     else:
         # Leaf node
         structure_mgr.add_leaf_list(parent, name, [name], instruction)
+        return (True, [])
 
 
 def collect_leaves_from_node(

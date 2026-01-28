@@ -325,10 +325,28 @@ def launch_gui(share=False):
                         
                         with gr.Accordion("Smart Tuning Parameters", open=True, visible=False) as smart_tuning_group:
                             gr.Markdown("_Smart Mode uses WordNet to analyze semantic importance. Adjust these to control granularity._")
+                            # Universal presets: (min_depth, min_hyponyms, min_leaf, merge_orphans)
                             SMART_PRESETS = {
+                                "Ultra-Detailed": (8, 5, 1, False),
                                 "Detailed": (6, 10, 3, False),
                                 "Balanced": (4, 50, 5, False),
-                                "Flat": (2, 500, 10, True)
+                                "Compact": (3, 100, 8, True),
+                                "Flat": (2, 500, 10, True),
+                                "Ultra-Flat": (1, 1000, 20, True),
+                            }
+                            # Dataset-specific overrides (dataset_name -> preset_name -> values)
+                            DATASET_PRESET_OVERRIDES = {
+                                "Open Images": {
+                                    "Balanced": (4, 50, 5, True),  # Force merge orphans
+                                    "Compact": (3, 100, 10, True),
+                                },
+                                "Tencent ML-Images": {
+                                    "Balanced": (4, 30, 5, True),  # Denser hierarchy
+                                    "Compact": (3, 80, 8, True),
+                                },
+                                "ImageNet": {
+                                    # ImageNet works well with defaults
+                                },
                             }
                             ds_smart_preset = gr.Radio(list(SMART_PRESETS.keys()), label="Preset", value="Balanced")
                             ds_min_depth = gr.Slider(0, 10, value=4, step=1, label="Significance Depth", info="Nodes shallower than this (close to root) are forced to be categories.")
@@ -336,11 +354,17 @@ def launch_gui(share=False):
                             ds_min_leaf = gr.Slider(1, 100, value=5, step=1, label="Min Leaf Size", info="Minimum items to keep a list. Valid lists smaller than this are merged up.")
                             ds_merge_orphans = gr.Checkbox(label="Merge Orphans", value=False, info="If checked, small lists are merged into a 'misc' key in the parent; otherwise they are kept as-is.")
                             
-                            def apply_smart_preset(p):
+                            def apply_smart_preset(p, dataset_name):
+                                # Check dataset-specific overrides first
+                                if dataset_name in DATASET_PRESET_OVERRIDES:
+                                    overrides = DATASET_PRESET_OVERRIDES[dataset_name]
+                                    if p in overrides:
+                                        return overrides[p]
+                                # Fall back to universal presets
                                 if p in SMART_PRESETS:
                                     return SMART_PRESETS[p]
                                 return [gr.update()]*4                            
-                            ds_smart_preset.change(apply_smart_preset, inputs=[ds_smart_preset], outputs=[ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_merge_orphans])
+                            ds_smart_preset.change(apply_smart_preset, inputs=[ds_smart_preset, ds_name], outputs=[ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_merge_orphans])
                         
                         with gr.Accordion("Advanced Filtering (ImageNet)", open=False, visible=True) as adv_filter_group:
                             ds_filter = gr.Dropdown(["none", "1k", "21k"], label="Sub-Filter", value="none")

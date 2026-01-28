@@ -107,6 +107,7 @@ When using `--smart`, you can fine-tune what becomes a category vs. what gets fl
 
 | Flag | Default | Effect |
 |------|---------|--------|
+| `--preset` | `balanced` | Quick tune: `ultra-detailed`, `detailed`, `balanced`, `compact`, `flat`, `ultra-flat` |
 | `--min-depth` | `6` | Nodes shallower than this in WordNet are always kept as categories. **Lower = fewer top-level categories** |
 | `--min-hyponyms` | `10` | Nodes with more descendants than this are kept as categories. **Higher = more flattening** |
 | `--min-leaf` | `3` | Minimum items per leaf list. Smaller lists are kept as-is (or merged with `--merge-orphans`) |
@@ -116,22 +117,25 @@ When using `--smart`, you can fine-tune what becomes a category vs. what gets fl
 
 ```bash
 # Default: Detailed hierarchy (~10k lines, ~2000 categories)
-wildcards-gen dataset tencent --smart -o output/skeleton_detailed.yaml
+wildcards-gen dataset tencent --smart --preset detailed -o output/skeleton_detailed.yaml
 
 # Balanced: Good for most use cases (~5k lines, ~500 categories)
-wildcards-gen dataset tencent --smart --min-depth 4 --min-hyponyms 50 -o output/skeleton_balanced.yaml
+wildcards-gen dataset tencent --smart --preset balanced -o output/skeleton_balanced.yaml
 
 # Flat: Minimal categories, maximum flattening (~2k lines, ~50 categories)
-wildcards-gen dataset tencent --smart --min-depth 2 --min-hyponyms 500 --merge-orphans -o output/skeleton_flat.yaml
+wildcards-gen dataset tencent --smart --preset flat -o output/skeleton_flat.yaml
 ```
 
 ##### Output Comparison
 
-| Preset | `--min-depth` | `--min-hyponyms` | Categories | Lines |
-|--------|---------------|------------------|------------|-------|
-| Detailed | 6 | 10 | ~2000 | ~10k |
-| Balanced | 4 | 50 | ~500 | ~5k |
-| Flat | 2 | 500 | ~50 | ~2k |
+| Preset | `--min-depth` | `--min-hyponyms` | `--min-leaf` | Merge Orphans |
+|--------|---------------|------------------|--------------|---------------|
+| `ultra-detailed` | 8 | 5 | 1 | No |
+| `detailed` | 6 | 10 | 3 | No |
+| `balanced` | 4 | 50 | 5 | No |
+| `compact` | 3 | 100 | 8 | Yes |
+| `flat` | 2 | 500 | 10 | Yes |
+| `ultra-flat` | 1 | 1000 | 20 | Yes |
 
 > [!TIP]
 > **Smart Mode** is also available for `imagenet` and `openimages` commands!

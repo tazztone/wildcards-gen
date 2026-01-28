@@ -51,13 +51,14 @@ The `LLMEngine` interacts with OpenRouter using specific prompt templates locate
 *   **Enrichment**: A targeted prompt that tells the LLM to "fill in the gaps" for any keys missing an `# instruction:` comment.
 *   **Cleaning**: The tool aggressively strips markdown code blocks (````yaml`, ` ``` `) from responses to prevent YAML parsing errors.
 
-*   **`wildcards_gen/cli.py`**: The single entry point. Defined using `argparse`. Now includes `gui` subcommand.
-*   **`wildcards_gen/gui.py`**: Gradio-based web interface for dataset generation.
+*   **`wildcards_gen/cli.py`**: The single entry point. Defined using `argparse`. Now includes `gui` subcommand and `SMART_PRESETS`.
+*   **`wildcards_gen/gui.py`**: Gradio-based web interface. Includes `SMART_PRESETS` and `DATASET_PRESET_OVERRIDES` to customize defaults per dataset (e.g. OpenImages uses merge_orphans=True by default).
 *   **`wildcards_gen/core/`**:
     *   `config.py`: Hierarchical configuration manager (CLI > Local > User > Env > Defaults).
     *   `structure.py`: Wrapper for `ruamel.yaml` logic.
     *   `llm.py`: OpenRouter interaction. Includes `_clean_response()` to fix markdown issues. Default model: `google/gemma-3-27b-it:free`.
     *   `wordnet.py`: NLTK WordNet wrappers.
+    *   `smart.py`: Common logic for semantic pruning and leaf bubbling.
     *   `datasets/`: Logic for specific datasets (ImageNet, COCO, OpenImages, Tencent).
 
 ## Maintenance & Contribution
@@ -86,4 +87,7 @@ When a command like `wildcards-gen dataset tencent` is run, the backend follows 
 *   **Unified CLI**: Managing one tool is significantly easier than multiple scripts.
 *   **Duplicate Wildcard Fix**: Resolved the `nose: - nose` issue by implementing strict self-reference filtering and empty-key output for leaves.
 *   **Smart Semantic Logic**: Added WordNet-based depth and hyponym analysis to produce "meaningful" categories instead of arbitrary depth truncation.
+*   **Smart Presets (Jan 28)**: Added 6 universal presets (`Ultra-Detailed` to `Ultra-Flat`) in both CLI (`--preset`) and GUI to simplify tuning.
+*   **Orphan Bubbling (Jan 28)**: Fixed `min_leaf` logic in ImageNet/OpenImages to bubble small lists up to parent `misc:` key (matching Tencent logic) instead of discarding them.
+*   **Dataset Overrides**: GUI now supports per-dataset preset overrides (e.g. OpenImages defaults to `merge_orphans=True` for better structure).
 *   **Usability Improvements**: Implemented case-insensitive alphabetical sorting across all datasets to improve manual navigability.
