@@ -80,7 +80,8 @@ def cmd_dataset_openimages(args):
         min_significance_depth=args.min_depth,
         min_hyponyms=args.min_hyponyms,
         min_leaf_size=args.min_leaf,
-        merge_orphans=getattr(args, 'merge_orphans', False)
+        merge_orphans=getattr(args, 'merge_orphans', False),
+        bbox_only=args.bbox_only
     )
     
     mgr = StructureManager()
@@ -254,6 +255,7 @@ def main():
     p_oi = dataset_sub.add_parser('openimages', help='Open Images hierarchy')
     p_oi.add_argument('--depth', type=int, default=config.get("generation.default_depth"))
     p_oi.add_argument('--no-glosses', action='store_true')
+    p_oi.add_argument('--bbox-only', action='store_true', help='Use only the 600 bounding-box labels (default: full 20k labels)')
     add_smart_args(p_oi)
     p_oi.add_argument('-o', '--output', default=os.path.join(config.output_dir, 'openimages.yaml'))
     p_oi.set_defaults(func=cmd_dataset_openimages)
