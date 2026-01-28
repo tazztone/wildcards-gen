@@ -19,6 +19,10 @@ def mock_wn_fixture():
         mock_synset = MagicMock()
         mock_synset.name.return_value = 'dog.n.01'
         mock_synset.definition.return_value = 'a domestic animal'
+        mock_synset.pos.return_value = 'n'
+        mock_synset.offset.return_value = 12345
+        mock_synset.min_depth.return_value = 5
+        mock_synset.hypernym_paths.return_value = [[mock_synset]] # Path to self for simple mock
         
         lemma_mock = MagicMock()
         lemma_mock.name.return_value = 'dog'
@@ -63,7 +67,7 @@ def test_coco_generation():
         assert 'bicycle' in structure['vehicle']
         assert 'car' in structure['vehicle']
 
-def test_openimages_generation():
+def test_openimages_generation_legacy():
     # Mock data loading
     mock_hierarchy = {
         "LabelName": "/m/root",
@@ -78,9 +82,35 @@ def test_openimages_generation():
          patch('wildcards_gen.core.datasets.openimages.get_primary_synset'), \
          patch('wildcards_gen.core.datasets.openimages.get_synset_gloss'):
          
-        structure = openimages.generate_openimages_hierarchy(max_depth=2)
+        # Test legacy mode explicitly
+        structure = openimages.generate_openimages_hierarchy(max_depth=2, bbox_only=True)
         
-        # Should detect children and create structure
         assert 'Cat1' in structure or ('Entity' in structure and 'Cat1' in structure['Entity'])
-        # Current logic might skip root 'Entity' wrapper if not explicit? 
-        # Actually parse_hierarchy_node handles root special case.
+
+def test_openimages_generation_full(mock_wn_fixture):
+    # Mock data loading
+    mock_names = {"/m/cat1": "Dog"}
+    
+    with patch('wildcards_gen.core.datasets.openimages.load_openimages_data', return_value=(None, mock_names)), \
+         patch('wildcards_gen.core.datasets.openimages.get_synset_gloss', return_value="gloss"):
+         
+        # Test full mode (default)
+        # We need to make sure build_wordnet_hierarchy works
+        structure = openimages.generate_openimages_hierarchy(bbox_only=False)
+        
+        # In simple non-smart mode, it creates a flat "OpenImages Full" list
+        assert 'OpenImages Full' in structure
+        assert 'Dog' in structure['OpenImages Full']
+
+def test_openimages_generation_full_smart(mock_wn_fixture):
+    # Mock data loading
+    mock_names = {"/m/cat1": "Dog"}
+    
+    with patch('wildcards_gen.core.datasets.openimages.load_openimages_data', return_value=(None, mock_names)), \
+         patch('wildcards_gen.core.datasets.openimages.get_synset_gloss', return_value="gloss"):
+         
+        # In smart mode, it should build a WordNet hierarchy
+        structure = openimages.generate_openimages_hierarchy(smart=True, bbox_only=False)
+        
+        # With our mock_synset name 'dog.n.01', it should result in 'dog' category or list
+        assert 'dog' in structure

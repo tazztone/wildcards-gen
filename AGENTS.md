@@ -80,7 +80,7 @@ When a command like `wildcards-gen dataset tencent` is run, the backend follows 
 6.  **Serialization**: The final structure is saved via `StructureManager`, ensuring that the complex `CommentedMap` is serialized back to clean YAML while preserving all metadata instructions and alphabetical sorting at every level.
 
 ## Session Takeaways (Jan 2026)
-*   **Open Images Fix**: The original generator produced flat lists. The new port ensures full hierarchy preservation.
+*   **Open Images Full Mode**: Implemented full support for 20,638 image-level labels (vs original ~600 bboxes). Uses dynamic WordNet mapping to build a deep hierarchy. Legacy bbox mode preserved via `--bbox-only`.
 *   **Tencent ML-Images**: Added support for this massive dataset (11k categories) using text-only download logic.
 *   **LLM Stability**: The `LLMEngine` must aggressively clean output (e.g. ` ```yaml `) to prevent parsing errors.
 *   **Unified CLI**: Managing one tool is significantly easier than multiple scripts.
