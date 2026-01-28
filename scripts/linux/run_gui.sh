@@ -14,4 +14,4 @@ fi
 
 source .venv/bin/activate
 echo "🎨 Launching wildcards-gen GUI..."
-wildcards-gen gui
+python -m wildcards_gen.cli gui
