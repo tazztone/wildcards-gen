@@ -23,7 +23,8 @@ def test_generate_dataset_handler_logic():
         path, content = gui.generate_dataset_handler(
             "ImageNet", "Standard", "animal.n.01", 3, "out.yaml",
             True, "none", True, False,
-            6, 10, 3, False, False
+            6, 10, 3, False, False,
+            None, None
         )
         
         assert path is not None
@@ -38,7 +39,8 @@ def test_generate_dataset_handler_error():
         path, content = gui.generate_dataset_handler(
             "ImageNet", "Standard", "root", 3, "out.yaml",
             True, "none", True, False,
-            6, 10, 3, False, False
+            6, 10, 3, False, False,
+            None, None
         )
         assert path is None
         assert "Boom" in content
@@ -58,7 +60,8 @@ def test_generate_dataset_handler_openimages():
         path, content = gui.generate_dataset_handler(
             "Open Images", "Smart", "", 3, "out.yaml",
             True, "none", False, False,
-            4, 10, 3, False, True
+            4, 10, 3, False, True,
+            None, None
         )
         
         assert path is not None
