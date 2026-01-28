@@ -16,5 +16,5 @@ if not exist ".venv" (
 
 call .venv\Scripts\activate.bat
 echo 🎨 Launching wildcards-gen GUI...
-wildcards-gen gui
+python -m wildcards_gen.cli gui
 pause

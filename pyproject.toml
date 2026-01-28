@@ -11,6 +11,9 @@ dependencies = [
     "tqdm>=4.64.0",
 ]
 
+[project.scripts]
+wildcards-gen = "wildcards_gen.cli:main"
+
 [project.optional-dependencies]
 lint = [
     "sentence-transformers>=2.7.0",

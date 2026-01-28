@@ -301,25 +301,30 @@ def lint_handler(file_obj, model, threshold, progress=gr.Progress()):
     
     progress(0, desc="Loading model... (this may take a moment)")
     try:
-        from wildcards_gen.core.linter import lint_file, format_lint_report
+        from wildcards_gen.core.linter import lint_file
         
         # Determine format
         # If running from GUI, we return markdown string directly
         output_path = file_obj.name
         
-        # Run Lint
-        outliers = lint_file(output_path, model, float(threshold))
+        # Run Lint - returns a dict with 'issues' list
+        result = lint_file(output_path, model, float(threshold))
+        issues = result.get('issues', [])
         
-        if not outliers:
+        if not issues:
             return "✅ **No outliers detected.** The structure looks semantically consistent!"
             
         # Format Report
-        report = f"### ⚠️ Found {len(outliers)} Potential Outliers\n\n"
-        report += "| Score | Item | Context |\n|---|---|---|\n"
+        total_outliers = sum(len(i['outliers']) for i in issues)
+        report = f"### ⚠️ Found {total_outliers} Potential Outliers in {len(issues)} lists\n\n"
+        report += "| Score | Item | Context (Path) |\n|---|---|---|\n"
         
-        for item in outliers:
-            score_bar = "█" * int(item['score'] * 10)
-            report += f"| {item['score']:.2f} | `{item['term']}` | {item['context']} |\n"
+        for issue in issues:
+            path = issue['path']
+            for out in issue['outliers']:
+                score = out['score']
+                term = out['term']
+                report += f"| **{score:.2f}** | `{term}` | `{path}` |\n"
             
         return report
         
@@ -440,7 +445,7 @@ def launch_gui(share=False):
                             }
                             ds_smart_preset = gr.Radio(list(SMART_PRESETS.keys()), label="Preset", value="Balanced")
                             ds_min_depth = gr.Slider(0, 10, value=4, step=1, label="Significance Depth", info="Nodes shallower than this (close to root) are forced to be categories.")
-                            ds_min_hyponyms = gr.Slider(0, 1000, value=50, step=10, label="Flattening Threshold", info="Nodes with more children than this are kept. Higher = more flattening of sub-lists.")
+                            ds_min_hyponyms = gr.Slider(0, 2000, value=50, step=10, label="Flattening Threshold", info="Nodes with more children than this are kept. Higher = more flattening of sub-lists.")
                             ds_min_leaf = gr.Slider(1, 100, value=5, step=1, label="Min Leaf Size", info="Minimum items to keep a list. Valid lists smaller than this are merged up.")
                             ds_merge_orphans = gr.Checkbox(label="Merge Orphans", value=False, info="If checked, small lists are merged into a 'misc' key in the parent; otherwise they are kept as-is.")
                             
