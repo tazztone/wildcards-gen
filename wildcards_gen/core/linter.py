@@ -1,0 +1,145 @@
+"""
+Semantic Linter Module.
+
+Uses embedding models (Qwen3, MPNet, MiniLM) and HDBSCAN* to detect
+semantic outliers in wildcard lists.
+"""
+
+import logging
+from typing import List, Tuple, Dict, Any
+import numpy as np
+
+logger = logging.getLogger(__name__)
+
+# Model registry
+MODELS = {
+    "qwen3": "Qwen/Qwen3-Embedding-0.6B",
+    "mpnet": "sentence-transformers/all-mpnet-base-v2",
+    "minilm": "sentence-transformers/all-MiniLM-L12-v2",
+}
+
+def check_dependencies():
+    """Ensure optional dependencies are installed."""
+    try:
+        import sentence_transformers
+        import hdbscan
+        return True
+    except ImportError:
+        return False
+
+def load_embedding_model(model_name: str = "qwen3"):
+    """Load embedding model by short name."""
+    from sentence_transformers import SentenceTransformer
+    
+    model_id = MODELS.get(model_name, MODELS["qwen3"])
+    logger.info(f"Loading embedding model: {model_id}...")
+    return SentenceTransformer(model_id, trust_remote_code=True)
+
+def compute_list_embeddings(model, terms: List[str]):
+    """Encode terms using selected embedding model."""
+    if not terms:
+        return np.array([])
+    return model.encode(terms, show_progress_bar=False)
+
+def detect_outliers_hdbscan(embeddings: np.ndarray, threshold: float = 0.1) -> List[Tuple[int, float]]:
+    """
+    HDBSCAN* outlier scoring.
+    Returns list of (index, score) for terms with score > threshold.
+    """
+    import hdbscan
+    
+    if len(embeddings) < 3:
+        return []
+
+    try:
+        # min_cluster_size=2 allows detecting even small anomalies in small lists
+        clusterer = hdbscan.HDBSCAN(min_cluster_size=2, gen_min_span_tree=True)
+        clusterer.fit(embeddings)
+        
+        # outlier_scores_ returns values where higher is more anomalous
+        scores = clusterer.outlier_scores_
+        
+        # Filter by threshold
+        outliers = [(i, float(s)) for i, s in enumerate(scores) if s > threshold]
+        
+        # Sort by score descending (most anomalous first)
+        return sorted(outliers, key=lambda x: -x[1])
+    except Exception as e:
+        logger.warning(f"HDBSCAN failed: {e}")
+        return []
+
+def lint_file(file_path: str, model_name: str, threshold: float) -> Dict[str, Any]:
+    """
+    Main entry point: Lint a YAML skeleton file.
+    """
+    from wildcards_gen.core.structure import StructureManager
+    
+    if not check_dependencies():
+        raise ImportError("Missing dependencies. Install with: pip install wildcards-gen[lint] (or uv pip install 'wildcards-gen[lint]')")
+
+    mgr = StructureManager()
+    structure = mgr.load_structure(file_path)
+    if not structure:
+        raise ValueError(f"Could not load structure from {file_path}")
+
+    # Initialize model
+    model = load_embedding_model(model_name)
+    
+    report = {
+        "file": file_path,
+        "model": MODELS.get(model_name, model_name),
+        "threshold": threshold,
+        "issues": []
+    }
+    
+    # Traverse and check leaf lists
+    def traverse(node, path):
+        if isinstance(node, dict):
+            for k, v in node.items():
+                traverse(v, path + [k])
+        elif isinstance(node, list):
+            # It's a leaf list
+            if len(node) < 3:
+                return # Too small to check
+            
+            embeddings = compute_list_embeddings(model, node)
+            outliers = detect_outliers_hdbscan(embeddings, threshold)
+            
+            if outliers:
+                issue = {
+                    "path": "/".join(path),
+                    "outliers": []
+                }
+                for idx, score in outliers:
+                    issue["outliers"].append({
+                        "term": node[idx],
+                        "score": round(score, 3)
+                    })
+                report["issues"].append(issue)
+
+    traverse(structure, [])
+    return report
+
+def print_lint_report(report: Dict[str, Any], output_format: str = 'markdown'):
+    """Print the lint report to console."""
+    if output_format == 'json':
+        import json
+        print(json.dumps(report, indent=2))
+        return
+
+    print(f"\n🧹 Semantic Lint Report: {report['file']}")
+    print(f"Model: {report['model']} | Threshold: {report['threshold']}")
+    print("=" * 60)
+    
+    if not report['issues']:
+        print("✅ No semantic outliers detected.")
+        return
+
+    for issue in report['issues']:
+        print(f"\n📂 {issue['path']}")
+        print(f"   {'Term':<40} | {'Score':<10}")
+        print(f"   {'-'*40} | {'-'*10}")
+        for out in issue['outliers']:
+            print(f"   {out['term']:<40} | {out['score']:<10}")
+            
+    print("=" * 60)
