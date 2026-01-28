@@ -87,8 +87,54 @@ def test_create_handler_logic():
         assert "topic:" in content
         mock_engine.generate_dynamic_structure.assert_called_once_with("Topic")
 
-def test_create_handler_no_key():
-    """Test create handler fails without API key."""
     path, content = gui.create_handler("Topic", "model", "", "out.yaml")
     assert path is None
     assert "API Key required" in content
+
+def test_launch_gui_construction():
+    """
+    Test that the GUI layout can be constructed without errors.
+    This ensures that all variable references in the layout (like outputs=[...]) 
+    are defined and valid.
+    """
+    with patch('wildcards_gen.gui.config') as mock_config:
+        # Setup config mocks
+        mock_config.api_key = "test_key"
+        mock_config.model = "test_model"
+        mock_config.get.return_value = "info"
+        
+        # We don't want to actually launch the server, just build the blocks
+        # The module-level mock_gr handles the components
+        
+        # Call the launch function
+        gui.launch_gui(share=False)
+        
+        # Verify that Blocks was used (entered)
+        # mock_gr.Blocks is a class, so return_value is the instance
+        mock_gr.Blocks.return_value.__enter__.assert_called()
+        
+        # Verify launch was called on the demo instance
+        demo_instance = mock_gr.Blocks.return_value.__enter__.return_value
+        demo_instance.launch.assert_called_once()
+
+def test_update_ds_filename():
+    """Test filename generation logic."""
+    # ImageNet: Should include root
+    f1 = gui.update_ds_filename("ImageNet", "animal.n.01", 3, "Standard")
+    assert "imagenet_animal_d3.yaml" == f1
+    
+    # OpenImages: Should NOT include root even if passed (as UI might hold old value)
+    f2 = gui.update_ds_filename("Open Images", "animal.n.01", 3, "Standard")
+    assert "open_images_d3.yaml" == f2
+    
+    # OpenImages Smart
+    f3 = gui.update_ds_filename("Open Images", "animal.n.01", 4, "Smart", 4, 50, 5)
+    assert "open_images_d4_s4_f50_l5_smart.yaml" == f3
+    
+    # OpenImages Smart BBox
+    f4 = gui.update_ds_filename("Open Images", "", 4, "Smart", 4, 50, 5, bbox_only=True)
+    assert "open_images_d4_s4_f50_l5_smart_bbox.yaml" == f4
+    
+    # Tencent: Should NOT include root
+    f5 = gui.update_ds_filename("Tencent ML-Images", "animal.n.01", 3, "Smart", 4, 100, 3)
+    assert "tencent_mlimages_d3_s4_f100_l3_smart.yaml" == f5

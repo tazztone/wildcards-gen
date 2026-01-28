@@ -52,12 +52,29 @@ def clean_filename(s):
     s = s.lower().replace(" ", "_")
     return re.sub(r'[^a-z0-9_.]', '', s)
 
-def update_ds_filename(name, root, depth, strategy, bbox_only=False):
-    root_part = clean_filename(root.split('.')[0]) if '.' in root else clean_filename(root)
+def update_ds_filename(name, root, depth, strategy, min_depth=4, min_hyponyms=50, min_leaf=5, bbox_only=False):
+    # Only use root in filename if it's ImageNet, otherwise ignore the hidden input
+    root_part = ""
+    if name == "ImageNet":
+        root_part = clean_filename(root.split('.')[0]) if '.' in root else clean_filename(root)
+    
     name_part = clean_filename(name)
     strategy_suffix = "_smart" if strategy == "Smart" else ""
     bbox_suffix = "_bbox" if (bbox_only and name == "Open Images") else ""
-    return f"{name_part}_{root_part}_d{depth}{strategy_suffix}{bbox_suffix}.yaml" if root_part else f"{name_part}_d{depth}{strategy_suffix}{bbox_suffix}.yaml"
+    
+    components = [name_part]
+    if root_part: components.append(root_part)
+    components.append(f"d{depth}")
+    
+    if strategy == "Smart":
+        components.append(f"s{min_depth}")
+        components.append(f"f{min_hyponyms}")
+        components.append(f"l{min_leaf}")
+        components.append("smart")
+    
+    if bbox_suffix: components.append(bbox_suffix.strip('_'))
+    
+    return "_".join(components) + ".yaml"
 
 def update_cr_filename(topic):
     if not topic: return "topic_skeleton.yaml"
@@ -226,7 +243,7 @@ def launch_gui(share=False):
     # Initial API key from config or env
     initial_key = config.api_key or os.environ.get("OPENROUTER_API_KEY", "")
     
-    with gr.Blocks(title="Wildcards-Gen", theme=gr.themes.Soft()) as demo:
+    with gr.Blocks(title="Wildcards-Gen") as demo:
         # Header with API Key Status
         with gr.Row():
             gr.Markdown("# 🎴 Wildcards-Gen")
@@ -271,7 +288,7 @@ def launch_gui(share=False):
                             ds_strategy = gr.Radio(
                                 ["Standard", "Smart"],
                                 label="Extraction Mode",
-                                value="Standard",
+                                value="Smart",
                                 info="Smart uses WordNet semantics to prune meaningless nodes."
                             )
                         
@@ -304,7 +321,7 @@ def launch_gui(share=False):
                         
                         with gr.Group():
                             gr.Markdown("**Hierarchy Depth**")
-                            ds_depth = gr.Slider(1, 12, value=config.get("generation.default_depth"), step=1, label="Max Depth", info="Standard: hard limit. Smart: max ceiling.")
+                            ds_depth = gr.Slider(1, 12, value=config.get("generation.default_depth"), step=1, label="Max Generation Depth", info="Limits how deep the hierarchy tree can grow (recursion limit).")
                         
                         with gr.Accordion("Smart Tuning Parameters", open=True, visible=False) as smart_tuning_group:
                             gr.Markdown("_Smart Mode uses WordNet to analyze semantic importance. Adjust these to control granularity._")
@@ -314,7 +331,7 @@ def launch_gui(share=False):
                                 "Flat": (2, 500, 10, True)
                             }
                             ds_smart_preset = gr.Radio(list(SMART_PRESETS.keys()), label="Preset", value="Balanced")
-                            ds_min_depth = gr.Slider(0, 10, value=4, step=1, label="Category Depth", info="Nodes shallower than this are kept as categories (lower = fewer distinct categories).")
+                            ds_min_depth = gr.Slider(0, 10, value=4, step=1, label="Significance Depth", info="Nodes shallower than this (close to root) are forced to be categories.")
                             ds_min_hyponyms = gr.Slider(0, 1000, value=50, step=10, label="Flattening Threshold", info="Nodes with more children than this are kept. Higher = more flattening of sub-lists.")
                             ds_min_leaf = gr.Slider(1, 100, value=5, step=1, label="Min Leaf Size", info="Minimum items to keep a list. Valid lists smaller than this are merged up.")
                             ds_merge_orphans = gr.Checkbox(label="Merge Orphans", value=False, info="If checked, small lists are merged into a 'misc' key in the parent; otherwise they are kept as-is.")
@@ -325,6 +342,7 @@ def launch_gui(share=False):
                                 return [gr.update()]*4                            
                             ds_smart_preset.change(apply_smart_preset, inputs=[ds_smart_preset], outputs=[ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_merge_orphans])
                         
+                        with gr.Accordion("Advanced Filtering (ImageNet)", open=False, visible=True) as adv_filter_group:
                             ds_filter = gr.Dropdown(["none", "1k", "21k"], label="Sub-Filter", value="none")
                             ds_strict = gr.Checkbox(label="Strict Lexical Match", value=True)
                             ds_blacklist = gr.Checkbox(label="Hide Abstract Concepts", value=False)
@@ -334,7 +352,7 @@ def launch_gui(share=False):
                         
                         with gr.Row():
                             ds_glosses = gr.Checkbox(label="Include Instructions", value=True)
-                            ds_out = gr.Textbox(label="Output Filename", value=update_ds_filename("ImageNet", config.get("datasets.imagenet.root_synset"), config.get("generation.default_depth"), "Standard", False))
+                            ds_out = gr.Textbox(label="Output Filename", value=update_ds_filename("ImageNet", config.get("datasets.imagenet.root_synset"), config.get("generation.default_depth"), "Smart", 4, 50, 5, False))
                         
                         ds_btn = gr.Button("🚀 Generate Skeleton", variant="primary", size="lg")
 
@@ -377,8 +395,8 @@ def launch_gui(share=False):
                 
                 ds_strategy.change(update_ds_ui, inputs=[ds_name, ds_strategy], outputs=[ds_imagenet_group, ds_strategy, smart_tuning_group, adv_filter_group, ds_openimages_group])
                 
-                for comp in [ds_name, ds_root, ds_depth, ds_strategy, ds_bbox_only]:
-                    comp.change(update_ds_filename, inputs=[ds_name, ds_root, ds_depth, ds_strategy, ds_bbox_only], outputs=[ds_out])
+                for comp in [ds_name, ds_root, ds_depth, ds_strategy, ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_bbox_only]:
+                    comp.change(update_ds_filename, inputs=[ds_name, ds_root, ds_depth, ds_strategy, ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_bbox_only], outputs=[ds_out])
                 
                 ds_btn.click(
                     generate_dataset_handler, 
@@ -459,5 +477,7 @@ def launch_gui(share=False):
 
     server_name = config.get("gui.server_name")
     server_port = config.get("gui.server_port")
-    demo.launch(share=share, server_name=server_name, server_port=server_port)
+    server_name = config.get("gui.server_name")
+    server_port = config.get("gui.server_port")
+    demo.launch(share=share, server_name=server_name, server_port=server_port, theme=gr.themes.Soft())
 
