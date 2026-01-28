@@ -218,3 +218,34 @@ uv pip install -e .
 
 **Q: Which LLM should I use?**
 **A:** We default to `google/gemma-3-27b-it:free` on OpenRouter, which is very capable and free. If you need more precision for complex categorization, larger models may work better.
+
+---
+
+## 🗺️ Roadmap
+
+Current status and planned features. We focus on **automation**, **structure architecture**, and **bulk processing**, leaving interactive editing and management to the [Wildcards Generator SPA](https://github.com/tazztone/wildcards-generator).
+
+### ✅ Completed
+- [x] Multi-dataset support (ImageNet, COCO, Open Images, Tencent)
+- [x] Smart semantic pruning with configurable thresholds
+- [x] LLM-powered taxonomy creation and enrichment
+- [x] Gradio web GUI with dataset-aware UI
+- [x] Comment-preserving YAML handling via ruamel.yaml
+
+### 🚧 In Progress / Short-Term
+- [ ] **Batch Pipeline** — Automated generation from a list of topics or roots (e.g. `input_topics.txt` → `multiple_skeletons/`)
+- [ ] **Migration Utilities** — CLI tool to reverse-engineer legacy `.txt` wildcard folders into a single structured `.yaml` skeleton
+- [ ] **Skeleton Merge/Split** — Tools to combine multiple skeletons or break a massive one into sub-modules
+
+### 🔮 Planned / Long-Term
+- [ ] **Custom Data Sources** — Plugins for Wikidata/DBpedia ingestion to complement WordNet
+- [ ] **LLM Caching & Cost Optimization** — Local caching to minimize API usage during enrichment processes
+- [ ] **CI/CD Integration** — Headless modes for validating skeleton integrity in build pipelines
+- [ ] **Async/Parallel Processing** — Optimized engines for processing massive graph traversals (e.g. full WordNet exports)
+
+### 💡 Ideas (Architecture & Data)
+- **Domain Vocabularies**: Pre-packaged, curated WordNet subsets (e.g. "Bio-Diversity", "Fashion", "Military Hardware")
+- **Semantic Linter**: Analyze skeletons to flag potentially "weak" or vague categories before AI population
+- **Auto-Enrichment**: recursive "deepening" of leaf nodes that are too broad
+
+> Have a feature request? Open an issue on [GitHub](https://github.com/tazztone/wildcards-gen/issues)!
