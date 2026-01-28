@@ -94,13 +94,16 @@ def generate_dataset_handler(
     dataset_name, strategy, root, depth, output_name,
     with_glosses, filter_set, strict_filter, blacklist_abstract,
     min_depth, min_hyponyms, min_leaf, merge_orphans,
-    bbox_only
+    bbox_only,
+    progress=gr.Progress()
 ):
+    progress(0, desc="Initializing...")
     try:
         is_smart = (strategy == "Smart")
         if dataset_name == "ImageNet":
             if not root:
                 return None, "Error: Root synset required for ImageNet (e.g. animal.n.01)"
+            progress(0.2, desc="Downloading ImageNet metadata...")
             data = imagenet.generate_imagenet_tree(
                 root,
                 max_depth=int(depth),
@@ -115,10 +118,12 @@ def generate_dataset_handler(
                 merge_orphans=merge_orphans
             )
         elif dataset_name == "COCO":
+            progress(0.2, desc="Loading COCO API...")
             data = coco.generate_coco_hierarchy(
                 with_glosses=with_glosses
             )
         elif dataset_name == "Open Images":
+            progress(0.2, desc="Loading Open Images metadata...")
             data = openimages.generate_openimages_hierarchy(
                 max_depth=int(depth),
                 with_glosses=with_glosses,
@@ -130,6 +135,7 @@ def generate_dataset_handler(
                 bbox_only=bbox_only
             )
         elif dataset_name == "Tencent ML-Images":
+            progress(0.2, desc="Loading Tencent dictionary...")
             data = tencent.generate_tencent_hierarchy(
                 max_depth=int(depth),
                 with_glosses=with_glosses,
@@ -258,6 +264,10 @@ def launch_gui(share=False):
                                 label="Source", 
                                 value="ImageNet"
                             )
+                            ds_info = gr.Markdown(
+                                "_**ImageNet**: 21k classes. Best for general objects/animals._",
+                                elem_id="ds-info"
+                            )
                             ds_strategy = gr.Radio(
                                 ["Standard", "Smart"],
                                 label="Extraction Mode",
@@ -296,18 +306,18 @@ def launch_gui(share=False):
                             gr.Markdown("**Hierarchy Depth**")
                             ds_depth = gr.Slider(1, 12, value=config.get("generation.default_depth"), step=1, label="Max Depth", info="Standard: hard limit. Smart: max ceiling.")
                         
-                        with gr.Group(visible=False) as smart_tuning_group:
-                            gr.Markdown("**Smart Tuning**")
+                        with gr.Accordion("Smart Tuning Parameters", open=True, visible=False) as smart_tuning_group:
+                            gr.Markdown("_Smart Mode uses WordNet to analyze semantic importance. Adjust these to control granularity._")
                             SMART_PRESETS = {
                                 "Detailed": (6, 10, 3, False),
                                 "Balanced": (4, 50, 5, False),
                                 "Flat": (2, 500, 10, True)
                             }
                             ds_smart_preset = gr.Radio(list(SMART_PRESETS.keys()), label="Preset", value="Balanced")
-                            ds_min_depth = gr.Slider(0, 10, value=4, step=1, label="Category Depth")
-                            ds_min_hyponyms = gr.Slider(0, 1000, value=50, step=10, label="Flattening Threshold")
-                            ds_min_leaf = gr.Slider(1, 100, value=5, step=1, label="Min Leaf Size")
-                            ds_merge_orphans = gr.Checkbox(label="Merge Orphans", value=False)
+                            ds_min_depth = gr.Slider(0, 10, value=4, step=1, label="Category Depth", info="Nodes shallower than this are kept as categories (lower = fewer distinct categories).")
+                            ds_min_hyponyms = gr.Slider(0, 1000, value=50, step=10, label="Flattening Threshold", info="Nodes with more children than this are kept. Higher = more flattening of sub-lists.")
+                            ds_min_leaf = gr.Slider(1, 100, value=5, step=1, label="Min Leaf Size", info="Minimum items to keep a list. Valid lists smaller than this are merged up.")
+                            ds_merge_orphans = gr.Checkbox(label="Merge Orphans", value=False, info="If checked, small lists are merged into a 'misc' key in the parent; otherwise they are kept as-is.")
                             
                             def apply_smart_preset(p):
                                 if p in SMART_PRESETS:
@@ -347,8 +357,24 @@ def launch_gui(share=False):
                         gr.update(visible=is_imagenet),                # adv_filter_group
                         gr.update(visible=(dataset_name == "Open Images")), # ds_openimages_group
                     ]
+                    
+                    # Update Info Text
+                    info_map = {
+                        "ImageNet": "_**ImageNet**: 21k classes. Best for general objects/animals._",
+                        "COCO": "_**COCO**: 80 objects. Very small, flat list._",
+                        "Open Images": "_**Open Images V7**: ~600 bbox classes or 20k+ image labels._",
+                        "Tencent ML-Images": "_**Tencent ML**: 11k categories. Massive, modern coverage._"
+                    }
+                    info_text = info_map.get(dataset_name, "")
                 
                 ds_name.change(update_ds_ui, inputs=[ds_name, ds_strategy], outputs=[ds_imagenet_group, ds_strategy, smart_tuning_group, adv_filter_group, ds_openimages_group])
+                ds_name.change(lambda x: ({
+                    "ImageNet": "_**ImageNet**: 21k classes. Best for general objects/animals._",
+                    "COCO": "_**COCO**: 80 objects. Very small, flat list._",
+                    "Open Images": "_**Open Images V7**: ~600 bbox classes or 20k+ image labels._",
+                    "Tencent ML-Images": "_**Tencent ML**: 11k categories. Massive, modern coverage._"
+                }.get(x, "")), inputs=[ds_name], outputs=[ds_info])
+                
                 ds_strategy.change(update_ds_ui, inputs=[ds_name, ds_strategy], outputs=[ds_imagenet_group, ds_strategy, smart_tuning_group, adv_filter_group, ds_openimages_group])
                 
                 for comp in [ds_name, ds_root, ds_depth, ds_strategy, ds_bbox_only]:
