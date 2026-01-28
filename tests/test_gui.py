@@ -21,9 +21,9 @@ def test_generate_dataset_handler_logic():
         mock_img.return_value = {"root": ["child"]}
         
         path, content = gui.generate_dataset_handler(
-            "ImageNet", "animal.n.01", 3, "out.yaml",
+            "ImageNet", "Standard", "animal.n.01", 3, "out.yaml",
             True, "none", True, False,
-            False, 6, 10, 3, False
+            6, 10, 3, False, False
         )
         
         assert path is not None
@@ -36,12 +36,36 @@ def test_generate_dataset_handler_error():
     # We patch inside gui.py's namespace for consistency
     with patch('wildcards_gen.gui.imagenet.generate_imagenet_tree', side_effect=Exception("Boom")):
         path, content = gui.generate_dataset_handler(
-            "ImageNet", "root", 3, "out.yaml",
+            "ImageNet", "Standard", "root", 3, "out.yaml",
             True, "none", True, False,
-            False, 6, 10, 3, False
+            6, 10, 3, False, False
         )
         assert path is None
         assert "Boom" in content
+
+def test_generate_dataset_handler_openimages():
+    """Test OpenImages handler passing bbox_only."""
+    with patch('wildcards_gen.core.datasets.openimages.generate_openimages_hierarchy') as mock_oi, \
+         patch('wildcards_gen.gui.StructureManager') as mock_mgr_cls, \
+         patch('builtins.open', mock_open()), \
+         patch('os.makedirs'):
+         
+        mock_mgr = mock_mgr_cls.return_value
+        mock_mgr.to_string.return_value = "res"
+        mock_oi.return_value = {}
+        
+        # Test valid call with bbox_only=True
+        path, content = gui.generate_dataset_handler(
+            "Open Images", "Smart", "", 3, "out.yaml",
+            True, "none", False, False,
+            4, 10, 3, False, True
+        )
+        
+        assert path is not None
+        mock_oi.assert_called_once()
+        # Verify bbox_only was passed as True
+        args, kwargs = mock_oi.call_args
+        assert kwargs.get('bbox_only') is True
 
 def test_create_handler_logic():
     """Test the LLM create handler logic."""

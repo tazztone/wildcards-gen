@@ -52,11 +52,12 @@ def clean_filename(s):
     s = s.lower().replace(" ", "_")
     return re.sub(r'[^a-z0-9_.]', '', s)
 
-def update_ds_filename(name, root, depth, strategy):
+def update_ds_filename(name, root, depth, strategy, bbox_only=False):
     root_part = clean_filename(root.split('.')[0]) if '.' in root else clean_filename(root)
     name_part = clean_filename(name)
     strategy_suffix = "_smart" if strategy == "Smart" else ""
-    return f"{name_part}_{root_part}_d{depth}{strategy_suffix}.yaml" if root_part else f"{name_part}_d{depth}{strategy_suffix}.yaml"
+    bbox_suffix = "_bbox" if (bbox_only and name == "Open Images") else ""
+    return f"{name_part}_{root_part}_d{depth}{strategy_suffix}{bbox_suffix}.yaml" if root_part else f"{name_part}_d{depth}{strategy_suffix}{bbox_suffix}.yaml"
 
 def update_cr_filename(topic):
     if not topic: return "topic_skeleton.yaml"
@@ -92,7 +93,8 @@ def update_dataset_inputs(dataset_name, strategy):
 def generate_dataset_handler(
     dataset_name, strategy, root, depth, output_name,
     with_glosses, filter_set, strict_filter, blacklist_abstract,
-    min_depth, min_hyponyms, min_leaf, merge_orphans
+    min_depth, min_hyponyms, min_leaf, merge_orphans,
+    bbox_only
 ):
     try:
         is_smart = (strategy == "Smart")
@@ -124,7 +126,8 @@ def generate_dataset_handler(
                 min_significance_depth=int(min_depth),
                 min_hyponyms=int(min_hyponyms),
                 min_leaf_size=int(min_leaf),
-                merge_orphans=merge_orphans
+                merge_orphans=merge_orphans,
+                bbox_only=bbox_only
             )
         elif dataset_name == "Tencent ML-Images":
             data = tencent.generate_tencent_hierarchy(
@@ -312,14 +315,16 @@ def launch_gui(share=False):
                                 return [gr.update()]*4                            
                             ds_smart_preset.change(apply_smart_preset, inputs=[ds_smart_preset], outputs=[ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_merge_orphans])
                         
-                        with gr.Accordion("Advanced Filtering (ImageNet)", open=False, visible=True) as adv_filter_group:
                             ds_filter = gr.Dropdown(["none", "1k", "21k"], label="Sub-Filter", value="none")
                             ds_strict = gr.Checkbox(label="Strict Lexical Match", value=True)
                             ds_blacklist = gr.Checkbox(label="Hide Abstract Concepts", value=False)
                         
+                        with gr.Group(visible=False) as ds_openimages_group:
+                            ds_bbox_only = gr.Checkbox(label="Legacy BBox Mode (600 classes)", value=False, info="Use original bounding-box hierarchy instead of full 20k labels.")
+                        
                         with gr.Row():
                             ds_glosses = gr.Checkbox(label="Include Instructions", value=True)
-                            ds_out = gr.Textbox(label="Output Filename", value=update_ds_filename("ImageNet", config.get("datasets.imagenet.root_synset"), config.get("generation.default_depth"), "Standard"))
+                            ds_out = gr.Textbox(label="Output Filename", value=update_ds_filename("ImageNet", config.get("datasets.imagenet.root_synset"), config.get("generation.default_depth"), "Standard", False))
                         
                         ds_btn = gr.Button("🚀 Generate Skeleton", variant="primary", size="lg")
 
@@ -340,17 +345,18 @@ def launch_gui(share=False):
                         gr.update(interactive=can_use_smart, value=new_strategy if not can_use_smart else strategy), # ds_strategy
                         gr.update(visible=is_smart),                   # smart_tuning_group
                         gr.update(visible=is_imagenet),                # adv_filter_group
+                        gr.update(visible=(dataset_name == "Open Images")), # ds_openimages_group
                     ]
                 
-                ds_name.change(update_ds_ui, inputs=[ds_name, ds_strategy], outputs=[ds_imagenet_group, ds_strategy, smart_tuning_group, adv_filter_group])
-                ds_strategy.change(update_ds_ui, inputs=[ds_name, ds_strategy], outputs=[ds_imagenet_group, ds_strategy, smart_tuning_group, adv_filter_group])
+                ds_name.change(update_ds_ui, inputs=[ds_name, ds_strategy], outputs=[ds_imagenet_group, ds_strategy, smart_tuning_group, adv_filter_group, ds_openimages_group])
+                ds_strategy.change(update_ds_ui, inputs=[ds_name, ds_strategy], outputs=[ds_imagenet_group, ds_strategy, smart_tuning_group, adv_filter_group, ds_openimages_group])
                 
-                for comp in [ds_name, ds_root, ds_depth, ds_strategy]:
-                    comp.change(update_ds_filename, inputs=[ds_name, ds_root, ds_depth, ds_strategy], outputs=[ds_out])
+                for comp in [ds_name, ds_root, ds_depth, ds_strategy, ds_bbox_only]:
+                    comp.change(update_ds_filename, inputs=[ds_name, ds_root, ds_depth, ds_strategy, ds_bbox_only], outputs=[ds_out])
                 
                 ds_btn.click(
                     generate_dataset_handler, 
-                    inputs=[ds_name, ds_strategy, ds_root, ds_depth, ds_out, ds_glosses, ds_filter, ds_strict, ds_blacklist, ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_merge_orphans],
+                    inputs=[ds_name, ds_strategy, ds_root, ds_depth, ds_out, ds_glosses, ds_filter, ds_strict, ds_blacklist, ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_merge_orphans, ds_bbox_only],
                     outputs=[ds_file, ds_prev]
                 )
 
