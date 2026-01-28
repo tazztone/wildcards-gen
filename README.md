@@ -235,6 +235,34 @@ uv pip install -e .
 
 ---
 
+## 🔧 Troubleshooting & Tips
+
+### 🐍 Python Version Error
+If you see dependency resolution errors involving `transformers` or `sentence-transformers`, verify your Python version:
+```bash
+python --version  # Must be >= 3.10
+```
+This is required for the Semantic Linter features.
+
+### 🚫 Missing Categories (e.g., "Canine")
+If a category you expect (like "canine") is missing or pruned, it's likely due to **WordNet Strictness**. WordNet's primary definition for "canine" is a *tooth*, not a dog. To tell the tool to be more permissive:
+```bash
+# Disable strict primary-synset checking
+wildcards-gen dataset imagenet --no-strict ...
+```
+
+### 📦 Import Errors ("ModuleNotFoundError")
+Always run the tool via `uv` or the installed script to ensure the environment is correct:
+```bash
+# ✅ CORRECT
+uv run python -m wildcards_gen.cli ...
+
+# ❌ INCORRECT (might use system python)
+python wildcards_gen/cli.py ...
+```
+
+---
+
 ## 🗺️ Roadmap
 
 Current status and planned features. We focus on **automation**, **structure architecture**, and **bulk processing**, leaving interactive editing and management to the [Wildcards Generator SPA](https://github.com/tazztone/wildcards-generator).

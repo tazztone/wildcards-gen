@@ -39,6 +39,7 @@ def get_api_key() -> Optional[str]:
 
 
 # Smart presets: (min_depth, min_hyponyms, min_leaf, merge_orphans)
+# Smart presets: (min_depth, min_hyponyms, min_leaf, merge_orphans)
 SMART_PRESETS = {
     "ultra-detailed": (8, 5, 1, False),
     "detailed": (6, 10, 3, False),
@@ -48,11 +49,34 @@ SMART_PRESETS = {
     "ultra-flat": (1, 1000, 20, True),
 }
 
+DATASET_PRESET_OVERRIDES = {
+    "openimages": {
+        "balanced": (4, 50, 5, True),
+        "compact": (3, 200, 10, True),
+        "flat": (2, 1500, 15, True),
+    },
+    "tencent": {
+        "balanced": (4, 30, 5, True),
+        "compact": (3, 100, 10, True),
+        "flat": (2, 600, 20, True),
+    },
+}
+
 
 def apply_smart_preset(args):
     """Apply preset values to args, with explicit flags taking precedence."""
     preset_name = getattr(args, 'preset', None)
-    defaults = SMART_PRESETS.get(preset_name, SMART_PRESETS['balanced'])
+    
+    # Determine defaults (check overrides first)
+    defaults = SMART_PRESETS['balanced']
+    dataset = getattr(args, 'dataset_type', None)
+    
+    if preset_name:
+        # Check overrides
+        if dataset and dataset in DATASET_PRESET_OVERRIDES and preset_name in DATASET_PRESET_OVERRIDES[dataset]:
+            defaults = DATASET_PRESET_OVERRIDES[dataset][preset_name]
+        else:
+            defaults = SMART_PRESETS.get(preset_name, defaults)
     
     if getattr(args, 'min_depth', None) is None:
         args.min_depth = defaults[0]
@@ -67,6 +91,26 @@ def apply_smart_preset(args):
 def cmd_dataset_imagenet(args):
     """Handle imagenet subcommand."""
     apply_smart_preset(args)
+    
+    # Analysis mode override
+    if getattr(args, 'analyze', False):
+        print("🔍 Analyzing ImageNet hierarchy... (this may take a moment)")
+        # Force non-smart to see full structure, ensure reasonable depth
+        hierarchy = generate_imagenet_tree(
+            root_synset_str=args.root,
+            max_depth=max(args.depth, 10), # Analyze deep by default
+            filter_set=args.filter if args.filter != 'none' else None,
+            with_glosses=False, # Speed up
+            strict_filter=not args.no_strict,
+            blacklist_abstract=args.blacklist,
+            smart=False # Raw tree
+        )
+        from .core import analyze
+        stats = analyze.compute_dataset_stats(hierarchy)
+        suggestions = analyze.suggest_thresholds(stats)
+        analyze.print_analysis_report(stats, suggestions)
+        return
+
     hierarchy = generate_imagenet_tree(
         root_synset_str=args.root,
         max_depth=args.depth,
@@ -78,7 +122,9 @@ def cmd_dataset_imagenet(args):
         min_significance_depth=args.min_depth,
         min_hyponyms=args.min_hyponyms,
         min_leaf_size=args.min_leaf,
-        merge_orphans=getattr(args, 'merge_orphans', False)
+        merge_orphans=getattr(args, 'merge_orphans', False),
+        exclude_regex=args.exclude_regex,
+        exclude_subtree=args.exclude_subtree
     )
     
     mgr = StructureManager()
@@ -101,6 +147,28 @@ def cmd_dataset_coco(args):
 def cmd_dataset_openimages(args):
     """Handle openimages subcommand."""
     apply_smart_preset(args)
+    
+    # Analysis mode override
+    if getattr(args, 'analyze', False):
+        print("🔍 Analyzing Open Images hierarchy...")
+        # For OpenImages, smart=False is just a flat list. 
+        # To analyze the potential hierarchy, we must use smart=True 
+        # but with parameters that preserve everything (no pruning).
+        hierarchy = generate_openimages_hierarchy(
+            max_depth=max(args.depth, 10),
+            with_glosses=False,
+            smart=True, 
+            min_significance_depth=20, # Make everything deep significant
+            min_hyponyms=0,            # Keep every branch
+            min_leaf_size=0,           # Never merge leaves
+            bbox_only=args.bbox_only
+        )
+        from .core import analyze
+        stats = analyze.compute_dataset_stats(hierarchy)
+        suggestions = analyze.suggest_thresholds(stats)
+        analyze.print_analysis_report(stats, suggestions)
+        return
+
     hierarchy = generate_openimages_hierarchy(
         max_depth=args.depth,
         with_glosses=not args.no_glosses,
@@ -120,6 +188,21 @@ def cmd_dataset_openimages(args):
 def cmd_dataset_tencent(args):
     """Handle tencent subcommand."""
     apply_smart_preset(args)
+    
+    # Analysis mode override
+    if getattr(args, 'analyze', False):
+        print("🔍 Analyzing Tencent ML-Images hierarchy...")
+        hierarchy = generate_tencent_hierarchy(
+            max_depth=max(args.depth, 10),
+            with_glosses=False,
+            smart=False # Raw tree
+        )
+        from .core import analyze
+        stats = analyze.compute_dataset_stats(hierarchy)
+        suggestions = analyze.suggest_thresholds(stats)
+        analyze.print_analysis_report(stats, suggestions)
+        return
+
     hierarchy = generate_tencent_hierarchy(
         max_depth=args.depth,
         with_glosses=not args.no_glosses,
@@ -127,7 +210,7 @@ def cmd_dataset_tencent(args):
         min_significance_depth=args.min_depth,
         min_hyponyms=args.min_hyponyms,
         min_leaf_size=args.min_leaf,
-        merge_orphans=args.merge_orphans
+        merge_orphans=getattr(args, 'merge_orphans', False)
     )
     
     mgr = StructureManager()
@@ -243,6 +326,28 @@ def cmd_gui(args):
     launch_gui(share=args.share)
 
 
+def cmd_lint(args):
+    """Handle lint command (Semantic Analysis)."""
+    from .core.linter import lint_file, print_lint_report
+    
+    try:
+        if not os.path.exists(args.skeleton):
+            print(f"Error: File not found: {args.skeleton}")
+            sys.exit(1)
+            
+        print(f"🔍 Linting {args.skeleton} using {args.model} (threshold={args.threshold})...")
+        report = lint_file(args.skeleton, args.model, args.threshold)
+        print_lint_report(report, args.output)
+        
+    except ImportError as e:
+        print(f"Error: {e}")
+        sys.exit(1)
+    except Exception as e:
+        logger.exception("Linting failed")
+        print(f"Error: {str(e)}")
+        sys.exit(1)
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog='wildcards-gen',
@@ -254,8 +359,11 @@ def main():
     p_dataset = subparsers.add_parser('dataset', help='Generate from CV dataset')
     dataset_sub = p_dataset.add_subparsers(dest='dataset_type', required=True)
     
+    from .core import analyze
+
     def add_smart_args(parser):
         parser.add_argument('--smart', action='store_true', help='Use semantic significance pruning (ignoring --depth)')
+        parser.add_argument('--analyze', action='store_true', help='Dry-run: Analyze logical structure and suggest smart thresholds')
         parser.add_argument('--preset', choices=list(SMART_PRESETS.keys()), default=None,
                             help='Smart tuning preset (sets defaults for other smart args)')
         parser.add_argument('--min-depth', type=int, default=None, help='[Smart] Max WordNet depth for significance (lower = more fundamental categories)')
@@ -271,6 +379,8 @@ def main():
     p_imagenet.add_argument('--no-glosses', action='store_true', help='Skip WordNet glosses')
     p_imagenet.add_argument('--no-strict', action='store_true', help='Disable strict filtering')
     p_imagenet.add_argument('--blacklist', action='store_true', help='Blacklist abstract categories')
+    p_imagenet.add_argument('--exclude-regex', nargs='+', help='Regex patterns to exclude (e.g. ".*sex.*" ".*nudity.*")')
+    p_imagenet.add_argument('--exclude-subtree', nargs='+', help='Subtree root WNIDs/names to exclude (e.g. "n02121808" "feline")')
     add_smart_args(p_imagenet)
     p_imagenet.add_argument('-o', '--output', default=os.path.join(config.output_dir, 'imagenet.yaml'))
     p_imagenet.set_defaults(func=cmd_dataset_imagenet)
@@ -329,6 +439,16 @@ def main():
     p_gui.add_argument('--share', action='store_true', default=config.get("gui.share"), help='Create public link')
     p_gui.add_argument('--port', type=int, default=config.get("gui.server_port"))
     p_gui.set_defaults(func=cmd_gui)
+
+    # === LINT COMMAND ===
+    p_lint = subparsers.add_parser('lint', help='Analyze skeleton for semantic quality')
+    p_lint.add_argument('skeleton', type=str, help='Path to skeleton YAML file')
+    p_lint.add_argument('--model', choices=['qwen3', 'mpnet', 'minilm'], default='qwen3',
+                        help='Embedding model (qwen3=best quality, minilm=fastest)')
+    p_lint.add_argument('--threshold', type=float, default=0.1,
+                        help='HDBSCAN outlier score threshold (0-1, higher = stricter)')
+    p_lint.add_argument('--output', choices=['json', 'markdown'], default='markdown')
+    p_lint.set_defaults(func=cmd_lint)
     
     args = parser.parse_args()
     args.func(args)

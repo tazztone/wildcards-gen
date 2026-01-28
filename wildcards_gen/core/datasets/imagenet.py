@@ -78,7 +78,9 @@ def build_tree_recursive(
     with_glosses: bool = True,
     strict_filter: bool = True,
     blacklist_abstract: bool = False,
-    smart_config: Any = None
+    smart_config: Any = None,
+    regex_list: List[Any] = None,
+    excluded_synsets: Set[Any] = None
 ) -> tuple:
     """
     Recursively build hierarchy tree from a synset.
@@ -87,6 +89,16 @@ def build_tree_recursive(
         Tuple[bool, List[str]]: (success, orphans_to_bubble_up)
     """
     name = get_synset_name(synset)
+    
+    # 1. Subtree Exclusion Check
+    if excluded_synsets and synset in excluded_synsets:
+        return (False, [])
+        
+    # 2. Regex Exclusion Check
+    if regex_list:
+        for pattern in regex_list:
+            if pattern.search(name):
+                return (False, [])
     
     # Blacklist check
     if blacklist_abstract and is_abstract_category(synset):
@@ -157,7 +169,7 @@ def build_tree_recursive(
         success, orphans = build_tree_recursive(
             child, structure_mgr, child_map, valid_wnids,
             depth + 1, max_depth, with_glosses, strict_filter, blacklist_abstract,
-            smart_config
+            smart_config, regex_list, excluded_synsets
         )
         if success:
             has_valid_children = True
@@ -201,7 +213,9 @@ def generate_imagenet_tree(
     min_significance_depth: int = 6,
     min_hyponyms: int = 10,
     min_leaf_size: int = 3,
-    merge_orphans: bool = False
+    merge_orphans: bool = False,
+    exclude_regex: Optional[List[str]] = None,
+    exclude_subtree: Optional[List[str]] = None
 ) -> CommentedMap:
     """
     Generate ImageNet hierarchy tree from a root synset.
@@ -215,6 +229,8 @@ def generate_imagenet_tree(
         blacklist_abstract: Skip abstract categories
         smart: Use semantic significance pruning
         merge_orphans: Merge small pruned lists into parent
+        exclude_regex: Regex patterns to exclude by name
+        exclude_subtree: Synset names/WNIDs to prune entire subtrees
     """
     ensure_nltk_data()
     
@@ -240,6 +256,27 @@ def generate_imagenet_tree(
     except Exception:
         logger.error(f"Could not find root synset: {root_synset_str}")
         return CommentedMap()
+        
+    # Prepare exclusions
+    import re
+    regex_list = [re.compile(r) for r in exclude_regex] if exclude_regex else []
+    
+    excluded_synsets = set()
+    if exclude_subtree:
+        for s_str in exclude_subtree:
+            try:
+                # Try as WNID first
+                if s_str.startswith('n') and len(s_str) > 5 and s_str[1:].isdigit():
+                    s = get_synset_from_wnid(s_str)
+                else:
+                    s = wn.synset(s_str)
+                
+                if s:
+                    excluded_synsets.add(s)
+                else:
+                    logger.warning(f"Could not resolve excluded subtree: {s_str}")
+            except Exception:
+                logger.warning(f"Could not resolve excluded subtree: {s_str}")
     
     logger.info(
         f"Building hierarchy from {root_synset_str} "
@@ -249,13 +286,18 @@ def generate_imagenet_tree(
     structure_mgr = StructureManager()
     result = CommentedMap()
     
+    # We pass exclusions to build_tree_recursive via a context object or added args
+    # For now, let's update build_tree_recursive signature first or wrap it
+    
     build_tree_recursive(
         root_synset, structure_mgr, result, valid_wnids,
         depth=0, max_depth=max_depth,
         with_glosses=with_glosses,
         strict_filter=strict_filter,
         blacklist_abstract=blacklist_abstract,
-        smart_config=smart_config
+        smart_config=smart_config,
+        regex_list=regex_list,
+        excluded_synsets=excluded_synsets
     )
     
     return result
