@@ -92,6 +92,16 @@ You want a single, massive file containing *everything*—objects, scenes, anima
 wildcards-gen dataset tencent --smart -o output/universal_skeleton.yaml
 ```
 
+**Scenario: Open Images (Full vs. BBox)**
+Open Images V7 contains over 20,000 image-level labels. By default, we generate a massive, deep hierarchy from all of them.
+```bash
+# Default: Full 20k labels (Deep hierarchy)
+wildcards-gen dataset openimages --smart -o output/openimages_full.yaml
+
+# Legacy: 600 Bounding Box classes (Shallow hierarchy)
+wildcards-gen dataset openimages --bbox-only --smart -o output/openimages_bbox.yaml
+```
+
 #### 🎚️ Tuning Smart Mode
 When using `--smart`, you can fine-tune what becomes a category vs. what gets flattened into a list:
 

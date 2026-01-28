@@ -1,0 +1,610 @@
+Entity:  # instruction: that which is perceived or known or inferred to have its own distinct existence (living or nonliving)
+  Coin:  # instruction: a flat metal piece (usually a disc) used as money
+    - Coin
+  Flag: # instruction: emblem usually consisting of a rectangular piece of cloth of distinctive design
+    - Flag
+  Light bulb: # instruction: electric lamp consisting of a transparent or translucent glass housing containing a wire filament (usually tungsten) that emits light when heated by electricity
+    - Light bulb
+  Home appliance: # instruction: an appliance that does a particular job in the home
+    - Blender
+    - Ceiling fan
+    - Coffeemaker
+    - Dishwasher
+    - Gas stove
+    - Hair dryer
+    - Hand dryer
+    - Heater
+    - Humidifier
+    - Kettle
+    - Mechanical fan
+    - Microwave oven
+    - Mixer
+    - Oven
+    - Refrigerator
+    - Sewing machine
+    - Toaster
+    - Washing machine
+    - Wood-burning stove
+  Office supplies: # instruction: Items related to Office supplies
+    - Adhesive tape
+    - Box
+    - Calculator
+    - Envelope
+    - Eraser
+    - Fax
+    - Paper cutter
+    - Pen
+    - Pencil case
+    - Pencil sharpener
+    - Plastic bag
+    - Poster
+    - Ring binder
+    - Scissors
+    - Stapler
+    - Toilet paper
+    - Whiteboard
+  Paper towel: # instruction: a disposable towel made of absorbent paper
+    - Paper towel
+  Pillow: # instruction: a cushion to support the head of a sleeping person
+    - Pillow
+  Kitchenware: # instruction: hardware utensils for use in a kitchen
+    - Blender
+    - Bottle
+    - Bottle opener
+    - Bowl
+    - Cake stand
+    - Can opener
+    - Chopsticks
+    - Cocktail shaker
+    - Coffee cup
+    - Coffeemaker
+    - Cutting board
+    - Dishwasher
+    - Drinking straw
+    - Food processor
+    - Fork
+    - Frying pan
+    - Jug
+    - Kitchen knife
+    - Knife
+    - Ladle
+    - Measuring cup
+    - Microwave oven
+    - Mixer
+    - Mixing bowl
+    - Mug
+    - Oven
+    - Pitcher (Container)
+    - Pizza cutter
+    - Plate
+    - Platter
+    - Pressure cooker
+    - Refrigerator
+    - Salt and pepper shakers
+    - Saucer
+    - Serving tray
+    - Slow cooker
+    - Spatula
+    - Spice rack
+    - Spoon
+    - Teapot
+    - Waffle iron
+    - Whisk
+    - Wine glass
+    - Wok
+  Fireplace: # instruction: an open recess in a wall at the base of a chimney where a fire can be built
+    - Fireplace
+  Countertop: # instruction: the top side of a counter
+    - Countertop
+  Book: # instruction: a written work or composition that has been published (printed on pages bound together)
+    - Book
+  Furniture: # instruction: furnishings that make a room or other area ready for occupancy
+    - Bathroom cabinet
+    - Bench
+    - Bookcase
+    - Cabinetry
+    - Chair
+    - Chest of drawers
+    - Closet
+    - Coffee table
+    - Cupboard
+    - Desk
+    - Drawer
+    - Filing cabinet
+    - Infant bed
+    - Kitchen & dining room table
+    - Loveseat
+    - Nightstand
+    - Shelf
+    - Sofa bed
+    - Stool
+    - Studio couch
+    - Wall clock
+    - Wardrobe
+    - Wine rack
+  Dog bed: # instruction: Items related to Dog bed
+    - Dog bed
+  Cat furniture: # instruction: Items related to Cat furniture
+    - Cat furniture
+  Lantern: # instruction: light in a transparent protective case
+    - Lantern
+  Vase: # instruction: an open jar of glass or porcelain used as an ornament or to hold flowers
+    - Vase
+  Window blind: # instruction: a blind for privacy or to keep out light
+    - Window blind
+  Curtain: # instruction: hanging cloth used as a blind (especially for a window)
+    - Curtain
+  Mirror: # instruction: polished surface that forms images by reflecting light
+    - Mirror
+  Picture frame: # instruction: a framework in which a picture is mounted
+    - Picture frame
+  Candle: # instruction: stick of wax with a wick in the middle
+    - Candle
+  Lamp: # instruction: an artificial source of visible illumination
+    - Lamp
+  Beehive: # instruction: any workplace where people are very busy
+    - Beehive
+  Tent: # instruction: a portable shelter (usually of canvas stretched over supporting poles and fastened to the ground with ropes and pegs)
+    - Tent
+  Parking meter: # instruction: a coin-operated timer located next to a parking space; depositing money into it entitles you to park your car there for a specified length of time
+    - Parking meter
+  Traffic light: # instruction: a visual signal to control the flow of traffic at intersections
+    - Traffic light
+  Billboard: # instruction: large outdoor signboard
+    - Billboard
+  Fire hydrant: # instruction: an upright hydrant for drawing water to use in fighting a fire
+    - Fire hydrant
+  Fountain: # instruction: a structure from which an artificially produced jet of water arises
+    - Fountain
+  Street light: # instruction: Items related to Street light
+    - Street light
+  Jacuzzi: # instruction: Items related to Jacuzzi
+    - Jacuzzi
+  Swimming pool: # instruction: pool that provides a facility for swimming
+    - Swimming pool
+  Person: # instruction: a human being
+    Man:  # instruction: an adult person who is male (as opposed to a woman)
+      - Man
+    Woman: # instruction: an adult female person (as opposed to a man)
+      - Woman
+    Boy: # instruction: a youthful male person
+      - Boy
+    Girl: # instruction: a young woman
+      - Girl
+  Food: # instruction: any substance that can be metabolized by an animal to give energy and build tissue
+    Waffle:  # instruction: pancake batter baked in a waffle iron
+      - Waffle
+    Pancake: # instruction: a flat cake of thin batter fried on both sides on a griddle
+      - Pancake
+    Burrito: # instruction: a flour tortilla folded around a filling
+      - Burrito
+    Guacamole: # instruction: a dip made of mashed avocado mixed with chopped onions and other seasonings
+      - Guacamole
+    Fruit: # instruction: the ripened reproductive body of a seed plant
+      - Apple
+      - Banana
+      - Cantaloupe
+      - Common fig
+      - Grape
+      - Grapefruit
+      - Lemon (plant)
+      - Mango
+      - Orange (fruit)
+      - Peach
+      - Pear
+      - Pineapple
+      - Pomegranate
+      - Strawberry
+      - Tomato
+      - Watermelon
+    Egg: # instruction: animal reproductive body consisting of an ovum or embryo together with nutritive and protective envelopes; especially the thin-shelled reproductive body laid by e.g. female birds
+      - Egg
+    Mushroom: # instruction: common name for an edible agaric (contrasting with the inedible toadstool)
+      - Mushroom
+    Pasta: # instruction: a dish that contains pasta as its main ingredient
+      - Pasta
+    Pizza: # instruction: Italian open pie made of thin bread dough spread with a spiced mixture of e.g. tomato sauce and cheese
+      - Pizza
+    Taco: # instruction: (ethnic slur) offensive term for a person of Mexican descent
+      - Taco
+    Cooking spray: # instruction: Items related to Cooking spray
+      - Cooking spray
+    Vegetable: # instruction: edible seeds or roots or stems or leaves or bulbs or tubers or nonsweet fruits of any of numerous herbaceous plant
+      - Artichoke
+      - Bell pepper
+      - Broccoli
+      - Cabbage
+      - Carrot
+      - Cucumber
+      - Garden Asparagus
+      - Potato
+      - Pumpkin
+      - Radish
+      - Salad
+      - Tomato
+      - Winter melon
+      - Zucchini
+    Honeycomb: # instruction: a structure of small hexagonal cells constructed from beeswax by bees and used to store honey and larvae
+      - Honeycomb
+    Sushi: # instruction: rice (with raw fish) wrapped in seaweed
+      - Sushi
+  Vehicle: # instruction: a conveyance that transports people or objects
+    Land vehicle:  # instruction: Items related to Land vehicle
+      - Ambulance
+      - Bicycle
+      - Bus
+      - Cart
+      - Golf cart
+      - Limousine
+      - Motorcycle
+      - Segway
+      - Snowmobile
+      - Tank
+      - Taxi
+      - Train
+      - Truck
+      - Unicycle
+      - Van
+      - Wheelchair
+  Clothing: # instruction: a covering designed to be worn on a person's body
+    Shorts:  # instruction: trousers that end at or above the knee
+      - Shorts
+    Dress: # instruction: a one-piece garment for a woman; has skirt and bodice
+      - Dress
+    Swimwear: # instruction: tight fitting garment worn for swimming
+      - Swimwear
+    Brassiere: # instruction: an undergarment worn by women to support their breasts
+      - Brassiere
+    Tiara: # instruction: a jeweled headdress worn by women on formal occasions
+      - Tiara
+    Shirt: # instruction: a garment worn on the upper half of the body
+      - Shirt
+    Coat: # instruction: an outer garment that has sleeves and covers the body from shoulder down; worn outdoors
+      - Coat
+    Suit: # instruction: a set of garments (usually including a jacket and trousers or skirt) for outerwear all of the same fabric and color
+      - Suit
+    Scarf: # instruction: a garment worn around the head or neck or shoulders for warmth or decoration
+      - Scarf
+    Jacket: # instruction: a short coat
+      - Jacket
+    Fashion accessory: # instruction: Items related to Fashion accessory
+      - Baseball glove
+      - Belt
+      - Cowboy hat
+      - Crown
+      - Earring
+      - Fedora
+      - Glasses
+      - Goggles
+      - Handbag
+      - Necklace
+      - Scarf
+      - Sock
+      - Sombrero
+      - Sun hat
+      - Sunglasses
+      - Tiara
+      - Tie
+      - Umbrella
+      - Watch
+    Swim cap: # instruction: Items related to Swim cap
+      - Swim cap
+    Sports uniform: # instruction: Items related to Sports uniform
+      - Sports uniform
+  Animal: # instruction: a living organism characterized by voluntary movement
+    Bird:  # instruction: warm-blooded egg-laying vertebrates characterized by feathers and forelimbs modified as wings
+      Magpie:  # instruction: long-tailed black-and-white crow that utters a raucous chattering call
+        - Magpie
+      Woodpecker: # instruction: bird with strong claws and a stiff tail adapted for climbing and a hard chisel-like bill for boring into wood for insects
+        - Woodpecker
+      Blue jay: # instruction: common jay of eastern North America; bright blue with grey breast
+        - Blue jay
+      Ostrich: # instruction: a person who refuses to face reality or recognize the truth (a reference to the popular notion that the ostrich hides from danger by burying its head in the sand)
+        - Ostrich
+      Penguin: # instruction: short-legged flightless birds of cold southern especially Antarctic regions having webbed feet and wings modified as flippers
+        - Penguin
+      Raven: # instruction: large black bird with a straight bill and long wedge-shaped tail
+        - Raven
+      Chicken: # instruction: the flesh of a chicken used for food
+        - Chicken
+      Eagle: # instruction: any of various large keen-sighted diurnal birds of prey noted for their broad wings and strong soaring flight
+        - Eagle
+      Owl: # instruction: nocturnal bird of prey with hawk-like beak and claws and large head with front-facing eyes
+        - Owl
+      Duck: # instruction: small wild or domesticated web-footed broad-billed swimming bird usually having a depressed body and short legs
+        - Duck
+      Canary: # instruction: someone acting as an informer or decoy for the police
+        - Canary
+      Goose: # instruction: web-footed long-necked typically gregarious migratory aquatic birds usually larger and less aquatic than ducks
+        - Goose
+      Swan: # instruction: stately heavy-bodied aquatic bird with very long neck and usually white plumage as adult
+        - Swan
+      Falcon: # instruction: diurnal birds of prey having long pointed powerful wings adapted for swift flight
+        - Falcon
+      Parrot: # instruction: usually brightly colored zygodactyl tropical birds with short hooked beaks and the ability to mimic sounds
+        - Parrot
+      Sparrow: # instruction: any of several small dull-colored singing birds feeding on seeds or insects
+        - Sparrow
+      Turkey: # instruction: large gallinaceous bird with fan-shaped tail; widely domesticated for food
+        - Turkey
+    Invertebrate: # instruction: any animal lacking a backbone or notochord; the term is not used as a scientific classification
+      Tick:  # instruction: a metallic tapping sound
+        - Tick
+      Centipede: # instruction: chiefly nocturnal predacious arthropod having a flattened body of 15 to 173 segments each with a pair of legs, the foremost pair being modified as prehensors
+        - Centipede
+      Scorpion: # instruction: (astrology) a person who is born while the sun is in Scorpio
+        - Scorpion
+      Worm: # instruction: any of numerous relatively small elongated soft-bodied animals especially of the phyla Annelida and Chaetognatha and Nematoda and Nemertea and Platyhelminthes; also many insect larvae
+        - Worm
+      Spider: # instruction: predatory arachnid with eight legs, two poison fangs, two feelers, and usually two silk-spinning organs at the back end of the body; they spin silk to make cocoons for eggs or traps for prey
+        - Spider
+      Oyster: # instruction: marine mollusks having a rough irregular shell; found on the sea bed mostly in coastal waters
+        - Oyster
+      Snail: # instruction: freshwater or marine or terrestrial gastropod mollusk usually having an external enclosing spiral shell
+        - Snail
+    Mammal: # instruction: any warm-blooded vertebrate having the skin more or less covered with hair; young are born alive except for the small subclass of monotremes and nourished with milk
+      Bat (Animal):  # instruction: Items related to Bat (Animal)
+        - Bat (Animal)
+      Carnivore: # instruction: a terrestrial or aquatic flesh-eating mammal
+        - Brown bear
+        - Cat
+        - Cheetah
+        - Dog
+        - Fox
+        - Jaguar (Animal)
+        - Leopard
+        - Lion
+        - Lynx
+        - Otter
+        - Panda
+        - Polar bear
+        - Raccoon
+        - Red panda
+        - Teddy bear
+        - Tiger
+      Camel: # instruction: cud-chewing mammal used as a draft or saddle animal in desert regions
+        - Camel
+      Cattle: # instruction: domesticated bovine animals as a group regardless of sex or age; ; ; - Bible
+        - Cattle
+      Giraffe: # instruction: tallest living quadruped; having a spotted coat and small horns and very long neck and legs; of savannahs of tropical Africa
+        - Giraffe
+      Rhinoceros: # instruction: massive powerful herbivorous odd-toed ungulate of southeast Asia and Africa having very thick skin and one or two horns on the snout
+        - Rhinoceros
+      Goat: # instruction: any of numerous agile ruminants related to sheep but having a beard and straight horns
+        - Goat
+      Horse: # instruction: solid-hoofed herbivorous quadruped domesticated since prehistoric times
+        - Horse
+      Hamster: # instruction: short-tailed Old World burrowing rodent with large cheek pouches
+        - Hamster
+      Kangaroo: # instruction: any of several herbivorous leaping marsupials of Australia and New Guinea having large powerful hind legs and a long thick tail
+        - Kangaroo
+      Koala: # instruction: sluggish tailless Australian arboreal marsupial with grey furry ears and coat; feeds on eucalyptus leaves and bark
+        - Koala
+      Mouse: # instruction: any of numerous small rodents typically resembling diminutive rats having pointed snouts and small ears on elongated bodies with slender usually hairless tails
+        - Mouse
+      Pig: # instruction: domestic swine
+        - Pig
+      Rabbit: # instruction: any of various burrowing animals of the family Leporidae having long ears and short tails; some domesticated and raised for pets or food
+        - Rabbit
+      Squirrel: # instruction: a kind of arboreal rodent having a long bushy tail
+        - Squirrel
+      Sheep: # instruction: woolly usually horned ruminant mammal related to the goat
+        - Sheep
+      Zebra: # instruction: any of several fleet black-and-white striped African equines
+        - Zebra
+      Monkey: # instruction: any of various long-tailed primates (excluding the prosimians)
+        - Monkey
+      Hippopotamus: # instruction: massive thick-skinned herbivorous animal living in or around rivers of tropical Africa
+        - Hippopotamus
+      Deer: # instruction: distinguished from Bovidae by the male's having solid deciduous antlers
+        - Deer
+      Elephant: # instruction: five-toed pachyderm
+        - Elephant
+      Porcupine: # instruction: relatively large rodents with sharp erectile bristles mingled with the fur
+        - Porcupine
+      Hedgehog: # instruction: relatively large rodents with sharp erectile bristles mingled with the fur
+        - Hedgehog
+      Bull: # instruction: uncastrated adult male of domestic cattle
+        - Bull
+      Antelope: # instruction: graceful Old World ruminant with long legs and horns directed upward and backward; includes gazelles; springboks; impalas; addax; gerenuks; blackbucks; dik-diks
+        - Antelope
+      Mule: # instruction: hybrid offspring of a male donkey and a female horse; usually sterile
+        - Mule
+      Skunk: # instruction: a person who is deemed to be despicable or contemptible
+        - Skunk
+      Alpaca: # instruction: wool of the alpaca
+        - Alpaca
+      Armadillo: # instruction: burrowing chiefly nocturnal mammal with body covered with strong horny plates
+        - Armadillo
+    Fish: # instruction: any of various mostly cold-blooded aquatic vertebrates usually having scales and breathing through gills
+      Goldfish:  # instruction: small golden or orange-red freshwater fishes of Eurasia used as pond or aquarium fishes
+        - Goldfish
+      Shark: # instruction: any of numerous elongate mostly marine carnivorous fishes with heterocercal caudal fins and tough skin covered with small toothlike scales
+        - Shark
+      Rays and skates: # instruction: Items related to Rays and skates
+        - Rays and skates
+      Seahorse: # instruction: either of two large northern marine mammals having ivory tusks and tough hide over thick blubber
+        - Seahorse
+  Musical instrument: # instruction: any of various devices or contrivances that can be used to produce musical tones or sounds
+    - Accordion
+    - Banjo
+    - Cello
+    - Chime
+    - Drum
+    - Flute
+    - French horn
+    - Guitar
+    - Harmonica
+    - Harp
+    - Harpsichord
+    - Maraca
+    - Musical keyboard
+    - Oboe
+    - Organ (Musical Instrument)
+    - Piano
+    - Saxophone
+    - Trombone
+    - Trumpet
+    - Violin
+  Sports equipment: # instruction: equipment needed to participate in a particular sport
+    - Balance beam
+    - Baseball bat
+    - Baseball glove
+    - Bicycle
+    - Bicycle helmet
+    - Billiard table
+    - Bow and arrow
+    - Bowling equipment
+    - Cricket ball
+    - Dumbbell
+    - Flying disc
+    - Football
+    - Football helmet
+    - Golf ball
+    - Hiking equipment
+    - Horizontal bar
+    - Indoor rower
+    - Paddle
+    - Parachute
+    - Personal flotation device
+    - Punching bag
+    - Roller skates
+    - Rugby ball
+    - Scoreboard
+    - Skateboard
+    - Ski
+    - Snowboard
+    - Stationary bicycle
+    - Surfboard
+    - Table tennis racket
+    - Tennis ball
+    - Tennis racket
+    - Training bench
+    - Treadmill
+    - Volleyball (Ball)
+  Tool: # instruction: an implement used in the practice of a vocation
+    - Axe
+    - Barrel
+    - Beaker
+    - Binoculars
+    - Bottle
+    - Bottle opener
+    - Camera
+    - Can opener
+    - Chainsaw
+    - Chisel
+    - Chopsticks
+    - Cutting board
+    - Drill (Tool)
+    - Drinking straw
+    - Flashlight
+    - Flowerpot
+    - Fork
+    - Grinder
+    - Hammer
+    - Jug
+    - Knife
+    - Ladder
+    - Ladle
+    - Measuring cup
+    - Nail (Construction)
+    - Picnic basket
+    - Pizza cutter
+    - Ratchet (Device)
+    - Ruler
+    - Scale
+    - Scissors
+    - Screwdriver
+    - Snowplow
+    - Spatula
+    - Spoon
+    - Tin can
+    - Toothbrush
+    - Torch
+    - Tripod
+    - Waste container
+    - Whisk
+    - Wrench
+  Weapon: # instruction: any instrument or instrumentality used in fighting or hunting
+    - Axe
+    - Bomb
+    - Bow and arrow
+    - Cannon
+    - Dagger
+    - Handgun
+    - Knife
+    - Missile
+    - Rifle
+    - Shotgun
+    - Sword
+    - Tank
+  Cassette deck: # instruction: a tape deck for playing and recording cassette tapes
+    - Cassette deck
+  Headphones: # instruction: electro-acoustic transducer for converting electric signals into sounds; it is held over or inserted into the ear
+    - Headphones
+  Laptop: # instruction: a portable computer small enough to use in your lap
+    - Laptop
+  Computer keyboard: # instruction: a keyboard that is a data input device for computers; arrangement of keys is modelled after the typewriter keyboard
+    - Computer keyboard
+  Printer: # instruction: someone whose occupation is printing
+    - Printer
+  Computer mouse: # instruction: a hand-operated electronic device that controls the coordinates of a cursor on your computer screen as you move it around on a pad; on the bottom of the device is a ball that rolls on the surface of the pad
+    - Computer mouse
+  Computer monitor: # instruction: a device that displays signals on a computer screen
+    - Computer monitor
+  Power plugs and sockets: # instruction: Items related to Power plugs and sockets
+    - Power plugs and sockets
+  Light switch: # instruction: Items related to Light switch
+    - Light switch
+  Television: # instruction: broadcasting visual images of stationary or moving objects; ;  - Ernie Kovacs
+    - Television
+  Tablet computer: # instruction: Items related to Tablet computer
+    - Tablet computer
+  Microphone: # instruction: device for converting sound waves into electrical energy
+    - Microphone
+  Ipod: # instruction: (trademark) a pocket-sized device used to play music files
+    - Ipod
+  Remote control: # instruction: a device that can be used to control a machine or apparatus from a distance
+    - Remote control
+  Bicycle wheel: # instruction: the wheel of a bicycle
+    - Bicycle wheel
+  Door handle: # instruction: Items related to Door handle
+    - Door handle
+  Door: # instruction: a swinging or sliding barrier that will close the entrance to a room or building or vehicle
+    - Door
+  Window: # instruction: a framework of wood or metal that contains a glass windowpane and is built into a wall or roof to admit light or air
+    - Window
+  Stairs: # instruction: a flight of stairs or a flight of steps
+    - Stairs
+  Porch: # instruction: a structure attached to the exterior of a building often forming a covered entrance
+    - Porch
+  Human eye: # instruction: Items related to Human eye
+    - Human eye
+  Skull: # instruction: the bony skeleton of the head of vertebrates
+    - Skull
+  Human head: # instruction: the head of a human being
+    - Human head
+  Human face: # instruction: the front of the human head from the forehead to the chin and ear to ear
+    - Human face
+  Human mouth: # instruction: Items related to Human mouth
+    - Human mouth
+  Human ear: # instruction: Items related to Human ear
+    - Human ear
+  Human nose: # instruction: Items related to Human nose
+    - Human nose
+  Human hair: # instruction: Items related to Human hair
+    - Human hair
+  Human hand: # instruction: Items related to Human hand
+    - Human hand
+  Human foot: # instruction: the part of the leg of a human being below the ankle joint
+    - Human foot
+  Human arm: # instruction: Items related to Human arm
+    - Human arm
+  Human leg: # instruction: Items related to Human leg
+    - Human leg
+  Beard: # instruction: the hair growing on the lower part of a man's face
+    - Beard
+  Human body: # instruction: alternative names for the body of a human being
+    - Human body
+  Coconut: # instruction: the edible white meat of a coconut; often shredded for use in e.g. cakes and curries
+    - Coconut
