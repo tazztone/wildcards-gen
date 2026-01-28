@@ -1,6 +1,14 @@
 #!/bin/bash
 
 # wildcards-gen Installation Script (Linux/macOS)
+# This script should be run from the repository root or its own directory.
+
+# Get the directory where the script is located
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+# Project root is two levels up from scripts/linux/
+ROOT_DIR="$( cd "$SCRIPT_DIR/../.." && pwd )"
+
+cd "$ROOT_DIR"
 
 # Exit on error
 set -e

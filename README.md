@@ -5,6 +5,9 @@
 
 This tool combines the precision of **WordNet** (for computer vision datasets) with the creativity of **LLMs** (for semantic categorization) to produce rich, context-aware taxonomies. It is designed to create the "skeleton" files used by the `wildcards-generator` SPA.
 
+> [!TIP]
+> **🎯 Looking for the Wildcards Generator SPA?** This CLI tool creates skeleton files for use with [**wildcards-generator**](https://github.com/tazztone/wildcards-generator) — the AI-powered web app that expands these skeletons into massive wildcard libraries.
+
 ## 🌟 How It Works
 
 `wildcards-gen` is the **architect**. It builds the structural foundation that other tools populate.
@@ -150,13 +153,46 @@ wildcards-gen enrich old_styles.yaml -o new_styles.yaml
 
 ### 4. Visual GUI
 Prefer clicking? Launch the web interface:
+
+**Linux/macOS:**
 ```bash
-wildcards-gen gui
+bash scripts/linux/run_gui.sh
 ```
+
+**Windows:**
+```powershell
+.\scripts\windows\run_gui.bat
+```
+
+Alternatively, if your environment is activated: `wildcards-gen gui`
 
 ---
 
-## Installation
+## 🛠️ Installation & Setup
+
+### 🚀 Easy Start (Recommended)
+We provide helper scripts that handle virtual environment creation and dependency installation automatically.
+
+**Linux/macOS:**
+```bash
+bash scripts/linux/install.sh
+```
+
+**Windows:**
+```powershell
+.\scripts\windows\install.bat
+```
+
+### 🧠 Quick Universal Skeleton
+To generate the recommended "Universal" smart skeleton (based on Tencent ML-Images):
+
+**Linux/macOS:** `bash scripts/linux/gen_universal.sh`
+**Windows:** `.\scripts\windows\gen_universal.bat`
+
+---
+
+### Manual Installation
+If you prefer to manage your environment manually:
 
 ```bash
 git clone https://github.com/tazztone/wildcards-gen.git
