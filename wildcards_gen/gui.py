@@ -112,6 +112,7 @@ def generate_dataset_handler(
     with_glosses, filter_set, strict_filter, blacklist_abstract,
     min_depth, min_hyponyms, min_leaf, merge_orphans,
     bbox_only,
+    exclude_subtree=None, exclude_regex=None,
     progress=gr.Progress()
 ):
     progress(0, desc="Initializing...")
@@ -132,7 +133,9 @@ def generate_dataset_handler(
                 min_significance_depth=int(min_depth),
                 min_hyponyms=int(min_hyponyms),
                 min_leaf_size=int(min_leaf),
-                merge_orphans=merge_orphans
+                merge_orphans=merge_orphans,
+                exclude_regex=exclude_regex,
+                exclude_subtree=exclude_subtree
             )
         elif dataset_name == "COCO":
             progress(0.2, desc="Loading COCO API...")
@@ -169,6 +172,59 @@ def generate_dataset_handler(
     except Exception as e:
         logger.exception("Dataset generation failed")
         return None, f"Error: {str(e)}"
+
+def analyze_handler(
+    dataset_name, root, depth, filter_set, strict_filter, blacklist_abstract, bbox_only,
+    progress=gr.Progress()
+):
+    """Run dry-run analysis and return report + suggestions."""
+    progress(0, desc="Analyzing structure...")
+    try:
+        data = None
+        if dataset_name == "ImageNet":
+            if not root: return "Error: Root required", 4, 50, 5
+            # Force non-smart for analysis
+            data = imagenet.generate_imagenet_tree(
+                root, max_depth=max(int(depth), 10), filter_set=filter_set if filter_set != 'none' else None,
+                with_glosses=False, strict_filter=strict_filter, blacklist_abstract=blacklist_abstract,
+                smart=False
+            )
+        elif dataset_name == "Open Images":
+            # OpenImages needs smart=True but permissive to see structure
+            data = openimages.generate_openimages_hierarchy(
+                max_depth=max(int(depth), 10), with_glosses=False, smart=True,
+                min_significance_depth=20, min_hyponyms=0, min_leaf_size=0, bbox_only=bbox_only
+            )
+        elif dataset_name == "Tencent ML-Images":
+            data = tencent.generate_tencent_hierarchy(
+                max_depth=max(int(depth), 10), with_glosses=False, smart=True,
+                min_significance_depth=20, min_hyponyms=0, min_leaf_size=0
+            )
+        else:
+            return "Analysis not supported for this dataset.", 4, 50, 5
+            
+        from wildcards_gen.core import analyze
+        stats = analyze.compute_dataset_stats(data)
+        tuned = analyze.suggest_thresholds(stats)
+        
+        report = f"""
+### 📊 Analysis Report
+* **Max Depth**: {stats.max_depth}
+* **Total Nodes**: {stats.total_nodes}
+* **Total Leaves**: {stats.total_leaves}
+* **Avg Branching**: {stats.to_dict()['avg_branching']}
+* **Avg Leaf Size**: {stats.to_dict()['avg_leaf_size']}
+
+### 💡 Suggestions
+* **Min Depth**: {tuned['min_depth']}
+* **Min Hyponyms**: {tuned['min_hyponyms']}
+* **Min Leaf Size**: {tuned['min_leaf_size']}
+"""
+        return report, tuned['min_depth'], tuned['min_hyponyms'], tuned['min_leaf_size']
+        
+    except Exception as e:
+        logger.exception("Analysis failed")
+        return f"Error: {str(e)}", 4, 50, 5
 
 def create_handler(topic, model, api_key, output_name):
     if not api_key:
@@ -238,6 +294,38 @@ def enrich_handler(input_yaml, topic, model, api_key, output_name):
     except Exception as e:
         logger.exception("Enrich failed")
         return None, f"Error: {str(e)}"
+
+def lint_handler(file_obj, model, threshold, progress=gr.Progress()):
+    if not file_obj:
+        return "Error: No file uploaded."
+    
+    progress(0, desc="Loading model... (this may take a moment)")
+    try:
+        from wildcards_gen.core.linter import lint_file, format_lint_report
+        
+        # Determine format
+        # If running from GUI, we return markdown string directly
+        output_path = file_obj.name
+        
+        # Run Lint
+        outliers = lint_file(output_path, model, float(threshold))
+        
+        if not outliers:
+            return "✅ **No outliers detected.** The structure looks semantically consistent!"
+            
+        # Format Report
+        report = f"### ⚠️ Found {len(outliers)} Potential Outliers\n\n"
+        report += "| Score | Item | Context |\n|---|---|---|\n"
+        
+        for item in outliers:
+            score_bar = "█" * int(item['score'] * 10)
+            report += f"| {item['score']:.2f} | `{item['term']}` | {item['context']} |\n"
+            
+        return report
+        
+    except Exception as e:
+        logger.exception("Linter failed")
+        return f"Error: {str(e)}"
 
 def launch_gui(share=False):
     # Initial API key from config or env
@@ -367,11 +455,31 @@ def launch_gui(share=False):
                                     return SMART_PRESETS[p]
                                 return [gr.update()]*4                            
                             ds_smart_preset.change(apply_smart_preset, inputs=[ds_smart_preset, ds_name], outputs=[ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_merge_orphans])
+
+                            # === NEW: Analysis Tools ===
+                            with gr.Row():
+                                ds_analyze_btn = gr.Button("🔍 Analyze Structure", size="sm")
+                            ds_analysis_output = gr.Markdown("")
+                            with gr.Row(visible=False) as apply_output_row:
+                                ds_apply_suggest = gr.Button("✅ Apply Suggestions", size="sm", variant="secondary")
+                                # Hidden states to store suggestion values
+                                sug_d = gr.State(4)
+                                sug_h = gr.State(50)
+                                sug_l = gr.State(5)
+                            
+                            ds_apply_suggest.click(
+                                lambda d, h, l: (d, h, l),
+                                inputs=[sug_d, sug_h, sug_l],
+                                outputs=[ds_min_depth, ds_min_hyponyms, ds_min_leaf]
+                            )
                         
                         with gr.Accordion("Advanced Filtering (ImageNet)", open=False, visible=True) as adv_filter_group:
                             ds_filter = gr.Dropdown(["none", "1k", "21k"], label="Sub-Filter", value="none")
                             ds_strict = gr.Checkbox(label="Strict Lexical Match", value=True)
                             ds_blacklist = gr.Checkbox(label="Hide Abstract Concepts", value=False)
+                            # === NEW: Exclusion Filters ===
+                            ds_exclude_subtree = gr.Textbox(label="Exclude Subtrees", placeholder="e.g. dog.n.01, vehicle.n.01 (Comma separated)")
+                            ds_exclude_regex = gr.Textbox(label="Exclude Regex", placeholder="e.g. .*sex.*, ^bad_prefix (Comma separated)")
                         
                         with gr.Group(visible=False) as ds_openimages_group:
                             ds_bbox_only = gr.Checkbox(label="Legacy BBox Mode (600 classes)", value=False, info="Use original bounding-box hierarchy instead of full 20k labels.")
@@ -424,9 +532,30 @@ def launch_gui(share=False):
                 for comp in [ds_name, ds_root, ds_depth, ds_strategy, ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_bbox_only]:
                     comp.change(update_ds_filename, inputs=[ds_name, ds_root, ds_depth, ds_strategy, ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_bbox_only], outputs=[ds_out])
                 
+                # Helper to parse text inputs into lists
+                def parse_csv(text):
+                    if not text: return None
+                    return [t.strip() for t in text.split(",") if t.strip()]
+
+                ds_analyze_btn.click(
+                    analyze_handler,
+                    inputs=[ds_name, ds_root, ds_depth, ds_filter, ds_strict, ds_blacklist, ds_bbox_only],
+                    outputs=[ds_analysis_output, sug_d, sug_h, sug_l]
+                ).then(lambda: gr.update(visible=True), outputs=[apply_output_row])
+
                 ds_btn.click(
-                    generate_dataset_handler, 
-                    inputs=[ds_name, ds_strategy, ds_root, ds_depth, ds_out, ds_glosses, ds_filter, ds_strict, ds_blacklist, ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_merge_orphans, ds_bbox_only],
+                    lambda *args: generate_dataset_handler(
+                        *args[:-2], 
+                        exclude_subtree=parse_csv(args[-2]), 
+                        exclude_regex=parse_csv(args[-1])
+                    ),
+                    inputs=[
+                        ds_name, ds_strategy, ds_root, ds_depth, ds_out, 
+                        ds_glosses, ds_filter, ds_strict, ds_blacklist, 
+                        ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_merge_orphans, 
+                        ds_bbox_only,
+                        ds_exclude_subtree, ds_exclude_regex
+                    ],
                     outputs=[ds_file, ds_prev]
                 )
 
@@ -473,7 +602,27 @@ def launch_gui(share=False):
                         en_prev = gr.Code(language="yaml", label="Preview", lines=20)
                 en_btn.click(enrich_handler, inputs=[en_yaml, en_topic, model_state, api_key_state, en_out], outputs=[en_file, en_prev])
 
-            # === TAB 5: SETTINGS ===
+            # === TAB 5: LINTER ===
+            with gr.Tab("🔬 Semantic Linter"):
+                gr.Markdown("### Detect Semantic Outliers using Embeddings — *Local ML*")
+                with gr.Row():
+                    with gr.Column(scale=1):
+                        lint_file = gr.File(label="Upload Skeleton YAML", file_types=[".yaml"])
+                        lint_model = gr.Dropdown(
+                            ["qwen3", "mpnet", "minilm"], 
+                            label="Embedding Model", 
+                            value="qwen3",
+                            info="Qwen3 (Best), MPNet (Fast), MiniLM (Fastest)"
+                        )
+                        lint_threshold = gr.Slider(0.01, 1.0, value=0.1, step=0.01, label="Sensitivity Threshold", info="Higher = stricter detection (more false positives).")
+                        lint_btn = gr.Button("🕵️ Run Linter", variant="primary")
+                    
+                    with gr.Column(scale=2):
+                        lint_output = gr.Markdown("Results will appear here...")
+                
+                lint_btn.click(lint_handler, inputs=[lint_file, lint_model, lint_threshold], outputs=[lint_output])
+
+            # === TAB 6: SETTINGS ===
             with gr.Tab("⚙️ Settings"):
                 gr.Markdown("### Configuration")
                 with gr.Group():
