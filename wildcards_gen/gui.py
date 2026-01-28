@@ -337,12 +337,14 @@ def launch_gui(share=False):
                             # Dataset-specific overrides (dataset_name -> preset_name -> values)
                             DATASET_PRESET_OVERRIDES = {
                                 "Open Images": {
-                                    "Balanced": (4, 50, 5, True),  # Force merge orphans
-                                    "Compact": (3, 100, 10, True),
+                                    "Balanced": (4, 50, 5, True),
+                                    "Compact": (3, 200, 10, True),  # Increased threshold to preserve structure
+                                    "Flat": (2, 1500, 15, True),    # Very aggressive threshold needed for this dataset
                                 },
                                 "Tencent ML-Images": {
-                                    "Balanced": (4, 30, 5, True),  # Denser hierarchy
-                                    "Compact": (3, 80, 8, True),
+                                    "Balanced": (4, 30, 5, True),
+                                    "Compact": (3, 100, 10, True),
+                                    "Flat": (2, 600, 20, True),     # Higher leaf size to reduce noise in dense lists
                                 },
                                 "ImageNet": {
                                     # ImageNet works well with defaults
