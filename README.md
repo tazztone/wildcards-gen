@@ -273,6 +273,7 @@ Current status and planned features. We focus on **automation**, **structure arc
 - [x] LLM-powered taxonomy creation and enrichment
 - [x] Gradio web GUI with dataset-aware UI
 - [x] Comment-preserving YAML handling via ruamel.yaml
+- [x] **Semantic Linter** — Analyze skeletons to detect semantically inconsistent items using embedding models
 
 ### 🚧 In Progress / Short-Term
 - [ ] **Batch Pipeline** — Automated generation from a list of topics or roots (e.g. `input_topics.txt` → `multiple_skeletons/`)
@@ -287,7 +288,31 @@ Current status and planned features. We focus on **automation**, **structure arc
 
 ### 💡 Ideas (Architecture & Data)
 - **Domain Vocabularies**: Pre-packaged, curated WordNet subsets (e.g. "Bio-Diversity", "Fashion", "Military Hardware")
-- **Semantic Linter**: Analyze skeletons to flag potentially "weak" or vague categories before AI population
 - **Auto-Enrichment**: recursive "deepening" of leaf nodes that are too broad
 
 > Have a feature request? Open an issue on [GitHub](https://github.com/tazztone/wildcards-gen/issues)!
+
+---
+
+## 🔬 Semantic Linter
+
+The Semantic Linter uses embedding models to detect outliers in your wildcard lists. Items that are semantically inconsistent with their siblings are flagged for review.
+
+### CLI Usage
+```bash
+# Lint a skeleton file using the default model (Qwen3)
+wildcards-gen lint output/skeleton.yaml
+
+# Use a faster model with custom threshold
+wildcards-gen lint output/skeleton.yaml --model minilm --threshold 0.2
+```
+
+### Available Models
+| Model | Speed | Quality | Best For |
+|-------|-------|---------|----------|
+| `qwen3` | Slow | Best | Final review |
+| `mpnet` | Medium | Good | General use |
+| `minilm` | Fast | Acceptable | Quick checks |
+
+### GUI
+The Linter is also available in the GUI under the "🔬 Semantic Linter" tab. Upload a YAML file, select a model, and click "Run Linter" to see the report.
