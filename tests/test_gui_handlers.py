@@ -30,20 +30,24 @@ class TestGUIHandlers(unittest.TestCase):
         mock_file.name = "test.yaml"
         
         # Patch the local import inside the function
-        with patch('wildcards_gen.core.linter.lint_file') as mock_lint:
+        with patch('wildcards_gen.core.linter.lint_file') as mock_lint, \
+             patch('wildcards_gen.core.linter.clean_structure') as mock_clean:
+            
+            mock_clean.return_value = {'cleaned': True}
+            
             # Case 1: No outliers
-            mock_lint.return_value = {'issues': []}
-            res = gui.lint_handler(mock_file, "qwen3", 0.1)
+            mock_lint.return_value = ({'issues': []}, MagicMock())
+            res, update, path = gui.lint_handler(mock_file, "qwen3", 0.1)
             self.assertIn("No outliers", res)
             
             # Case 2: Outliers found
-            mock_lint.return_value = {
+            mock_lint.return_value = ({
                 'issues': [{
                     'path': 'root', 
                     'outliers': [{'term': 'bad', 'score': 0.9}]
                 }]
-            }
-            res = gui.lint_handler(mock_file, "qwen3", 0.1)
+            }, MagicMock())
+            res, update, path = gui.lint_handler(mock_file, "qwen3", 0.1)
             self.assertIn("Found 1 Potential Outliers", res)
             self.assertIn("| **0.90** | `bad` |", res)
 

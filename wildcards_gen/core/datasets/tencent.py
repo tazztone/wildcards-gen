@@ -285,6 +285,8 @@ def generate_tencent_hierarchy(
                  return None, filtered_leaves # Bubble further up
             
             return (filtered_leaves if filtered_leaves else None), []
+        
+        return cm, []
 
     # Root level
     final_map = CommentedMap()
