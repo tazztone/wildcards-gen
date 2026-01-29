@@ -30,3 +30,11 @@ DATASET_PRESET_OVERRIDES = {
         # ImageNet works well with defaults
     },
 }
+
+# Per-Category Static Overrides (dataset_name -> category_name -> config)
+DATASET_CATEGORY_OVERRIDES = {
+    # Example:
+    # "ImageNet": {
+    #     "person": {"min_hyponyms": 1000}, # Always flatten person
+    # }
+}

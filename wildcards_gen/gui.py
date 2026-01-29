@@ -1,4 +1,3 @@
-
 import gradio as gr
 import os
 import yaml
@@ -126,8 +125,6 @@ def on_dataset_change(dataset_name, strategy):
         gr.update(value=""),      # ds_analysis_output
         gr.update(visible=False)  # apply_output_row
     ]
-
-
 
 
 def generate_dataset_handler(
@@ -386,252 +383,232 @@ def launch_gui(share=False):
         model_state = gr.State(config.model)
         
         with gr.Tabs():
-            # === TAB 1: DATASETS (Local & Free) ===
-            with gr.Tab("🗂️ Datasets"):
-                gr.Markdown("### Generate from CV Datasets — *100% Local & Free*")
+            # === TAB 1: BUILDER (Consolidated) ===
+            with gr.Tab("🏗️ Builder"):
                 
-                # WordNet Search (Moved to top for discoverability)
-                with gr.Accordion("🔍 WordNet ID Lookup", open=False):
-                    gr.Markdown("### 🔍 Dictionary Lookup\n*Find the specific WordNet synset ID required for ImageNet root settings.*")
-                    with gr.Row():
-                        search_in = gr.Textbox(label="Search Term", placeholder="e.g. camera, dog, sword", scale=3, info="Lookup meanings and synset IDs (e.g. 'camera' -> 'camera.n.01').")
-                        search_btn = gr.Button("Search", scale=1)
-                    search_out = gr.Markdown("Results appear here...")
-                    search_btn.click(search_wordnet, inputs=[search_in], outputs=[search_out])
-                
+                # Source Selection
                 with gr.Row():
-                    # Left Column: Configuration
-                    with gr.Column(scale=1):
-                        with gr.Group():
-                            gr.Markdown("**Dataset & Strategy**")
-                            ds_name = gr.Dropdown(
-                                ["ImageNet", "COCO", "Open Images", "Tencent ML-Images"], 
-                                label="Source", 
-                                value="ImageNet",
-                                info="Source dataset for hierarchy generation."
-                            )
-                            ds_info = gr.Markdown(
-                                "_**ImageNet**: 21k classes. Best for general objects/animals._",
-                                elem_id="ds-info"
-                            )
-                            ds_strategy = gr.Radio(
-                                ["Standard", "Smart"],
-                                label="Extraction Mode",
-                                value="Smart",
-                                info="Smart: Uses semantic analysis to prune meaningless intermediates and flatten deep lists."
-                            )
-                        
-                        with gr.Group(visible=True) as ds_imagenet_group:
-                            gr.Markdown("**ImageNet Configuration**")
-                            ds_root = gr.Textbox(
-                                label="Root Synset", 
-                                value=config.get("datasets.imagenet.root_synset"),
-                                placeholder="entity.n.01",
-                                info="WordNet ID (e.g. entity.n.01). Use Lookup above to find others."
-                            )
-                            COMMON_ROOTS = {
-                                "— Presets —": "",
-                                "Everything": "entity.n.01",
-                                "Animals": "animal.n.01",
-                                "Living Things": "living_thing.n.01",
-                                "Plants": "plant.n.02",
-                                "Vehicles": "vehicle.n.01",
-                                "Furniture": "furniture.n.01",
-                                "Clothing": "clothing.n.01",
-                                "Food": "food.n.01",
-                                "Tools": "tool.n.01"
-                            }
-                            ds_presets = gr.Dropdown(
-                                choices=list(COMMON_ROOTS.keys()),
-                                label="Quick Presets",
-                                info="Select common ImageNet high-level categories."
-                            )
-                            def apply_preset(p):
-                                return COMMON_ROOTS.get(p, "")
-                            ds_presets.change(apply_preset, inputs=[ds_presets], outputs=[ds_root])
-                        
-                        with gr.Group():
-                            gr.Markdown("**Hierarchy Depth**")
-                            ds_depth = gr.Slider(1, 12, value=config.get("generation.default_depth"), step=1, label="Max Generation Depth", info="Maximum recursion limit for the hierarchy tree.")
-                        
-                        with gr.Accordion("Smart Tuning Parameters", open=True, visible=True) as smart_tuning_group:
-                            gr.Markdown("_Smart Mode uses WordNet to analyze semantic importance. Adjust these to control granularity._")
-                            
-                            ds_smart_preset = gr.Radio(list(SMART_PRESETS.keys()), label="Preset", value="Balanced", info="Semantic pruning levels from Ultra-Detailed to Ultra-Flat.")
-                            ds_min_depth = gr.Slider(0, 10, value=4, step=1, label="Significance Depth", info="Force categories if shallower than this.")
-                            ds_min_hyponyms = gr.Slider(0, 2000, value=50, step=10, label="Flattening Threshold", info="Keep as category if more descendants than this.")
-                            ds_min_leaf = gr.Slider(1, 100, value=5, step=1, label="Min Leaf Size", info="Merge small lists into parent.")
-                            ds_merge_orphans = gr.Checkbox(label="Merge Orphans", value=True, info="Group small pruned lists into a 'misc' key.")
-                            
-                            def apply_smart_preset(p, dataset_name):
-                                # Check dataset-specific overrides first
-                                if dataset_name in DATASET_PRESET_OVERRIDES:
-                                    overrides = DATASET_PRESET_OVERRIDES[dataset_name]
-                                    if p in overrides:
-                                        return overrides[p]
-                                # Fall back to universal presets
-                                if p in SMART_PRESETS:
-                                    return SMART_PRESETS[p]
-                                return [gr.update()]*4                            
-                            ds_smart_preset.change(apply_smart_preset, inputs=[ds_smart_preset, ds_name], outputs=[ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_merge_orphans])
-
-                            # === NEW: Analysis Tools ===
-                            gr.Markdown("### 📊 Dataset Analysis\n*Examine the raw hierarchy to find the best 'Smart' flattening thresholds for this specific dataset and root.*")
-                            with gr.Row():
-                                ds_analyze_btn = gr.Button("🔍 Analyze Structure", size="sm")
-                            ds_analysis_output = gr.Markdown("")
-                            with gr.Row(visible=False) as apply_output_row:
-                                gr.Markdown("💡 **Optimization**: Apply the suggested thresholds found during analysis.")
-                                ds_apply_suggest = gr.Button("✅ Apply Suggestions", size="sm", variant="secondary")
-                                # Hidden states to store suggestion values
-                                sug_d = gr.State(4)
-                                sug_h = gr.State(50)
-                                sug_l = gr.State(5)
-                            
-                            ds_apply_suggest.click(
-                                lambda d, h, l: (d, h, l),
-                                inputs=[sug_d, sug_h, sug_l],
-                                outputs=[ds_min_depth, ds_min_hyponyms, ds_min_leaf]
-                            )
-                        
-                        with gr.Accordion("Advanced Filtering (ImageNet)", open=False, visible=True) as adv_filter_group:
-                            ds_filter = gr.Dropdown(["none", "1k", "21k"], label="Sub-Filter", value="none", info="ImageNet subsets (1k/21k classes).")
-                            ds_strict = gr.Checkbox(label="Strict Lexical Match", value=True, info="Prevent ambiguous semantic paths.")
-                            ds_blacklist = gr.Checkbox(label="Hide Abstract Concepts", value=False, info="Hide non-visual WordNet concepts.")
-                            # === NEW: Exclusion Filters ===
-                            ds_exclude_subtree = gr.Textbox(label="Exclude Subtrees", placeholder="e.g. dog.n.01, vehicle.n.01 (Comma separated)", info="Remove entire branches (e.g., 'clothing.n.01').")
-                            ds_exclude_regex = gr.Textbox(label="Exclude Regex", placeholder="e.g. .*sex.*, ^bad_prefix (Comma separated)", info="Skip names matching regex.")
-                        
-                        with gr.Group(visible=False) as ds_openimages_group:
-                            ds_bbox_only = gr.Checkbox(label="Legacy BBox Mode (600 classes)", value=False, info="Limit to ~600 primary detection classes.")
-                        
-                        with gr.Row():
-                            ds_glosses = gr.Checkbox(label="Include Instructions", value=True, info="Add WordNet definitions as instructions.")
-                            ds_out = gr.Textbox(label="Output Filename", info="Auto-generated based on configuration.", value=update_ds_filename("ImageNet", config.get("datasets.imagenet.root_synset"), config.get("generation.default_depth"), "Smart", 4, 50, 5, False))
-                        
-                        gr.Markdown("### 🚀 Build Skeleton\n*Generate the WordNet-linked hierarchy based on your source and pruning settings.*")
-                        ds_btn = gr.Button("🚀 Generate Skeleton", variant="primary", size="lg")
-
-                    # Right Column: Preview
-                    with gr.Column(scale=1):
-                        ds_file = gr.File(label="Download YAML")
-                        ds_prev = gr.Code(language="yaml", label="Preview", lines=25)
+                    source_type = gr.Radio(
+                        ["Dataset (CV)", "New Topic (LLM)", "Raw List (LLM)"],
+                        label="Source Type",
+                        value="Dataset (CV)",
+                        info="Choose how you want to generate the hierarchy."
+                    )
                 
-
-
-                ds_name.change(
-                    on_dataset_change, 
-                    inputs=[ds_name, ds_strategy], 
-                    outputs=[ds_imagenet_group, ds_strategy, smart_tuning_group, adv_filter_group, ds_openimages_group, ds_info, ds_analysis_output, apply_output_row]
-                )
-                
-                ds_strategy.change(
-                    on_dataset_change, 
-                    inputs=[ds_name, ds_strategy], 
-                    outputs=[ds_imagenet_group, ds_strategy, smart_tuning_group, adv_filter_group, ds_openimages_group, ds_info, ds_analysis_output, apply_output_row]
-                )
-                
-                for comp in [ds_name, ds_root, ds_depth, ds_strategy, ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_bbox_only]:
-                    comp.change(update_ds_filename, inputs=[ds_name, ds_root, ds_depth, ds_strategy, ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_bbox_only], outputs=[ds_out])
-                
-                # Helper to parse text inputs into lists
-                def parse_csv(text):
-                    if not text: return None
-                    return [t.strip() for t in text.split(",") if t.strip()]
-
-                ds_analyze_btn.click(
-                    analyze_handler,
-                    inputs=[ds_name, ds_root, ds_depth, ds_filter, ds_strict, ds_blacklist, ds_bbox_only],
-                    outputs=[ds_analysis_output, sug_d, sug_h, sug_l]
-                ).then(lambda r: gr.update(visible=True if "Error" not in r else False), inputs=[ds_analysis_output], outputs=[apply_output_row])
-
-                ds_btn.click(
-                    lambda *args: generate_dataset_handler(
-                        *args[:-2], 
-                        exclude_subtree=parse_csv(args[-2]), 
-                        exclude_regex=parse_csv(args[-1])
-                    ),
-                    inputs=[
-                        ds_name, ds_strategy, ds_root, ds_depth, ds_out, 
-                        ds_glosses, ds_filter, ds_strict, ds_blacklist, 
-                        ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_merge_orphans, 
-                        ds_bbox_only,
-                        ds_exclude_subtree, ds_exclude_regex
-                    ],
-                    outputs=[ds_file, ds_prev]
-                )
-
-            # === TAB 2: CREATE (LLM) ===
-            with gr.Tab("🪄 Create"):
-                gr.Markdown("### Generate Taxonomy from Scratch — *LLM Powered*")
-                with gr.Row():
-                    with gr.Column():
-                        cr_topic = gr.Textbox(label="Topic", placeholder="e.g. Types of Cyberpunk Augmentations", info="Phrase describing the taxonomy for AI to brainstorm.")
-                        cr_out = gr.Textbox(label="Output Filename", value="topic_skeleton.yaml", info="Filename for the generated YAML skeleton.")
-                        cr_topic.change(update_cr_filename, inputs=[cr_topic], outputs=[cr_out])
-                        gr.Markdown("*Click to brainstorm a complete hierarchy for this topic via AI.*")
-                        cr_btn = gr.Button("✨ Generate", variant="primary")
-                    with gr.Column():
-                        cr_file = gr.File(label="Download YAML")
-                        cr_prev = gr.Code(language="yaml", label="Preview", lines=20)
-                cr_btn.click(create_handler, inputs=[cr_topic, model_state, api_key_state, cr_out], outputs=[cr_file, cr_prev])
-
-            # === TAB 3: CATEGORIZE (LLM) ===
-            with gr.Tab("📊 Categorize"):
-                gr.Markdown("### Organize Flat List into Hierarchy — *LLM Powered*")
-                with gr.Row():
-                    with gr.Column():
-                        cat_terms = gr.TextArea(label="Raw Terms", placeholder="Lion\\nTiger\\nLeopard\\n...", info="List of terms (one per line) for AI to organize.")
-                        cat_out = gr.Textbox(label="Output Filename", value="categorized.yaml", info="Filename for the organized output.")
-                        cat_terms.change(update_cat_filename, inputs=[cat_terms], outputs=[cat_out])
-                        gr.Markdown("*Organize your terms into a logical structure with categories and sub-categories.*")
-                        cat_btn = gr.Button("🗂️ Categorize", variant="primary")
-                    with gr.Column():
-                        cat_file = gr.File(label="Download YAML")
-                        cat_prev = gr.Code(language="yaml", label="Preview", lines=20)
-                cat_btn.click(categorize_handler, inputs=[cat_terms, model_state, api_key_state, cat_out], outputs=[cat_file, cat_prev])
-
-            # === TAB 4: ENRICH (LLM) ===
-            with gr.Tab("✨ Enrich"):
-                gr.Markdown("### Add Instructions to Existing YAML — *LLM Powered*")
-                with gr.Row():
-                    with gr.Column():
-                        en_yaml = gr.TextArea(label="Existing YAML", placeholder="Paste your .yaml structure here...", info="Input YAML for adding '# instruction:' comments.")
-                        en_topic = gr.Textbox(label="Context / Goal", value="AI image generation wildcards", info="Guides AI instructions (e.g. 'Stable Diffusion').")
-                        en_out = gr.Textbox(label="Output Filename", value="enriched.yaml", info="Filename for the enriched output.")
-                        en_topic.change(update_en_filename, inputs=[en_topic], outputs=[en_out])
-                        gr.Markdown("*Add instruction comments to your existing YAML based on the context/goal.*")
-                        en_btn = gr.Button("💡 Enrich", variant="primary")
-                    with gr.Column():
-                        en_file = gr.File(label="Download YAML")
-                        en_prev = gr.Code(language="yaml", label="Preview", lines=20)
-                en_btn.click(enrich_handler, inputs=[en_yaml, en_topic, model_state, api_key_state, en_out], outputs=[en_file, en_prev])
-
-            # === TAB 5: LINTER ===
-            with gr.Tab("🔬 Semantic Linter"):
-                gr.Markdown("### Detect Semantic Outliers using Embeddings — *Local ML*")
-                with gr.Row():
-                    with gr.Column(scale=1):
-                        lint_file = gr.File(label="Upload Skeleton YAML (Select the YAML skeleton to analyze.)", file_types=[".yaml"])
-                        lint_model = gr.Dropdown(
-                            ["qwen3", "mpnet", "minilm"], 
-                            label="Embedding Model", 
-                            value="qwen3",
-                            info="Qwen3 (Best), MPNet (Fast), MiniLM (Fastest)"
-                        )
-                        lint_threshold = gr.Slider(0.01, 1.0, value=0.1, step=0.01, label="Sensitivity Threshold", info="Higher = stricter outlier detection.")
-                        gr.Markdown("*Analyze local embeddings to identify nodes that are semantically distinct from their parents.*")
-                        lint_btn = gr.Button("🕵️ Run Linter", variant="primary")
+                # --- Group: Dataset (CV) ---
+                with gr.Group(visible=True) as grp_dataset:
+                    gr.Markdown("### Generate from CV Datasets — *100% Local & Free*")
                     
-                    with gr.Column(scale=2):
-                        lint_output = gr.Markdown("Results will appear here...")
-                        with gr.Group(visible=False) as lint_clean_group:
-                            gr.Markdown("### ✨ Cleaned Skeleton\n*Outliers have been automatically removed. Download the refined structure below:*")
-                            lint_clean_file = gr.File(label="Download Cleaned YAML")
-                
-                lint_btn.click(lint_handler, inputs=[lint_file, lint_model, lint_threshold], outputs=[lint_output, lint_clean_group, lint_clean_file])
+                    # WordNet Search
+                    with gr.Accordion("🔍 WordNet ID Lookup", open=False):
+                        gr.Markdown("### 🔍 Dictionary Lookup\n*Find the specific WordNet synset ID required for ImageNet root settings.*")
+                        with gr.Row():
+                            search_in = gr.Textbox(label="Search Term", placeholder="e.g. camera, dog, sword", scale=3, info="Lookup meanings and synset IDs (e.g. 'camera' -> 'camera.n.01').")
+                            search_btn = gr.Button("Search", scale=1)
+                        search_out = gr.Markdown("Results appear here...")
+                        search_btn.click(search_wordnet, inputs=[search_in], outputs=[search_out])
+                    
+                    with gr.Row():
+                        # Left Column: Configuration
+                        with gr.Column(scale=1):
+                            with gr.Group():
+                                gr.Markdown("**Dataset & Strategy**")
+                                ds_name = gr.Dropdown(
+                                    ["ImageNet", "COCO", "Open Images", "Tencent ML-Images"],
+                                    label="Source", 
+                                    value="ImageNet",
+                                    info="Source dataset for hierarchy generation."
+                                )
+                                ds_info = gr.Markdown(
+                                    "_**ImageNet**: 21k classes. Best for general objects/animals._",
+                                    elem_id="ds-info"
+                                )
+                                ds_strategy = gr.Radio(
+                                    ["Standard", "Smart"],
+                                    label="Extraction Mode",
+                                    value="Smart",
+                                    info="Smart: Uses semantic analysis to prune meaningless intermediates and flatten deep lists."
+                                )
+                            
+                            with gr.Group(visible=True) as ds_imagenet_group:
+                                gr.Markdown("**ImageNet Configuration**")
+                                ds_root = gr.Textbox(
+                                    label="Root Synset", 
+                                    value=config.get("datasets.imagenet.root_synset"),
+                                    placeholder="entity.n.01",
+                                    info="WordNet ID (e.g. entity.n.01). Use Lookup above to find others."
+                                )
+                                COMMON_ROOTS = {
+                                    "— Presets —": "",
+                                    "Everything": "entity.n.01",
+                                    "Animals": "animal.n.01",
+                                    "Living Things": "living_thing.n.01",
+                                    "Plants": "plant.n.02",
+                                    "Vehicles": "vehicle.n.01",
+                                    "Furniture": "furniture.n.01",
+                                    "Clothing": "clothing.n.01",
+                                    "Food": "food.n.01",
+                                    "Tools": "tool.n.01"
+                                }
+                                ds_presets = gr.Dropdown(
+                                    choices=list(COMMON_ROOTS.keys()),
+                                    label="Quick Presets",
+                                    info="Select common ImageNet high-level categories."
+                                )
+                                def apply_preset(p):
+                                    return COMMON_ROOTS.get(p, "")
+                                ds_presets.change(apply_preset, inputs=[ds_presets], outputs=[ds_root])
+                            
+                            with gr.Group():
+                                gr.Markdown("**Hierarchy Depth**")
+                                ds_depth = gr.Slider(1, 12, value=config.get("generation.default_depth"), step=1, label="Max Generation Depth", info="Maximum recursion limit for the hierarchy tree.")
+                            
+                            with gr.Accordion("Smart Tuning Parameters", open=True, visible=True) as smart_tuning_group:
+                                gr.Markdown("_Smart Mode uses WordNet to analyze semantic importance. Adjust these to control granularity._")
+                                
+                                ds_smart_preset = gr.Radio(list(SMART_PRESETS.keys()), label="Preset", value="Balanced", info="Semantic pruning levels from Ultra-Detailed to Ultra-Flat.")
+                                ds_min_depth = gr.Slider(0, 10, value=4, step=1, label="Significance Depth", info="Force categories if shallower than this.")
+                                ds_min_hyponyms = gr.Slider(0, 2000, value=50, step=10, label="Flattening Threshold", info="Keep as category if more descendants than this.")
+                                ds_min_leaf = gr.Slider(1, 100, value=5, step=1, label="Min Leaf Size", info="Merge small lists into parent.")
+                                ds_merge_orphans = gr.Checkbox(label="Merge Orphans", value=True, info="Group small pruned lists into a 'misc' key.")
+                                
+                                def apply_smart_preset(p, dataset_name):
+                                    # Check dataset-specific overrides first
+                                    if dataset_name in DATASET_PRESET_OVERRIDES:
+                                        overrides = DATASET_PRESET_OVERRIDES[dataset_name]
+                                        if p in overrides:
+                                            return overrides[p]
+                                    # Fall back to universal presets
+                                    if p in SMART_PRESETS:
+                                        return SMART_PRESETS[p]
+                                    return [gr.update()]*4                            
+                                ds_smart_preset.change(apply_smart_preset, inputs=[ds_smart_preset, ds_name], outputs=[ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_merge_orphans])
 
-            # === TAB 6: SETTINGS ===
+                                # === NEW: Analysis Tools ===
+                                gr.Markdown("### 📊 Dataset Analysis\n*Examine the raw hierarchy to find the best 'Smart' flattening thresholds for this specific dataset and root.*")
+                                with gr.Row():
+                                    ds_analyze_btn = gr.Button("🔍 Analyze Structure", size="sm")
+                                ds_analysis_output = gr.Markdown("")
+                                with gr.Row(visible=False) as apply_output_row:
+                                    gr.Markdown("💡 **Optimization**: Apply the suggested thresholds found during analysis.")
+                                    ds_apply_suggest = gr.Button("✅ Apply Suggestions", size="sm", variant="secondary")
+                                    # Hidden states to store suggestion values
+                                    sug_d = gr.State(4)
+                                    sug_h = gr.State(50)
+                                    sug_l = gr.State(5)
+                                
+                                ds_apply_suggest.click(
+                                    lambda d, h, l: (d, h, l),
+                                    inputs=[sug_d, sug_h, sug_l],
+                                    outputs=[ds_min_depth, ds_min_hyponyms, ds_min_leaf]
+                                )
+                            
+                            with gr.Accordion("Advanced Filtering (ImageNet)", open=False, visible=True) as adv_filter_group:
+                                ds_filter = gr.Dropdown(["none", "1k", "21k"], label="Sub-Filter", value="none", info="ImageNet subsets (1k/21k classes).")
+                                ds_strict = gr.Checkbox(label="Strict Lexical Match", value=True, info="Prevent ambiguous semantic paths.")
+                                ds_blacklist = gr.Checkbox(label="Hide Abstract Concepts", value=False, info="Hide non-visual WordNet concepts.")
+                                # === NEW: Exclusion Filters ===
+                                ds_exclude_subtree = gr.Textbox(label="Exclude Subtrees", placeholder="e.g. dog.n.01, vehicle.n.01 (Comma separated)", info="Remove entire branches (e.g., 'clothing.n.01').")
+                                ds_exclude_regex = gr.Textbox(label="Exclude Regex", placeholder="e.g. .*sex.*, ^bad_prefix (Comma separated)", info="Skip names matching regex.")
+                            
+                            with gr.Group(visible=False) as ds_openimages_group:
+                                ds_bbox_only = gr.Checkbox(label="Legacy BBox Mode (600 classes)", value=False, info="Limit to ~600 primary detection classes.")
+                            
+                            with gr.Row():
+                                ds_glosses = gr.Checkbox(label="Include Instructions", value=True, info="Add WordNet definitions as instructions.")
+                                ds_out = gr.Textbox(label="Output Filename", info="Auto-generated based on configuration.", value=update_ds_filename("ImageNet", config.get("datasets.imagenet.root_synset"), config.get("generation.default_depth"), "Smart", 4, 50, 5, False))
+                            
+                            gr.Markdown("### 🚀 Build Skeleton\n*Generate the WordNet-linked hierarchy based on your source and pruning settings.*")
+                            ds_btn = gr.Button("🚀 Generate Skeleton", variant="primary", size="lg")
+
+                        # Right Column: Preview
+                        with gr.Column(scale=1):
+                            ds_file = gr.File(label="Download YAML")
+                            ds_prev = gr.Code(language="yaml", label="Preview", lines=25)
+
+                # --- Group: Create (Topic) ---
+                with gr.Group(visible=False) as grp_create:
+                    gr.Markdown("### Generate Taxonomy from Scratch — *LLM Powered*")
+                    with gr.Row():
+                        with gr.Column():
+                            cr_topic = gr.Textbox(label="Topic", placeholder="e.g. Types of Cyberpunk Augmentations", info="Phrase describing the taxonomy for AI to brainstorm.")
+                            cr_out = gr.Textbox(label="Output Filename", value="topic_skeleton.yaml", info="Filename for the generated YAML skeleton.")
+                            cr_topic.change(update_cr_filename, inputs=[cr_topic], outputs=[cr_out])
+                            gr.Markdown("*Click to brainstorm a complete hierarchy for this topic via AI.*")
+                            cr_btn = gr.Button("✨ Generate", variant="primary")
+                        with gr.Column():
+                            cr_file = gr.File(label="Download YAML")
+                            cr_prev = gr.Code(language="yaml", label="Preview", lines=20)
+                    cr_btn.click(create_handler, inputs=[cr_topic, model_state, api_key_state, cr_out], outputs=[cr_file, cr_prev])
+
+                # --- Group: Categorize (List) ---
+                with gr.Group(visible=False) as grp_categorize:
+                    gr.Markdown("### Organize Flat List into Hierarchy — *LLM Powered*")
+                    with gr.Row():
+                        with gr.Column():
+                            cat_terms = gr.TextArea(label="Raw Terms", placeholder="Lion\nTiger\nLeopard\n...", info="List of terms (one per line) for AI to organize.")
+                            cat_out = gr.Textbox(label="Output Filename", value="categorized.yaml", info="Filename for the organized output.")
+                            cat_terms.change(update_cat_filename, inputs=[cat_terms], outputs=[cat_out])
+                            gr.Markdown("*Organize your terms into a logical structure with categories and sub-categories.*")
+                            cat_btn = gr.Button("🗂️ Categorize", variant="primary")
+                        with gr.Column():
+                            cat_file = gr.File(label="Download YAML")
+                            cat_prev = gr.Code(language="yaml", label="Preview", lines=20)
+                    cat_btn.click(categorize_handler, inputs=[cat_terms, model_state, api_key_state, cat_out], outputs=[cat_file, cat_prev])
+
+                # Source Toggle Logic
+                def on_source_change(choice):
+                    return [
+                        gr.update(visible=(choice == "Dataset (CV)")),
+                        gr.update(visible=(choice == "New Topic (LLM)")),
+                        gr.update(visible=(choice == "Raw List (LLM)"))
+                    ]
+                source_type.change(on_source_change, inputs=[source_type], outputs=[grp_dataset, grp_create, grp_categorize])
+
+            # === TAB 2: TOOLS (Consolidated) ===
+            with gr.Tab("🛠️ Tools"):
+                with gr.Tabs():
+                    # --- Subtab: Enrich ---
+                    with gr.Tab("✨ Enrich"):
+                        gr.Markdown("### Add Instructions to Existing YAML — *LLM Powered*")
+                        with gr.Row():
+                            with gr.Column():
+                                en_yaml = gr.TextArea(label="Existing YAML", placeholder="Paste your .yaml structure here...", info="Input YAML for adding '# instruction:' comments.")
+                                en_topic = gr.Textbox(label="Context / Goal", value="AI image generation wildcards", info="Guides AI instructions (e.g. 'Stable Diffusion').")
+                                en_out = gr.Textbox(label="Output Filename", value="enriched.yaml", info="Filename for the enriched output.")
+                                en_topic.change(update_en_filename, inputs=[en_topic], outputs=[en_out])
+                                gr.Markdown("*Add instruction comments to your existing YAML based on the context/goal.*")
+                                en_btn = gr.Button("💡 Enrich", variant="primary")
+                            with gr.Column():
+                                en_file = gr.File(label="Download YAML")
+                                en_prev = gr.Code(language="yaml", label="Preview", lines=20)
+                        en_btn.click(enrich_handler, inputs=[en_yaml, en_topic, model_state, api_key_state, en_out], outputs=[en_file, en_prev])
+
+                    # --- Subtab: Linter ---
+                    with gr.Tab("🔬 Semantic Linter"):
+                        gr.Markdown("### Detect Semantic Outliers using Embeddings — *Local ML*")
+                        with gr.Row():
+                            with gr.Column(scale=1):
+                                lint_file = gr.File(label="Upload Skeleton YAML (Select the YAML skeleton to analyze.)", file_types=[".yaml"])
+                                lint_model = gr.Dropdown(
+                                    ["qwen3", "mpnet", "minilm"],
+                                    label="Embedding Model", 
+                                    value="qwen3",
+                                    info="Qwen3 (Best), MPNet (Fast), MiniLM (Fastest)"
+                                )
+                                lint_threshold = gr.Slider(0.01, 1.0, value=0.1, step=0.01, label="Sensitivity Threshold", info="Higher = stricter outlier detection.")
+                                gr.Markdown("*Analyze local embeddings to identify nodes that are semantically distinct from their parents.*")
+                                lint_btn = gr.Button("🕵️ Run Linter", variant="primary")
+                            
+                            with gr.Column(scale=2):
+                                lint_output = gr.Markdown("Results will appear here...")
+                                with gr.Group(visible=False) as lint_clean_group:
+                                    gr.Markdown("### ✨ Cleaned Skeleton\n*Outliers have been automatically removed. Download the refined structure below:*")
+                                    lint_clean_file = gr.File(label="Download Cleaned YAML")
+                        
+                        lint_btn.click(lint_handler, inputs=[lint_file, lint_model, lint_threshold], outputs=[lint_output, lint_clean_group, lint_clean_file])
+
+            # === TAB 3: SETTINGS ===
             with gr.Tab("⚙️ Settings"):
                 gr.Markdown("### Configuration")
                 with gr.Group():
@@ -648,7 +625,7 @@ def launch_gui(share=False):
                 with gr.Group():
                     gr.Markdown("**Default LLM Model**")
                     set_model = gr.Dropdown(
-                        [config.model, "anthropic/claude-3.5-sonnet", "openai/gpt-4o", "google/gemini-pro"], 
+                        [config.model, "anthropic/claude-3.5-sonnet", "openai/gpt-4o", "google/gemini-pro"],
                         label="Model", 
                         value=config.model, 
                         allow_custom_value=True,
@@ -659,8 +636,51 @@ def launch_gui(share=False):
                 
                 gr.Markdown("> *Settings are for this session only. Edit `wildcards-gen.yaml` for persistence.*")
 
+        # Wire up dataset listeners again (copied from original, logic remains same)
+        # Indented to be inside gr.Blocks
+        ds_name.change(
+            on_dataset_change, 
+            inputs=[ds_name, ds_strategy], 
+            outputs=[ds_imagenet_group, ds_strategy, smart_tuning_group, adv_filter_group, ds_openimages_group, ds_info, ds_analysis_output, apply_output_row]
+        )
+        
+        ds_strategy.change(
+            on_dataset_change, 
+            inputs=[ds_name, ds_strategy], 
+            outputs=[ds_imagenet_group, ds_strategy, smart_tuning_group, adv_filter_group, ds_openimages_group, ds_info, ds_analysis_output, apply_output_row]
+        )
+        
+        for comp in [ds_name, ds_root, ds_depth, ds_strategy, ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_bbox_only]:
+            comp.change(update_ds_filename, inputs=[ds_name, ds_root, ds_depth, ds_strategy, ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_bbox_only], outputs=[ds_out])
+        
+        # Helper to parse text inputs into lists
+        def parse_csv(text):
+            if not text: return None
+            return [t.strip() for t in text.split(",") if t.strip()]
+
+        ds_analyze_btn.click(
+            analyze_handler,
+            inputs=[ds_name, ds_root, ds_depth, ds_filter, ds_strict, ds_blacklist, ds_bbox_only],
+            outputs=[ds_analysis_output, sug_d, sug_h, sug_l]
+        ).then(lambda r: gr.update(visible=True if "Error" not in r else False), inputs=[ds_analysis_output], outputs=[apply_output_row])
+
+        ds_btn.click(
+            lambda *args: generate_dataset_handler(
+                *args[:-2], 
+                exclude_subtree=parse_csv(args[-2]), 
+                exclude_regex=parse_csv(args[-1])
+            ),
+            inputs=[
+                ds_name, ds_strategy, ds_root, ds_depth, ds_out, 
+                ds_glosses, ds_filter, ds_strict, ds_blacklist, 
+                ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_merge_orphans, 
+                ds_bbox_only,
+                ds_exclude_subtree, ds_exclude_regex
+            ],
+            outputs=[ds_file, ds_prev]
+        )
+
     server_name = config.get("gui.server_name")
     server_port = config.get("gui.server_port")
     logger.info(f"🌐 GUI is starting at http://{server_name or '127.0.0.1'}:{server_port or 7860}")
     demo.launch(share=share, server_name=server_name, server_port=server_port, theme=gr.themes.Soft())
-

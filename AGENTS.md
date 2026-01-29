@@ -1,4 +1,3 @@
-
 # Agent Instructions & Architecture
 
 ## Project Overview
@@ -31,8 +30,14 @@ The `# instruction:` comment is the payload. It tells the downhill AI what a cat
 To prevent "directory bloat" and noisy hierarchies, the tool uses an intelligent pruning strategy (enabled via `--smart`):
 *   **Semantic Significance**: Uses WordNet depth and branching factor to keep meaningful categories (e.g., "fruit") while flattening obscure intermediates.
 *   **Linear Chain Removal**: Skips nodes that only have one child, consolidating them into the parent to reduce nesting depth.
-*   **Minimum Leaf Size**: Small categories are merged upward to ensure every list in the skeleton has enough variety to be useful.
+*   **Orphan Bubbling**: Small lists (`min_leaf`) are bubbled up to the parent's `misc:` key (via `--merge-orphans`) instead of being discarded.
 *   **Self-Reference Filtering**: Ensures leaf nodes never contain their own parent name (e.g., `nose:` instead of `nose: - nose`).
+
+## Supported Datasets
+
+1.  **ImageNet**: The default CV standard. Supports ~21k classes.
+2.  **Tencent ML-Images**: Massive, modern dataset with ~11k categories. Handled via text-only logic to avoid large downloads.
+3.  **Open Images V7**: Supports full ~20k image-level labels (deep hierarchy) or legacy 600 bounding-box classes via `--bbox-only`.
 
 ## Data Flow & State
 
@@ -51,19 +56,25 @@ The `LLMEngine` interacts with OpenRouter using specific prompt templates locate
 *   **Enrichment**: A targeted prompt that tells the LLM to "fill in the gaps" for any keys missing an `# instruction:` comment.
 *   **Cleaning**: The tool aggressively strips markdown code blocks (````yaml`, ` ``` `) from responses to prevent YAML parsing errors.
 
+## Codebase Map
+
 *   **`wildcards_gen/cli.py`**: The single entry point. Defined using `argparse`. Now includes `gui` subcommand. Imports `SMART_PRESETS` from `core.presets`.
 *   **`wildcards_gen/gui.py`**: Gradio-based web interface. Imports `SMART_PRESETS` and `DATASET_PRESET_OVERRIDES` from `core.presets` to customize defaults per dataset.
 *   **`wildcards_gen/core/`**:
     *   `config.py`: Hierarchical configuration manager (CLI > Local > User > Env > Defaults).
     *   `structure.py`: Wrapper for `ruamel.yaml` logic.
     *   `llm.py`: OpenRouter interaction. Includes `_clean_response()` to fix markdown issues. Default model: `google/gemma-3-27b-it:free`.
-    *   `wordnet.py`: NLTK WordNet wrappers.
+    *   `wordnet.py`: NLTK WordNet wrappers. Includes polysemy handling (`--no-strict` for permissive matching).
     *   `smart.py`: Common logic for semantic pruning and leaf bubbling.
     *   **`presets.py`**: **Single Source of Truth** for semantic pruning `SMART_PRESETS` and `DATASET_PRESET_OVERRIDES`.
     *   `datasets/`: Logic for specific datasets (ImageNet, COCO, OpenImages, Tencent).
 
 ## UI/UX Principles (GUI)
 
+*   **Consolidated Workflow**: The GUI is organized into 3 main tabs:
+    *   **Builder**: Unified interface for all generation tasks (Dataset, Create, Categorize).
+    *   **Tools**: Post-processing utilities (Enrich, Linter).
+    *   **Settings**: Configuration.
 *   **Documentation via `info=`**: Standard Gradio input components (Slider, Checkbox, Textbox, Dropdown, Radio) support the `info=` argument to provide detailed UX guidance directly under the label. NOT supported by `gr.File` (append info to label instead). Do NOT use `tooltip=` as it is not supported in the project's Gradio version.
 *   **Live Previews**: Ensure that filenames and status indicators update immediately via `.change()` events to give the user instant feedback on their settings.
 *   **Progressive Disclosure**: Use `gr.Accordion` and `gr.Group` (with `visible` toggles) to keep the interface clean while hiding advanced tuning parameters by default.
@@ -73,6 +84,7 @@ The `LLMEngine` interacts with OpenRouter using specific prompt templates locate
 *   **Adding Datasets**: Implement a new module in `core/datasets/` that returns a dictionary. Use `wordnet.py` to fetch glosses.
 *   **Updating Prompts**: Edit text files in `wildcards_gen/prompts/`.
 *   **Testing**: Run `uv run pytest tests/`. Ensure any new LLM logic mimics the `_clean_response` pattern to handle API variances.
+*   **Requirements**: Python `>=3.10` is strictly required due to dependencies in the semantic linter (`transformers`).
 
 ## Technical Deep Dive: Trace of Execution
 
@@ -86,23 +98,3 @@ When a command like `wildcards-gen dataset tencent` is run, the backend follows 
     *   **In Traditional Mode**: Truncates strictly at `max_depth`.
     *   **In Smart Mode**: Evaluates semantic value. If a node is significant and branching, it becomes a key; otherwise, its descendants are flattened into a leaf list.
 6.  **Serialization**: The final structure is saved via `StructureManager`, ensuring that the complex `CommentedMap` is serialized back to clean YAML while preserving all metadata instructions and alphabetical sorting at every level.
-
-## Session Takeaways (Jan 2026)
-*   **Open Images Full Mode**: Implemented full support for 20,638 image-level labels (vs original ~600 bboxes). Uses dynamic WordNet mapping to build a deep hierarchy. Legacy bbox mode preserved via `--bbox-only`.
-*   **Tencent ML-Images**: Added support for this massive dataset (11k categories) using text-only download logic.
-*   **LLM Stability**: The `LLMEngine` must aggressively clean output (e.g. ` ```yaml `) to prevent parsing errors.
-*   **Unified CLI**: Managing one tool is significantly easier than multiple scripts.
-*   **Duplicate Wildcard Fix**: Resolved the `nose: - nose` issue by implementing strict self-reference filtering and empty-key output for leaves.
-*   **Smart Semantic Logic**: Added WordNet-based depth and hyponym analysis to produce "meaningful" categories instead of arbitrary depth truncation.
-*   **Smart Presets (Jan 28)**: Added 6 universal presets (`Ultra-Detailed` to `Ultra-Flat`) in both CLI (`--preset`) and GUI to simplify tuning.
-*   **Orphan Bubbling (Jan 28)**: Fixed `min_leaf` logic in ImageNet/OpenImages to bubble small lists up to parent `misc:` key (matching Tencent logic) instead of discarding them.
-*   **Dataset Overrides**: GUI now supports per-dataset preset overrides (e.g. OpenImages defaults to `merge_orphans=True` for better structure).
-*   **Usability Improvements**: Implemented case-insensitive alphabetical sorting across all datasets to improve manual navigability.
-*   **Python Versioning (Jan 28)**: Strict requirement for Python `>=3.10` due to `transformers>=4.51.0` dependency in the linter.
-*   **Execution Hygiene**: 
-    *   **Always** execute via the virtual environment (`.venv`).
-    *   **Run**: `python -m wildcards_gen.cli` (ensures `sys.path` correctness).
-    *   **Test**: `uv run pytest` (automatically manages venv context).
-    *   **Avoid**: Running `python` directly unless you have manually activated source.
-*   **Analysis Depth**: OpenImages structure requires `smart=True` with permissive thresholds in analysis mode, otherwise it appears as a flat list (depth 1).
-*   **WordNet Polysemy**: Strict filtering can inadvertently prune categories like "canine" (tooth vs mammal). Use `--no-strict` when excluding logical subtrees.
