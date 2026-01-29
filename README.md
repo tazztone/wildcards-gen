@@ -81,6 +81,9 @@ datasets:
 **Scenario: Building a Creature Generator**
 You want a massive list of animals, organized scientifically, with descriptions for an AI to use.
 ```bash
+# General Note: We recommend running all commands via `uv run` if not in an active venv.
+# Example: uv run wildcards-gen dataset ...
+
 # Generate a hierarchy of all animals, 4 levels deep
 wildcards-gen dataset imagenet --root animal.n.01 --depth 4 -o output/creatures.yaml
 ```
@@ -240,7 +243,7 @@ uv pip install -e .
 ### 🐍 Python Version Error
 If you see dependency resolution errors involving `transformers` or `sentence-transformers`, verify your Python version:
 ```bash
-python --version  # Must be >= 3.10
+python --version  # (or `uv run python --version`) Must be >= 3.10
 ```
 This is required for the Semantic Linter features.
 
@@ -274,6 +277,7 @@ Current status and planned features. We focus on **automation**, **structure arc
 - [x] Gradio web GUI with dataset-aware UI
 - [x] Comment-preserving YAML handling via ruamel.yaml
 - [x] **Semantic Linter** — Analyze skeletons to detect semantically inconsistent items using embedding models
+- [x] **Robustness Testing Suite** — Static & dynamic analysis to prevent UI/CLI/Mapping regressions
 
 ### 🚧 In Progress / Short-Term
 - [ ] **Batch Pipeline** — Automated generation from a list of topics or roots (e.g. `input_topics.txt` → `multiple_skeletons/`)
