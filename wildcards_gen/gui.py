@@ -11,6 +11,9 @@ from wildcards_gen.core.llm import LLMEngine
 
 logger = logging.getLogger(__name__)
 
+from .core.presets import SMART_PRESETS, DATASET_PRESET_OVERRIDES
+
+
 def save_and_preview(data, output_name):
     """Helper to save structure and return path + content."""
     mgr = StructureManager()
@@ -418,31 +421,7 @@ def launch_gui(share=False):
                         
                         with gr.Accordion("Smart Tuning Parameters", open=True, visible=False) as smart_tuning_group:
                             gr.Markdown("_Smart Mode uses WordNet to analyze semantic importance. Adjust these to control granularity._")
-                            # Universal presets: (min_depth, min_hyponyms, min_leaf, merge_orphans)
-                            SMART_PRESETS = {
-                                "Ultra-Detailed": (8, 5, 1, False),
-                                "Detailed": (6, 10, 3, False),
-                                "Balanced": (4, 50, 5, False),
-                                "Compact": (3, 100, 8, True),
-                                "Flat": (2, 500, 10, True),
-                                "Ultra-Flat": (1, 1000, 20, True),
-                            }
-                            # Dataset-specific overrides (dataset_name -> preset_name -> values)
-                            DATASET_PRESET_OVERRIDES = {
-                                "Open Images": {
-                                    "Balanced": (4, 50, 5, True),
-                                    "Compact": (3, 200, 10, True),  # Increased threshold to preserve structure
-                                    "Flat": (2, 1500, 15, True),    # Very aggressive threshold needed for this dataset
-                                },
-                                "Tencent ML-Images": {
-                                    "Balanced": (4, 30, 5, True),
-                                    "Compact": (3, 100, 10, True),
-                                    "Flat": (2, 600, 20, True),     # Higher leaf size to reduce noise in dense lists
-                                },
-                                "ImageNet": {
-                                    # ImageNet works well with defaults
-                                },
-                            }
+                            
                             ds_smart_preset = gr.Radio(list(SMART_PRESETS.keys()), label="Preset", value="Balanced")
                             ds_min_depth = gr.Slider(0, 10, value=4, step=1, label="Significance Depth", info="Nodes shallower than this (close to root) are forced to be categories.")
                             ds_min_hyponyms = gr.Slider(0, 2000, value=50, step=10, label="Flattening Threshold", info="Nodes with more children than this are kept. Higher = more flattening of sub-lists.")

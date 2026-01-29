@@ -51,21 +51,22 @@ The `LLMEngine` interacts with OpenRouter using specific prompt templates locate
 *   **Enrichment**: A targeted prompt that tells the LLM to "fill in the gaps" for any keys missing an `# instruction:` comment.
 *   **Cleaning**: The tool aggressively strips markdown code blocks (````yaml`, ` ``` `) from responses to prevent YAML parsing errors.
 
-*   **`wildcards_gen/cli.py`**: The single entry point. Defined using `argparse`. Now includes `gui` subcommand and `SMART_PRESETS`.
-*   **`wildcards_gen/gui.py`**: Gradio-based web interface. Includes `SMART_PRESETS` and `DATASET_PRESET_OVERRIDES` to customize defaults per dataset (e.g. OpenImages uses merge_orphans=True by default).
+*   **`wildcards_gen/cli.py`**: The single entry point. Defined using `argparse`. Now includes `gui` subcommand. Imports `SMART_PRESETS` from `core.presets`.
+*   **`wildcards_gen/gui.py`**: Gradio-based web interface. Imports `SMART_PRESETS` and `DATASET_PRESET_OVERRIDES` from `core.presets` to customize defaults per dataset.
 *   **`wildcards_gen/core/`**:
     *   `config.py`: Hierarchical configuration manager (CLI > Local > User > Env > Defaults).
     *   `structure.py`: Wrapper for `ruamel.yaml` logic.
     *   `llm.py`: OpenRouter interaction. Includes `_clean_response()` to fix markdown issues. Default model: `google/gemma-3-27b-it:free`.
     *   `wordnet.py`: NLTK WordNet wrappers.
     *   `smart.py`: Common logic for semantic pruning and leaf bubbling.
+    *   **`presets.py`**: **Single Source of Truth** for semantic pruning `SMART_PRESETS` and `DATASET_PRESET_OVERRIDES`.
     *   `datasets/`: Logic for specific datasets (ImageNet, COCO, OpenImages, Tencent).
 
 ## Maintenance & Contribution
 
 *   **Adding Datasets**: Implement a new module in `core/datasets/` that returns a dictionary. Use `wordnet.py` to fetch glosses.
 *   **Updating Prompts**: Edit text files in `wildcards_gen/prompts/`.
-*   **Testing**: Run `pytest tests/`. Ensure any new LLM logic mimics the `_clean_response` pattern to handle API variances.
+*   **Testing**: Run `uv run pytest tests/`. Ensure any new LLM logic mimics the `_clean_response` pattern to handle API variances.
 
 ## Technical Deep Dive: Trace of Execution
 
@@ -92,6 +93,10 @@ When a command like `wildcards-gen dataset tencent` is run, the backend follows 
 *   **Dataset Overrides**: GUI now supports per-dataset preset overrides (e.g. OpenImages defaults to `merge_orphans=True` for better structure).
 *   **Usability Improvements**: Implemented case-insensitive alphabetical sorting across all datasets to improve manual navigability.
 *   **Python Versioning (Jan 28)**: Strict requirement for Python `>=3.10` due to `transformers>=4.51.0` dependency in the linter.
-*   **Execution Hygiene**: Always use `uv run python -m wildcards_gen.cli` to ensure proper environment resolution and avoid `ModuleNotFoundError`.
+*   **Execution Hygiene**: 
+    *   **Always** execute via the virtual environment (`.venv`).
+    *   **Run**: `python -m wildcards_gen.cli` (ensures `sys.path` correctness).
+    *   **Test**: `uv run pytest` (automatically manages venv context).
+    *   **Avoid**: Running `python` directly unless you have manually activated source.
 *   **Analysis Depth**: OpenImages structure requires `smart=True` with permissive thresholds in analysis mode, otherwise it appears as a flat list (depth 1).
 *   **WordNet Polysemy**: Strict filtering can inadvertently prune categories like "canine" (tooth vs mammal). Use `--no-strict` when excluding logical subtrees.
