@@ -23,6 +23,7 @@ from ..wordnet import (
     get_synset_name, get_synset_gloss, get_synset_wnid,
     is_in_valid_set, get_all_descendants, is_abstract_category
 )
+from ..presets import DATASET_CATEGORY_OVERRIDES
 from .downloaders import ensure_imagenet_1k_data, ensure_imagenet_21k_data
 
 try:
@@ -166,10 +167,17 @@ def build_tree_recursive(
     collected_orphans = []
     
     for child in children:
+        # Determine child-specific config
+        child_config = smart_config
+        if smart_config and smart_config.enabled:
+             child_name_simple = get_synset_name(child)
+             child_wnid = get_synset_wnid(child)
+             child_config = smart_config.get_child_config(child_name_simple, child_wnid)
+
         success, orphans = build_tree_recursive(
             child, structure_mgr, child_map, valid_wnids,
             depth + 1, max_depth, with_glosses, strict_filter, blacklist_abstract,
-            smart_config, regex_list, excluded_synsets
+            child_config, regex_list, excluded_synsets
         )
         if success:
             has_valid_children = True
@@ -215,7 +223,8 @@ def generate_imagenet_tree(
     min_leaf_size: int = 3,
     merge_orphans: bool = False,
     exclude_regex: Optional[List[str]] = None,
-    exclude_subtree: Optional[List[str]] = None
+    exclude_subtree: Optional[List[str]] = None,
+    smart_overrides: Optional[Dict] = None
 ) -> CommentedMap:
     """
     Generate ImageNet hierarchy tree from a root synset.
@@ -231,16 +240,24 @@ def generate_imagenet_tree(
         merge_orphans: Merge small pruned lists into parent
         exclude_regex: Regex patterns to exclude by name
         exclude_subtree: Synset names/WNIDs to prune entire subtrees
+        smart_overrides: Dictionary of per-category smart config overrides
     """
     ensure_nltk_data()
     
+    # Determine overrides (CLI/Args > Preset)
+    preset_overrides = DATASET_CATEGORY_OVERRIDES.get("ImageNet", {})
+    final_overrides = preset_overrides.copy()
+    if smart_overrides:
+        final_overrides.update(smart_overrides)
+
     from ..smart import SmartConfig
     smart_config = SmartConfig(
         enabled=smart,
         min_depth=min_significance_depth,
         min_hyponyms=min_hyponyms,
         min_leaf_size=min_leaf_size,
-        merge_orphans=merge_orphans
+        merge_orphans=merge_orphans,
+        category_overrides=final_overrides
     )
     
     # Load filter set
