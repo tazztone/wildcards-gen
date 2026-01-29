@@ -20,7 +20,9 @@ class TestGUIHandlers(unittest.TestCase):
             "ImageNet", "Standard", "root.n.01", 3, "out.yaml",
             False, "none", True, False,
             4, 50, 5, False,  # valid ints + bool
-            False, None, None
+            False, 
+            False, "minilm", 0.1, # semantic args
+            None, None
         )
         mock_gen.assert_called_once()
         
