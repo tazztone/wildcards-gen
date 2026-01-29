@@ -7,6 +7,7 @@ from ruamel.yaml import CommentedMap
 import yaml
 from .downloaders import download_tencent_hierarchy
 from ..wordnet import get_synset_gloss, ensure_nltk_data, get_synset_from_wnid
+from ..presets import DATASET_CATEGORY_OVERRIDES
 
 logger = logging.getLogger(__name__)
 
@@ -110,7 +111,8 @@ def generate_tencent_hierarchy(
     min_significance_depth: int = 6,
     min_hyponyms: int = 10,
     min_leaf_size: int = 3,
-    merge_orphans: bool = False
+    merge_orphans: bool = False,
+    smart_overrides: Optional[Dict] = None
 ) -> Dict:
     """Generate Tencent ML-Images hierarchy."""
     file_path = download_tencent_hierarchy()
@@ -136,12 +138,18 @@ def generate_tencent_hierarchy(
     from ruamel.yaml.comments import CommentedMap
     from ..smart import SmartConfig, should_prune_node, handle_small_leaves
     
+    preset_overrides = DATASET_CATEGORY_OVERRIDES.get("Tencent ML-Images", {})
+    final_overrides = preset_overrides.copy()
+    if smart_overrides:
+        final_overrides.update(smart_overrides)
+        
     smart_config = SmartConfig(
         enabled=smart,
         min_depth=min_significance_depth,
         min_hyponyms=min_hyponyms,
         min_leaf_size=min_leaf_size,
-        merge_orphans=merge_orphans
+        merge_orphans=merge_orphans,
+        category_overrides=final_overrides
     )
 
     def merge_nodes(existing: Any, new_val: Any) -> Any:
@@ -160,7 +168,7 @@ def generate_tencent_hierarchy(
         return existing
     
     
-    def build_commented(current_idx: int, current_depth: int) -> Tuple[Any, List[str]]:
+    def build_commented(current_idx: int, current_depth: int, config: SmartConfig) -> Tuple[Any, List[str]]:
         cat_info = categories[current_idx]
         name = cat_info['name'].split(',')[0].strip()
         wnid = cat_info['id']
@@ -174,7 +182,7 @@ def generate_tencent_hierarchy(
         # Decision logic: keep as category or flatten?
         should_flatten = False
         
-        if smart:
+        if smart and config.enabled:
             synset = get_synset_from_wnid(wnid)
             is_root = categories[current_idx]['parent'] == -1
             
@@ -182,7 +190,7 @@ def generate_tencent_hierarchy(
                 synset=synset, 
                 child_count=len(children), 
                 is_root=is_root, 
-                config=smart_config
+                config=config
             )
         else:
             # Traditional depth-based pruning
@@ -196,8 +204,8 @@ def generate_tencent_hierarchy(
             filtered_leaves = sorted(list(set([l for l in leaves if l.lower() != normalized_name])), key=str.casefold)
             
             # Min leaf size check for smart mode
-            if smart and len(filtered_leaves) < smart_config.min_leaf_size:
-                if merge_orphans:
+            if smart and config.enabled and len(filtered_leaves) < config.min_leaf_size:
+                if config.merge_orphans:
                      # Merge into parent (bubble up these leaves)
                      return None, filtered_leaves
                 else:
@@ -214,7 +222,14 @@ def generate_tencent_hierarchy(
         valid_items_added = 0
         for child_idx in sorted_children:
             child_name = categories[child_idx]['name'].split(',')[0].strip()
-            child_val, child_orphans = build_commented(child_idx, current_depth + 1)
+            
+            # Calculate child config
+            child_config = config
+            if smart and config.enabled:
+                 child_wnid = categories[child_idx]['id']
+                 child_config = config.get_child_config(child_name, child_wnid)
+            
+            child_val, child_orphans = build_commented(child_idx, current_depth + 1, child_config)
             
             # Collect bubbled-up orphans from children
             if child_orphans:
@@ -249,14 +264,6 @@ def generate_tencent_hierarchy(
         
         # Handle orphan leaves at this level
         if orphan_leaves:
-            # Where to put them?
-            # 1. If we have a _misc list, add there.
-            # 2. Or just add them as keys with empty values? (Leaves in our format are list items or empty keys)
-            # Mixed content: Category dict can't hold list items directly unless under a key.
-            # We'll put them under a '_misc' key or similar, OR merge them if we became a list?
-            # Wait, if we are a dict, we can't just return [orphans] + dict.
-            # Standard approach: Create 'misc' category for them.
-            
             # Deduplicate orphans
             orphan_leaves = sorted(list(set(orphan_leaves)), key=str.casefold)
             cm['misc'] = orphan_leaves
@@ -274,12 +281,10 @@ def generate_tencent_hierarchy(
             filtered_leaves = sorted(list(set([l for l in leaves if l.lower() != normalized_name])), key=str.casefold)
             
             # Check min leaf size again?
-            if smart and len(filtered_leaves) < smart_config.min_leaf_size:
+            if smart and config.enabled and len(filtered_leaves) < config.min_leaf_size:
                  return None, filtered_leaves # Bubble further up
             
             return (filtered_leaves if filtered_leaves else None), []
-            
-        return cm, []
 
     # Root level
     final_map = CommentedMap()
@@ -287,7 +292,7 @@ def generate_tencent_hierarchy(
     
     for root_idx in sorted_roots:
         root_name = categories[root_idx]['name'].split(',')[0].strip()
-        root_val, root_orphans = build_commented(root_idx, 1)
+        root_val, root_orphans = build_commented(root_idx, 1, smart_config)
         
         # If root produced orphans, what to do? Add them to 'misc'?
         # Roots are usually dicts, so we check root_val type.

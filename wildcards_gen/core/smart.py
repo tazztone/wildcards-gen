@@ -6,7 +6,7 @@ whether a node should be a full category or flattened into a list.
 """
 
 from typing import Optional, Any
-from .wordnet import get_synset_from_wnid, get_primary_synset
+from .wordnet import get_synset_from_wnid, get_primary_synset, get_synset_name, get_synset_wnid
 
 class SmartConfig:
     """Configuration for smart pruning."""
@@ -15,12 +15,54 @@ class SmartConfig:
                  min_depth: int = 6,
                  min_hyponyms: int = 10,
                  min_leaf_size: int = 3,
-                 merge_orphans: bool = False):
+                 merge_orphans: bool = False,
+                 category_overrides: dict = None):
         self.enabled = enabled
         self.min_depth = min_depth
         self.min_hyponyms = min_hyponyms
         self.min_leaf_size = min_leaf_size
         self.merge_orphans = merge_orphans
+        self.category_overrides = category_overrides or {}
+
+    def get_child_config(self, node_name: str, node_wnid: Optional[str] = None) -> 'SmartConfig':
+        """
+        Get a SmartConfig instance for a child node, applying any specific overrides.
+        If no overrides match, returns self (optimization).
+        """
+        if not self.enabled or not self.category_overrides:
+            return self
+
+        # Check for overrides
+        # Match against Name (case-insensitive?) or WNID
+        override = None
+        
+        # Check WNID first (most precise)
+        if node_wnid and node_wnid in self.category_overrides:
+            override = self.category_overrides[node_wnid]
+        
+        # Check Name
+        if not override and node_name:
+            # Try exact match
+            if node_name in self.category_overrides:
+                override = self.category_overrides[node_name]
+            # Try case-insensitive
+            elif node_name.lower() in self.category_overrides:
+                override = self.category_overrides[node_name.lower()]
+        
+        if not override:
+            return self
+
+        # Create new config with overrides applied
+        # Default behavior: overrides are recursive (they become the new base)
+        return SmartConfig(
+            enabled=self.enabled,
+            min_depth=override.get('min_depth', self.min_depth),
+            min_hyponyms=override.get('min_hyponyms', self.min_hyponyms),
+            min_leaf_size=override.get('min_leaf_size', self.min_leaf_size),
+            merge_orphans=override.get('merge_orphans', self.merge_orphans),
+            category_overrides=self.category_overrides # Propagate the full map
+        )
+
 
 def is_synset_significant(synset: Any, config: SmartConfig) -> bool:
     """

@@ -12,6 +12,7 @@ import argparse
 import logging
 import sys
 import os
+import yaml
 from typing import Optional
 
 from .core.config import config
@@ -30,12 +31,13 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Silence noisy libraries
+# Silence only the most verbose network/API loggers
 logging.getLogger("httpx").setLevel(logging.WARNING)
 logging.getLogger("httpcore").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger("huggingface_hub").setLevel(logging.ERROR)
-logging.getLogger("sentence_transformers").setLevel(logging.WARNING)
+# Keep lifecycle logs (model loading, etc.) visible
+logging.getLogger("sentence_transformers").setLevel(logging.INFO)
 
 
 def get_api_key() -> Optional[str]:
@@ -86,9 +88,31 @@ def apply_smart_preset(args):
         args.merge_orphans = defaults[3]
 
 
+def load_smart_overrides(config_path: Optional[str]) -> dict:
+    """Load smart overrides from a YAML file."""
+    if not config_path:
+        return {}
+    
+    if not os.path.exists(config_path):
+        logger.warning(f"Smart config file not found: {config_path}")
+        return {}
+        
+    try:
+        with open(config_path, 'r', encoding='utf-8') as f:
+            data = yaml.safe_load(f)
+            if not isinstance(data, dict):
+                logger.warning(f"Invalid smart config format in {config_path} (expected dict)")
+                return {}
+            return data
+    except Exception as e:
+        logger.error(f"Failed to load smart config: {e}")
+        return {}
+
+
 def cmd_dataset_imagenet(args):
     """Handle imagenet subcommand."""
     apply_smart_preset(args)
+    overrides = load_smart_overrides(args.smart_config)
     
     # Analysis mode override
     if getattr(args, 'analyze', False):
@@ -122,7 +146,8 @@ def cmd_dataset_imagenet(args):
         min_leaf_size=args.min_leaf,
         merge_orphans=getattr(args, 'merge_orphans', False),
         exclude_regex=args.exclude_regex,
-        exclude_subtree=args.exclude_subtree
+        exclude_subtree=args.exclude_subtree,
+        smart_overrides=overrides
     )
     
     mgr = StructureManager()
@@ -145,6 +170,8 @@ def cmd_dataset_coco(args):
 def cmd_dataset_openimages(args):
     """Handle openimages subcommand."""
     apply_smart_preset(args)
+    # OpenImages doesn't support fine-grained overrides yet in this PR, 
+    # but we should handle the arg gracefully or ignore it.
     
     # Analysis mode override
     if getattr(args, 'analyze', False):
@@ -186,6 +213,7 @@ def cmd_dataset_openimages(args):
 def cmd_dataset_tencent(args):
     """Handle tencent subcommand."""
     apply_smart_preset(args)
+    overrides = load_smart_overrides(args.smart_config)
     
     # Analysis mode override
     if getattr(args, 'analyze', False):
@@ -208,7 +236,8 @@ def cmd_dataset_tencent(args):
         min_significance_depth=args.min_depth,
         min_hyponyms=args.min_hyponyms,
         min_leaf_size=args.min_leaf,
-        merge_orphans=getattr(args, 'merge_orphans', False)
+        merge_orphans=getattr(args, 'merge_orphans', False),
+        smart_overrides=overrides
     )
     
     mgr = StructureManager()
@@ -368,6 +397,7 @@ def main():
         parser.add_argument('--min-hyponyms', type=int, default=None, help='[Smart] Min descendants to keep as category (higher = fewer, larger categories)')
         parser.add_argument('--min-leaf', type=int, default=None, help='[Smart] Min items per leaf list (smaller lists are merged upward)')
         parser.add_argument('--merge-orphans', action='store_true', default=None, help='[Smart] Merge small pruned lists into parent misc category')
+        parser.add_argument('--smart-config', type=str, default=None, help='[Smart] Path to YAML config file for fine-grained per-category overrides')
 
     # ImageNet
     p_imagenet = dataset_sub.add_parser('imagenet', help='ImageNet (WordNet-based) hierarchy')
