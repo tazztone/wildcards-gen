@@ -118,7 +118,33 @@ def lint_file(file_path: str, model_name: str, threshold: float) -> Dict[str, An
                 report["issues"].append(issue)
 
     traverse(structure, [])
-    return report
+    return report, structure
+
+def clean_structure(structure: Dict[str, Any], report: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Remove identified outliers from the structure.
+    """
+    import copy
+    clean_data = copy.deepcopy(structure)
+    
+    # Map paths to outliers for quick lookup
+    path_to_outliers = {issue['path']: set(o['term'] for o in issue['outliers']) for issue in report['issues']}
+    
+    def traverse_and_clean(node, path_parts):
+        path = "/".join(path_parts)
+        if isinstance(node, dict):
+            for k in list(node.keys()):
+                traverse_and_clean(node[k], path_parts + [k])
+        elif isinstance(node, list):
+            if path in path_to_outliers:
+                outliers = path_to_outliers[path]
+                # Filter out the terms that are considered outliers
+                new_list = [term for term in node if term not in outliers]
+                node.clear()
+                node.extend(new_list)
+                
+    traverse_and_clean(clean_data, [])
+    return clean_data
 
 def print_lint_report(report: Dict[str, Any], output_format: str = 'markdown'):
     """Print the lint report to console."""

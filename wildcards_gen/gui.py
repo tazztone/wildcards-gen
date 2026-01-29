@@ -92,6 +92,42 @@ def update_en_filename(topic):
     if not topic: return "enriched.yaml"
     return f"enriched_{clean_filename(topic)[:20]}.yaml"
 
+def update_ds_ui(dataset_name, strategy):
+    """Calculate visibility and state updates for dataset-related UI components."""
+    is_imagenet = (dataset_name == "ImageNet")
+    can_use_smart = dataset_name in ["ImageNet", "Open Images", "Tencent ML-Images"]
+    is_smart = (strategy == "Smart") and can_use_smart
+    new_strategy = "Smart" if (can_use_smart and dataset_name != "COCO") else strategy
+    
+    return [
+        gr.update(visible=is_imagenet),                # ds_imagenet_group
+        gr.update(interactive=can_use_smart, value=new_strategy if not can_use_smart else strategy), # ds_strategy
+        gr.update(visible=is_smart),                   # smart_tuning_group
+        gr.update(visible=is_imagenet),                # adv_filter_group
+        gr.update(visible=(dataset_name == "Open Images")), # ds_openimages_group
+    ]
+
+def on_dataset_change(dataset_name, strategy):
+    """Handle all UI updates when the source dataset or extraction mode changes."""
+    # 1. Run the existing UI visibility logic
+    visibility_updates = update_ds_ui(dataset_name, strategy)
+    
+    # 2. Update the info markdown
+    info_text = {
+        "ImageNet": "_**ImageNet**: 21k classes. Best for general objects/animals._",
+        "COCO": "_**COCO**: 80 objects. Very small, flat list._",
+        "Open Images": "_**Open Images V7**: ~600 bbox classes or 20k+ image labels._",
+        "Tencent ML-Images": "_**Tencent ML**: 11k categories. Massive, modern coverage._"
+    }.get(dataset_name, "")
+    
+    # Returns: visibility_updates (5) + info_update (1) + reset_analysis (2)
+    return visibility_updates + [
+        gr.update(value=info_text),
+        gr.update(value=""),      # ds_analysis_output
+        gr.update(visible=False)  # apply_output_row
+    ]
+
+
 
 
 def generate_dataset_handler(
@@ -284,22 +320,19 @@ def enrich_handler(input_yaml, topic, model, api_key, output_name):
 
 def lint_handler(file_obj, model, threshold, progress=gr.Progress()):
     if not file_obj:
-        return "Error: No file uploaded."
+        return "Error: No file uploaded.", gr.update(visible=False), None
     
     progress(0, desc="Loading model... (this may take a moment)")
     try:
-        from wildcards_gen.core.linter import lint_file
+        from wildcards_gen.core.linter import lint_file, clean_structure
         
-        # Determine format
-        # If running from GUI, we return markdown string directly
         output_path = file_obj.name
-        
-        # Run Lint - returns a dict with 'issues' list
-        result = lint_file(output_path, model, float(threshold))
+        # Run Lint - returns report and the original structure object
+        result, structure = lint_file(output_path, model, float(threshold))
         issues = result.get('issues', [])
         
         if not issues:
-            return "✅ **No outliers detected.** The structure looks semantically consistent!"
+            return "✅ **No outliers detected.** The structure looks semantically consistent!", gr.update(visible=False), None
             
         # Format Report
         total_outliers = sum(len(i['outliers']) for i in issues)
@@ -312,12 +345,27 @@ def lint_handler(file_obj, model, threshold, progress=gr.Progress()):
                 score = out['score']
                 term = out['term']
                 report += f"| **{score:.2f}** | `{term}` | `{path}` |\n"
+        
+        # 3. Create cleaned version
+        clean_data = clean_structure(structure, result)
+        
+        # Save to temp file for download
+        from wildcards_gen.core.structure import StructureManager
+        mgr = StructureManager()
+        
+        base_name = os.path.basename(output_path).replace(".yaml", "")
+        clean_filename = f"{base_name}_cleaned.yaml"
+        clean_path = os.path.join(os.path.dirname(output_path), clean_filename)
+        
+        # Use StructureManager to format the output
+        with open(clean_path, 'w', encoding='utf-8') as f:
+            f.write(mgr.to_string(clean_data))
             
-        return report
+        return report, gr.update(visible=True), clean_path
         
     except Exception as e:
         logger.exception("Linter failed")
-        return f"Error: {str(e)}"
+        return f"Error: {str(e)}", gr.update(visible=False), None
 
 def launch_gui(share=False):
     # Initial API key from config or env
@@ -344,7 +392,7 @@ def launch_gui(share=False):
                 
                 # WordNet Search (Moved to top for discoverability)
                 with gr.Accordion("🔍 WordNet ID Lookup", open=False):
-                    gr.Markdown("*Find the right synset ID for ImageNet roots.*")
+                    gr.Markdown("### 🔍 Dictionary Lookup\n*Find the specific WordNet synset ID required for ImageNet root settings.*")
                     with gr.Row():
                         search_in = gr.Textbox(label="Search Term", placeholder="e.g. camera, dog, sword", scale=3, info="Lookup meanings and synset IDs (e.g. 'camera' -> 'camera.n.01').")
                         search_btn = gr.Button("Search", scale=1)
@@ -428,10 +476,12 @@ def launch_gui(share=False):
                             ds_smart_preset.change(apply_smart_preset, inputs=[ds_smart_preset, ds_name], outputs=[ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_merge_orphans])
 
                             # === NEW: Analysis Tools ===
+                            gr.Markdown("### 📊 Dataset Analysis\n*Examine the raw hierarchy to find the best 'Smart' flattening thresholds for this specific dataset and root.*")
                             with gr.Row():
                                 ds_analyze_btn = gr.Button("🔍 Analyze Structure", size="sm")
                             ds_analysis_output = gr.Markdown("")
                             with gr.Row(visible=False) as apply_output_row:
+                                gr.Markdown("💡 **Optimization**: Apply the suggested thresholds found during analysis.")
                                 ds_apply_suggest = gr.Button("✅ Apply Suggestions", size="sm", variant="secondary")
                                 # Hidden states to store suggestion values
                                 sug_d = gr.State(4)
@@ -459,6 +509,7 @@ def launch_gui(share=False):
                             ds_glosses = gr.Checkbox(label="Include Instructions", value=True, info="Add WordNet definitions as instructions.")
                             ds_out = gr.Textbox(label="Output Filename", info="Auto-generated based on configuration.", value=update_ds_filename("ImageNet", config.get("datasets.imagenet.root_synset"), config.get("generation.default_depth"), "Smart", 4, 50, 5, False))
                         
+                        gr.Markdown("### 🚀 Build Skeleton\n*Generate the WordNet-linked hierarchy based on your source and pruning settings.*")
                         ds_btn = gr.Button("🚀 Generate Skeleton", variant="primary", size="lg")
 
                     # Right Column: Preview
@@ -466,39 +517,19 @@ def launch_gui(share=False):
                         ds_file = gr.File(label="Download YAML")
                         ds_prev = gr.Code(language="yaml", label="Preview", lines=25)
                 
-                # Dynamic UI Linking
-                def update_ds_ui(dataset_name, strategy):
-                    is_imagenet = (dataset_name == "ImageNet")
-                    can_use_smart = dataset_name in ["ImageNet", "Open Images", "Tencent ML-Images"]
-                    is_smart = (strategy == "Smart") and can_use_smart
-                    new_strategy = "Smart" if (can_use_smart and dataset_name != "COCO") else strategy
-                    
-                    return [
-                        gr.update(visible=is_imagenet),                # ds_imagenet_group
-                        gr.update(interactive=can_use_smart, value=new_strategy if not can_use_smart else strategy), # ds_strategy
-                        gr.update(visible=is_smart),                   # smart_tuning_group
-                        gr.update(visible=is_imagenet),                # adv_filter_group
-                        gr.update(visible=(dataset_name == "Open Images")), # ds_openimages_group
-                    ]
-                    
-                    # Update Info Text
-                    info_map = {
-                        "ImageNet": "_**ImageNet**: 21k classes. Best for general objects/animals._",
-                        "COCO": "_**COCO**: 80 objects. Very small, flat list._",
-                        "Open Images": "_**Open Images V7**: ~600 bbox classes or 20k+ image labels._",
-                        "Tencent ML-Images": "_**Tencent ML**: 11k categories. Massive, modern coverage._"
-                    }
-                    info_text = info_map.get(dataset_name, "")
+
+
+                ds_name.change(
+                    on_dataset_change, 
+                    inputs=[ds_name, ds_strategy], 
+                    outputs=[ds_imagenet_group, ds_strategy, smart_tuning_group, adv_filter_group, ds_openimages_group, ds_info, ds_analysis_output, apply_output_row]
+                )
                 
-                ds_name.change(update_ds_ui, inputs=[ds_name, ds_strategy], outputs=[ds_imagenet_group, ds_strategy, smart_tuning_group, adv_filter_group, ds_openimages_group])
-                ds_name.change(lambda x: ({
-                    "ImageNet": "_**ImageNet**: 21k classes. Best for general objects/animals._",
-                    "COCO": "_**COCO**: 80 objects. Very small, flat list._",
-                    "Open Images": "_**Open Images V7**: ~600 bbox classes or 20k+ image labels._",
-                    "Tencent ML-Images": "_**Tencent ML**: 11k categories. Massive, modern coverage._"
-                }.get(x, "")), inputs=[ds_name], outputs=[ds_info])
-                
-                ds_strategy.change(update_ds_ui, inputs=[ds_name, ds_strategy], outputs=[ds_imagenet_group, ds_strategy, smart_tuning_group, adv_filter_group, ds_openimages_group])
+                ds_strategy.change(
+                    on_dataset_change, 
+                    inputs=[ds_name, ds_strategy], 
+                    outputs=[ds_imagenet_group, ds_strategy, smart_tuning_group, adv_filter_group, ds_openimages_group, ds_info, ds_analysis_output, apply_output_row]
+                )
                 
                 for comp in [ds_name, ds_root, ds_depth, ds_strategy, ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_bbox_only]:
                     comp.change(update_ds_filename, inputs=[ds_name, ds_root, ds_depth, ds_strategy, ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_bbox_only], outputs=[ds_out])
@@ -512,7 +543,7 @@ def launch_gui(share=False):
                     analyze_handler,
                     inputs=[ds_name, ds_root, ds_depth, ds_filter, ds_strict, ds_blacklist, ds_bbox_only],
                     outputs=[ds_analysis_output, sug_d, sug_h, sug_l]
-                ).then(lambda: gr.update(visible=True), outputs=[apply_output_row])
+                ).then(lambda r: gr.update(visible=True if "Error" not in r else False), inputs=[ds_analysis_output], outputs=[apply_output_row])
 
                 ds_btn.click(
                     lambda *args: generate_dataset_handler(
@@ -538,6 +569,7 @@ def launch_gui(share=False):
                         cr_topic = gr.Textbox(label="Topic", placeholder="e.g. Types of Cyberpunk Augmentations", info="Phrase describing the taxonomy for AI to brainstorm.")
                         cr_out = gr.Textbox(label="Output Filename", value="topic_skeleton.yaml", info="Filename for the generated YAML skeleton.")
                         cr_topic.change(update_cr_filename, inputs=[cr_topic], outputs=[cr_out])
+                        gr.Markdown("*Click to brainstorm a complete hierarchy for this topic via AI.*")
                         cr_btn = gr.Button("✨ Generate", variant="primary")
                     with gr.Column():
                         cr_file = gr.File(label="Download YAML")
@@ -552,6 +584,7 @@ def launch_gui(share=False):
                         cat_terms = gr.TextArea(label="Raw Terms", placeholder="Lion\\nTiger\\nLeopard\\n...", info="List of terms (one per line) for AI to organize.")
                         cat_out = gr.Textbox(label="Output Filename", value="categorized.yaml", info="Filename for the organized output.")
                         cat_terms.change(update_cat_filename, inputs=[cat_terms], outputs=[cat_out])
+                        gr.Markdown("*Organize your terms into a logical structure with categories and sub-categories.*")
                         cat_btn = gr.Button("🗂️ Categorize", variant="primary")
                     with gr.Column():
                         cat_file = gr.File(label="Download YAML")
@@ -567,6 +600,7 @@ def launch_gui(share=False):
                         en_topic = gr.Textbox(label="Context / Goal", value="AI image generation wildcards", info="Guides AI instructions (e.g. 'Stable Diffusion').")
                         en_out = gr.Textbox(label="Output Filename", value="enriched.yaml", info="Filename for the enriched output.")
                         en_topic.change(update_en_filename, inputs=[en_topic], outputs=[en_out])
+                        gr.Markdown("*Add instruction comments to your existing YAML based on the context/goal.*")
                         en_btn = gr.Button("💡 Enrich", variant="primary")
                     with gr.Column():
                         en_file = gr.File(label="Download YAML")
@@ -586,12 +620,16 @@ def launch_gui(share=False):
                             info="Qwen3 (Best), MPNet (Fast), MiniLM (Fastest)"
                         )
                         lint_threshold = gr.Slider(0.01, 1.0, value=0.1, step=0.01, label="Sensitivity Threshold", info="Higher = stricter outlier detection.")
+                        gr.Markdown("*Analyze local embeddings to identify nodes that are semantically distinct from their parents.*")
                         lint_btn = gr.Button("🕵️ Run Linter", variant="primary")
                     
                     with gr.Column(scale=2):
                         lint_output = gr.Markdown("Results will appear here...")
+                        with gr.Group(visible=False) as lint_clean_group:
+                            gr.Markdown("### ✨ Cleaned Skeleton\n*Outliers have been automatically removed. Download the refined structure below:*")
+                            lint_clean_file = gr.File(label="Download Cleaned YAML")
                 
-                lint_btn.click(lint_handler, inputs=[lint_file, lint_model, lint_threshold], outputs=[lint_output])
+                lint_btn.click(lint_handler, inputs=[lint_file, lint_model, lint_threshold], outputs=[lint_output, lint_clean_group, lint_clean_file])
 
             # === TAB 6: SETTINGS ===
             with gr.Tab("⚙️ Settings"):
