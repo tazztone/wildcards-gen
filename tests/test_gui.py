@@ -137,3 +137,32 @@ def test_update_ds_filename():
     # Tencent: Should NOT include root
     f5 = gui.update_ds_filename("Tencent ML-Images", "entity.n.01", 3, "Smart", 4, 100, 3)
     assert "tencent_mlimages_d3_s4_f100_l3_smart.yaml" == f5
+
+def test_lint_handler_logic():
+    """Test the linter handler logic."""
+    with patch('wildcards_gen.core.linter.lint_file') as mock_lint, \
+         patch('wildcards_gen.core.linter.clean_structure') as mock_clean, \
+         patch('wildcards_gen.gui.StructureManager') as mock_mgr_cls, \
+         patch('builtins.open', mock_open()), \
+         patch('os.path.dirname', return_value='/tmp'), \
+         patch('os.path.basename', return_value='test.yaml'):
+         
+        mock_file = MagicMock()
+        mock_file.name = "test.yaml"
+        
+        # Scenario: Outliers found
+        mock_lint.return_value = ({"issues": [{"path": "a", "outliers": [{"term": "x", "score": 0.5}]}]}, {"a": ["x", "y"]})
+        mock_clean.return_value = {"a": ["y"]}
+        mock_mgr = mock_mgr_cls.return_value
+        mock_mgr.to_string.return_value = "cleaned_content"
+        
+        report, vis_update, path = gui.lint_handler(mock_file, "qwen3", 0.1)
+        
+        assert "Found 1 Potential Outliers" in report
+        assert vis_update['visible'] is True
+        assert "cleaned.yaml" in path
+        
+        # Scenario: No file
+        report, vis_update, path = gui.lint_handler(None, "qwen3", 0.1)
+        assert "Error" in report
+        assert vis_update['visible'] is False
