@@ -62,6 +62,12 @@ The `LLMEngine` interacts with OpenRouter using specific prompt templates locate
     *   **`presets.py`**: **Single Source of Truth** for semantic pruning `SMART_PRESETS` and `DATASET_PRESET_OVERRIDES`.
     *   `datasets/`: Logic for specific datasets (ImageNet, COCO, OpenImages, Tencent).
 
+## UI/UX Principles (GUI)
+
+*   **Documentation via `info=`**: Standard Gradio input components (Slider, Checkbox, Textbox, Dropdown, Radio) support the `info=` argument to provide detailed UX guidance directly under the label. NOT supported by `gr.File` (append info to label instead). Do NOT use `tooltip=` as it is not supported in the project's Gradio version.
+*   **Live Previews**: Ensure that filenames and status indicators update immediately via `.change()` events to give the user instant feedback on their settings.
+*   **Progressive Disclosure**: Use `gr.Accordion` and `gr.Group` (with `visible` toggles) to keep the interface clean while hiding advanced tuning parameters by default.
+
 ## Maintenance & Contribution
 
 *   **Adding Datasets**: Implement a new module in `core/datasets/` that returns a dictionary. Use `wordnet.py` to fetch glosses.

@@ -221,7 +221,7 @@ def generate_imagenet_tree(
     Generate ImageNet hierarchy tree from a root synset.
     
     Args:
-        root_synset_str: Root synset (e.g., 'animal.n.01', 'entity.n.01')
+        root_synset_str: Root synset (e.g., 'entity.n.01', 'animal.n.01')
         max_depth: Maximum depth before flattening
         filter_set: '1k', '21k', or None for all
         with_glosses: Add WordNet glosses as instructions
