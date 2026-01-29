@@ -140,6 +140,31 @@ wildcards-gen dataset tencent --smart --preset flat -o output/skeleton_flat.yaml
 | `flat` | 2 | 500 | 10 | Yes |
 | `ultra-flat` | 1 | 1000 | 20 | Yes |
 
+#### 🔧 Advanced: Granular Group Tuning
+You can apply different smart settings to specific subtrees using a configuration YAML file and the `--smart-config` flag. This allows you to flatten specific dense branches (like "person") while keeping others detailed.
+
+**overrides.yaml:**
+```yaml
+# Apply strict flattening to 'person' subtree
+person:
+  min_hyponyms: 1000
+  min_leaf_size: 20
+
+# Keep 'vehicle' very detailed
+vehicle:
+  min_hyponyms: 5
+  min_depth: 10
+
+# Target by WordNet ID for precision
+n02084071: # 'dog'
+  merge_orphans: false
+```
+
+**Usage:**
+```bash
+wildcards-gen dataset imagenet --smart --smart-config overrides.yaml -o output/custom_skeleton.yaml
+```
+
 > [!TIP]
 > **Smart Mode** is also available for `imagenet` and `openimages` commands!
 

@@ -661,7 +661,6 @@ def launch_gui(share=False):
 
     server_name = config.get("gui.server_name")
     server_port = config.get("gui.server_port")
-    server_name = config.get("gui.server_name")
-    server_port = config.get("gui.server_port")
+    logger.info(f"🌐 GUI is starting at http://{server_name or '127.0.0.1'}:{server_port or 7860}")
     demo.launch(share=share, server_name=server_name, server_port=server_port, theme=gr.themes.Soft())
 
