@@ -56,11 +56,19 @@ def build_wordnet_hierarchy(
     """
     result = CommentedMap()
     
-    # Map names to their primary synsets
-    # We use a dict to group multiple label IDs that might map to the same synset name
-    synset_to_labels = {}
+@functools.lru_cache(maxsize=1)
+def _get_cached_synset_tree() -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    """
+    Cached worker to build the synset tree structure.
+    Returns (synset_to_labels, synset_tree).
+    """
+    # 1. Load Data (Already Cached)
+    _, id_to_name = load_openimages_data()
     
-    logger.info(f"Mapping {len(id_to_name)} labels to WordNet synsets...")
+    # 2. Map names to synsets
+    synset_to_labels = {}
+    logger.info(f"Mapping {len(id_to_name)} labels to WordNet synsets (First Run Only)...")
+    
     for label_id, name in id_to_name.items():
         # Clean name for WordNet lookup
         clean_name = name.lower().replace('/', ' ')
@@ -73,67 +81,75 @@ def build_wordnet_hierarchy(
         else:
             # If no synset, add to a catch-all "Other" or root
             if None not in synset_to_labels:
-                 # Minimal mock-like synset for things not in WordNet
                  synset_to_labels[None] = {'synset': None, 'labels': []}
             synset_to_labels[None]['labels'].append(name)
 
-    # Now we have synsets for most things. We want to build a tree.
-    # To keep it simple and efficient, we'll use the StructureManager's existing logic
-    # if we can, but we need a tree structure first.
+    # 3. Build Tree
+    logger.info("Building dynamic WordNet-based hierarchy (First Run Only)...")
+    synset_tree = {} # wnid -> {'parent': wnid, 'children': [wnids], 'labels': [names]}
     
-    # Let's group by top-level categories if smart mode is on, 
-    # or just build a flat-ish structure grouped by category if not.
-    
-    # If smart mode is enabled, we can use the synset hierarchy
-    if smart_config and smart_config.enabled:
-        logger.info("Building dynamic WordNet-based hierarchy...")
+    for wnid, data in synset_to_labels.items():
+        synset = data['synset']
+        labels = data['labels']
         
-        # Build a temporary tree of synsets
-        synset_tree = {} # wnid -> {'parent': wnid, 'children': [wnids], 'labels': [names]}
-        
-        for wnid, data in synset_to_labels.items():
-            synset = data['synset']
-            labels = data['labels']
-            
-            if synset:
-                # Find a reasonable parent
-                paths = synset.hypernym_paths()
-                if paths:
-                    # Use the longest path to get the most specific hierarchy
-                    path = paths[0]
-                    # path is [entity, ..., parent, synset]
-                    # We want to register all nodes in the path
-                    for i in range(len(path)):
-                        curr = path[i]
-                        curr_wnid = f"{curr.pos()}{curr.offset():08d}"
-                        if curr_wnid not in synset_tree:
-                            parent_wnid = None
-                            if i > 0:
-                                p = path[i-1]
-                                parent_wnid = f"{p.pos()}{p.offset():08d}"
-                            
-                            synset_tree[curr_wnid] = {
-                                'synset': curr,
-                                'parent': parent_wnid,
-                                'children': set(),
-                                'labels': []
-                            }
-                            if parent_wnid:
-                                synset_tree[parent_wnid]['children'].add(curr_wnid)
-                    
-                    # Add labels to the leaf synset
-                    curr_wnid = f"{synset.pos()}{synset.offset():08d}"
-                    synset_tree[curr_wnid]['labels'].extend(labels)
-                else:
-                    # No hypernyms? Rare, but add to root
-                    if 'root' not in synset_tree:
-                        synset_tree['root'] = {'synset': None, 'parent': None, 'children': set(), 'labels': []}
-                    synset_tree['root']['labels'].extend(labels)
+        if synset:
+            # Find a reasonable parent
+            paths = synset.hypernym_paths()
+            if paths:
+                # Use the longest path to get the most specific hierarchy
+                path = paths[0]
+                # path is [entity, ..., parent, synset]
+                # We want to register all nodes in the path
+                for i in range(len(path)):
+                    curr = path[i]
+                    curr_wnid = f"{curr.pos()}{curr.offset():08d}"
+                    if curr_wnid not in synset_tree:
+                        parent_wnid = None
+                        if i > 0:
+                            p = path[i-1]
+                            parent_wnid = f"{p.pos()}{p.offset():08d}"
+                        
+                        synset_tree[curr_wnid] = {
+                            'synset': curr,
+                            'parent': parent_wnid,
+                            'children': set(),
+                            'labels': []
+                        }
+                        if parent_wnid:
+                            synset_tree[parent_wnid]['children'].add(curr_wnid)
+                
+                # Add labels to the leaf synset
+                curr_wnid = f"{synset.pos()}{synset.offset():08d}"
+                synset_tree[curr_wnid]['labels'].extend(labels)
             else:
-                # No synset
-                if 'other' not in synset_tree:
-                    synset_tree['other'] = {'synset': None, 'parent': None, 'children': set(), 'labels': []}
-                synset_tree['other']['labels'].extend(labels)
+                # No hypernyms? Rare, but add to root
+                if 'root' not in synset_tree:
+                    synset_tree['root'] = {'synset': None, 'parent': None, 'children': set(), 'labels': []}
+                synset_tree['root']['labels'].extend(labels)
+        else:
+            # No synset
+            if 'other' not in synset_tree:
+                synset_tree['other'] = {'synset': None, 'parent': None, 'children': set(), 'labels': []}
+            synset_tree['other']['labels'].extend(labels)
+            
+    return synset_to_labels, synset_tree
+
+def build_wordnet_hierarchy(
+    id_to_name: Dict[str, str],
+    structure_mgr: StructureManager,
+    with_glosses: bool = True,
+    smart_config: Any = None
+) -> CommentedMap:
+    """
+    Build a hierarchy for all labels using WordNet hypernym paths.
+    """
+    result = CommentedMap()
+    
+    # If smart mode is enabled, we uses the pre-computed tree
+    if smart_config and smart_config.enabled:
+        # Uses cached tree structure
+        synset_to_labels, synset_tree = _get_cached_synset_tree()
+        
 
         # Recursive function to convert synset_tree to CommentedMap
         def build_recursive(wnid, parent_map, depth):
@@ -257,6 +273,9 @@ def build_wordnet_hierarchy(
         # Simple mode: Group by first letter or just one big list?
         # Let's at least group by first WordNet parent if possible, otherwise flat.
         logger.info("Building flat-ish hierarchy for full labels...")
+        
+        synset_to_labels, _ = _get_cached_synset_tree()
+        
         all_labels = []
         for wnid, data in synset_to_labels.items():
             all_labels.extend(data['labels'])

@@ -268,7 +268,10 @@ def generate_imagenet_tree(
     smart_overrides: Optional[Dict] = None,
     semantic_cleanup: bool = False,
     semantic_model: str = "minilm",
-    semantic_threshold: float = 0.1
+    semantic_threshold: float = 0.1,
+    semantic_arrangement: bool = False,
+    semantic_arrangement_threshold: float = 0.1,
+    semantic_arrangement_min_cluster: int = 5
 ) -> CommentedMap:
     """
     Generate ImageNet hierarchy tree from a root synset.
@@ -285,6 +288,12 @@ def generate_imagenet_tree(
         exclude_regex: Regex patterns to exclude by name
         exclude_subtree: Synset names/WNIDs to prune entire subtrees
         smart_overrides: Dictionary of per-category smart config overrides
+        semantic_cleanup: Enable semantic outlier detection
+        semantic_model: Model to use for cleaning/arrangement
+        semantic_threshold: Threshold for cleaning
+        semantic_arrangement: Enable semantic clustering
+        semantic_arrangement_threshold: Threshold for clustering
+        semantic_arrangement_min_cluster: Min cluster size
     """
     ensure_nltk_data()
     
@@ -305,8 +314,9 @@ def generate_imagenet_tree(
         semantic_cleanup=semantic_cleanup,
         semantic_model=semantic_model,
         semantic_threshold=semantic_threshold,
-        semantic_arrangement=smart_overrides.get('semantic_arrangement') if smart_overrides else semantic_cleanup, # Default inheritance? No, passed separately
-        # Wait, wrapper logic below handles CLI args -> SmartConfig, but we need to pass them in generate_imagenet_tree args too
+        semantic_arrangement=semantic_arrangement,
+        semantic_arrangement_threshold=semantic_arrangement_threshold,
+        semantic_arrangement_min_cluster=semantic_arrangement_min_cluster
     )
     
     # Load filter set

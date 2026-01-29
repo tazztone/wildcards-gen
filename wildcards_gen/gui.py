@@ -71,7 +71,14 @@ def save_and_preview(data, output_name):
     with open(output_path, 'w', encoding='utf-8') as f:
         f.write(yaml_str)
         
-    return output_path, yaml_str
+    # Truncate for preview to avoid UI lag
+    lines = yaml_str.split('\n')
+    if len(lines) > 500:
+        preview_str = '\n'.join(lines[:500]) + '\n\n# ... (Preview truncated. Download file to view full content.)'
+    else:
+        preview_str = yaml_str
+
+    return output_path, preview_str
 
 def search_wordnet(query):
     """Search for synsets matching the query."""
@@ -442,8 +449,9 @@ def lint_handler(file_obj, model, threshold, progress=gr.Progress()):
 def launch_gui(share=False):
     # Initial API key from config or env
     initial_key = config.api_key or os.environ.get('OPENROUTER_API_KEY', '')
+    initial_hf_token = config.get('hf_token') or os.environ.get('HF_TOKEN', '')
     
-    with gr.Blocks(title='Wildcards-Gen', css=CUSTOM_CSS, theme=gr.themes.Soft()) as demo:
+    with gr.Blocks(title='Wildcards-Gen') as demo:
         # Header with API Key Status
         with gr.Row(elem_classes=['header-section']):
             with gr.Column(scale=4):
@@ -563,7 +571,7 @@ def launch_gui(share=False):
                          # Block 2: Preview
                          with gr.Column():
                              gr.Markdown('**Preview output**')
-                             ds_prev = gr.Code(language='yaml', label='YAML Preview', lines=15)
+                             ds_prev = gr.Code(language='yaml', label='YAML Preview', lines=15, max_lines=30)
                              ds_out_name = gr.Textbox(label='Output Filename', value='skeleton.yaml', show_label=False)
 
                          # Block 3: Run Controls
@@ -584,7 +592,7 @@ def launch_gui(share=False):
                                 cr_out = gr.Textbox(label='Output Filename', value='topic_skeleton.yaml')
                                 cr_btn = gr.Button('✨ Generate', variant='primary')
                             with gr.Column():
-                                cr_prev = gr.Code(language='yaml', label='Preview', lines=20)
+                                cr_prev = gr.Code(language='yaml', label='Preview', lines=20, max_lines=30)
                                 cr_file = gr.File(label='Download')
                         cr_topic.change(update_cr_filename, inputs=[cr_topic], outputs=[cr_out])
                         cr_btn.click(create_handler, inputs=[cr_topic, model_state, api_key_state, cr_out], outputs=[cr_file, cr_prev])
@@ -598,7 +606,7 @@ def launch_gui(share=False):
                                 cat_out = gr.Textbox(label='Output Filename', value='categorized.yaml')
                                 cat_btn = gr.Button('🗂️ Categorize', variant='primary')
                             with gr.Column():
-                                cat_prev = gr.Code(language='yaml', label='Preview', lines=20)
+                                cat_prev = gr.Code(language='yaml', label='Preview', lines=20, max_lines=30)
                                 cat_file = gr.File(label='Download')
                         cat_terms.change(update_cat_filename, inputs=[cat_terms], outputs=[cat_out])
                         cat_btn.click(categorize_handler, inputs=[cat_terms, model_state, api_key_state, cat_out], outputs=[cat_file, cat_prev])
@@ -613,7 +621,7 @@ def launch_gui(share=False):
                                 en_out = gr.Textbox(label='Output Filename', value='enriched.yaml')
                                 en_btn = gr.Button('💡 Enrich', variant='primary')
                             with gr.Column():
-                                en_prev = gr.Code(language='yaml', label='Preview', lines=20)
+                                en_prev = gr.Code(language='yaml', label='Preview', lines=20, max_lines=30)
                                 en_file = gr.File(label='Download')
                         en_topic.change(update_en_filename, inputs=[en_topic], outputs=[en_out])
                         en_btn.click(enrich_handler, inputs=[en_yaml, en_topic, model_state, api_key_state, en_out], outputs=[en_file, en_prev])
@@ -639,10 +647,19 @@ def launch_gui(share=False):
             # === TAB 4: SETTINGS ===
             with gr.Tab('⚙️ Settings'):
                 with gr.Group():
-                    gr.Markdown('**API Key**')
+                    gr.Markdown('**Keys**')
                     set_key = gr.Textbox(label='OpenRouter API Key', value=initial_key, type='password')
-                    set_save_key = gr.Button('Update API Key')
-                    set_save_key.click(lambda k: (k, f"🔑 API: {'✅ Set' if k else '❌ Not Set'}"), inputs=[set_key], outputs=[api_key_state, api_status])
+                    set_hf_token = gr.Textbox(label='Hugging Face Token', value=initial_hf_token, type='password', info="Required for gated models or to avoid rate limits.")
+                    
+                    set_save_keys = gr.Button('Update Keys')
+                    
+                    def update_keys(ak, hft):
+                        # In a real app, save to config file here
+                        if hft:
+                            os.environ['HF_TOKEN'] = hft
+                        return ak, f"🔑 API: {'✅ Set' if ak else '❌ Not Set'}"
+                        
+                    set_save_keys.click(update_keys, inputs=[set_key, set_hf_token], outputs=[api_key_state, api_status])
                 
                 with gr.Group():
                     gr.Markdown('**Default LLM**')
@@ -710,7 +727,26 @@ def launch_gui(share=False):
         
         ds_btn.click(generate_dataset_handler, inputs=all_gen_inputs, outputs=[ds_file, ds_prev])
 
+    # Configure logging to reduce spam
+    logging.getLogger("transformers").setLevel(logging.ERROR)
+    logging.getLogger("sentence_transformers").setLevel(logging.WARNING)
+    logging.getLogger("huggingface_hub").setLevel(logging.WARNING)
+
     server_name = config.get('gui.server_name')
     server_port = config.get('gui.server_port')
+    
+    # HF Token Handling
+    hf_token = config.get('hf_token') or os.environ.get('HF_TOKEN')
+    if hf_token:
+        os.environ['HF_TOKEN'] = hf_token
+    
     logger.info(f'🌐 GUI is starting at http://{server_name or '127.0.0.1'}:{server_port or 7860}')
-    demo.launch(share=share, server_name=server_name, server_port=server_port, theme=gr.themes.Soft())
+    
+    # NOTE: Gradio 6.0 migration: theme and css moved to launch()
+    demo.launch(
+        share=share, 
+        server_name=server_name, 
+        server_port=server_port, 
+        theme=gr.themes.Soft(),
+        css=CUSTOM_CSS
+    )

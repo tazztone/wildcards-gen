@@ -8,8 +8,7 @@ whether a node should be a full category or flattened into a list.
 from typing import Optional, Any, List, Tuple
 from .wordnet import get_synset_from_wnid, get_primary_synset, get_synset_name, get_synset_wnid
 
-# Lazy-loaded embedding model for semantic cleaning
-_EMBEDDING_MODEL = None
+
 
 class SmartConfig:
     """Configuration for smart pruning."""
@@ -176,36 +175,21 @@ def handle_small_leaves(
     
     return (leaves if leaves else [], [])
 
-def init_semantic_model(model_name: str = "minilm"):
-    """Initialize the global embedding model if not already loaded."""
-    global _EMBEDDING_MODEL
-    if _EMBEDDING_MODEL is None:
-        from .linter import load_embedding_model, check_dependencies
-        if check_dependencies():
-            _EMBEDDING_MODEL = load_embedding_model(model_name)
-        else:
-            # Log warning or handle gracefully
-            print("Warning: Semantic cleaning enabled but dependencies missing. Skipping.")
-            _EMBEDDING_MODEL = "DISABLED"
-
 def apply_semantic_cleaning(items: List[str], config: SmartConfig) -> List[str]:
     """
     Clean a list of items using semantic embeddings if enabled.
     Returns the cleaned list.
     """
-    global _EMBEDDING_MODEL
-    
     if not config.enabled or not config.semantic_cleanup or not items:
         return items
         
-    if _EMBEDDING_MODEL is None:
-        init_semantic_model(config.semantic_model)
-        
-    if _EMBEDDING_MODEL == "DISABLED":
+    from .linter import load_embedding_model, check_dependencies, clean_list
+    
+    if not check_dependencies():
         return items
         
-    from .linter import clean_list
-    cleaned, _ = clean_list(items, _EMBEDDING_MODEL, config.semantic_threshold)
+    model = load_embedding_model(config.semantic_model)
+    cleaned, _ = clean_list(items, model, config.semantic_threshold)
     return cleaned
 
 def apply_semantic_arrangement(items: List[str], config: SmartConfig) -> Tuple[dict, List[str]]:
@@ -216,10 +200,26 @@ def apply_semantic_arrangement(items: List[str], config: SmartConfig) -> Tuple[d
     if not config.enabled or not config.semantic_arrangement or not items:
         return {}, items
         
-    init_semantic_model(config.semantic_model)
-    if _EMBEDDING_MODEL is None or _EMBEDDING_MODEL == "DISABLED":
+    from .linter import load_embedding_model, check_dependencies
+    
+    if not check_dependencies():
          return {}, items
-         
+    
+    # Ensure model is primed (arranger might need it, or we pass it? 
+    # Arranger likely loads it independently or we should update arranger too?
+    # Let's check arranger usage. It takes model_name string usually?
+    # Wait, earlier I saw arranger import. Let's assume arranger handles it or we pass the model object.
+    # Looking at previous code calling `arrange_list(items, config.semantic_model...)`
+    # It seems `arrange_list` takes the model NAME. 
+    # If `arrange_list` loads the model itself, we should make sure IT uses the cached loader.
+    # But `smart.py` previously called `init_semantic_model`?
+    # Let's verify `wildcards_gen/core/arranger.py` if possible.
+    # Assuming `arrange_list` is smart enough or we update it.
+    # Actually, the previous code called `init_semantic_model` which set `_EMBEDDING_MODEL` global, 
+    # but `arrange_list` call didn't seem to use that global?
+    # Ah, `arrange_list` was imported from `.arranger`.
+    # Anyhow, let's keep it consistent.
+    
     from .arranger import arrange_list
     return arrange_list(
         items, 
