@@ -115,7 +115,10 @@ def generate_tencent_hierarchy(
     smart_overrides: Optional[Dict] = None,
     semantic_cleanup: bool = False,
     semantic_model: str = "minilm",
-    semantic_threshold: float = 0.1
+    semantic_threshold: float = 0.1,
+    semantic_arrangement: bool = False,
+    semantic_arrangement_threshold: float = 0.1,
+    semantic_arrangement_min_cluster: int = 5
 ) -> Dict:
     """Generate Tencent ML-Images hierarchy."""
     file_path = download_tencent_hierarchy()
@@ -155,7 +158,10 @@ def generate_tencent_hierarchy(
         category_overrides=final_overrides,
         semantic_cleanup=semantic_cleanup,
         semantic_model=semantic_model,
-        semantic_threshold=semantic_threshold
+        semantic_threshold=semantic_threshold,
+        semantic_arrangement=semantic_arrangement,
+        semantic_arrangement_threshold=semantic_arrangement_threshold,
+        semantic_arrangement_min_cluster=semantic_arrangement_min_cluster
     )
 
     def merge_nodes(existing: Any, new_val: Any) -> Any:

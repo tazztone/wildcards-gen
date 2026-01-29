@@ -19,6 +19,7 @@ from ruamel.yaml.comments import CommentedMap, CommentedSeq
 from ..structure import StructureManager
 from ..wordnet import ensure_nltk_data, get_primary_synset, get_synset_gloss, get_synset_name
 from .downloaders import ensure_openimages_data
+from ..smart import should_prune_node, apply_semantic_cleaning, apply_semantic_arrangement
 
 logger = logging.getLogger(__name__)
 
@@ -86,7 +87,6 @@ def build_wordnet_hierarchy(
     # If smart mode is enabled, we can use the synset hierarchy
     if smart_config and smart_config.enabled:
         logger.info("Building dynamic WordNet-based hierarchy...")
-        from ..smart import should_prune_node, apply_semantic_cleaning
         
         # Build a temporary tree of synsets
         synset_tree = {} # wnid -> {'parent': wnid, 'children': [wnids], 'labels': [names]}
@@ -323,7 +323,6 @@ def parse_hierarchy_node(
     should_flatten = False
     
     if smart_config and smart_config.enabled:
-        from ..smart import should_prune_node, apply_semantic_cleaning
         is_root = (depth == 0)
         should_flatten = should_prune_node(
             synset=synset,
@@ -453,7 +452,10 @@ def generate_openimages_hierarchy(
     bbox_only: bool = False,
     semantic_cleanup: bool = False,
     semantic_model: str = "minilm",
-    semantic_threshold: float = 0.1
+    semantic_threshold: float = 0.1,
+    semantic_arrangement: bool = False,
+    semantic_arrangement_threshold: float = 0.1,
+    semantic_arrangement_min_cluster: int = 5
 ) -> CommentedMap:
     """
     Generate hierarchy from Open Images dataset.
@@ -479,7 +481,10 @@ def generate_openimages_hierarchy(
         merge_orphans=merge_orphans,
         semantic_cleanup=semantic_cleanup,
         semantic_model=semantic_model,
-        semantic_threshold=semantic_threshold
+        semantic_threshold=semantic_threshold,
+        semantic_arrangement=semantic_arrangement,
+        semantic_arrangement_threshold=semantic_arrangement_threshold,
+        semantic_arrangement_min_cluster=semantic_arrangement_min_cluster
     )
     
     logger.info("Generating Open Images hierarchy...")
