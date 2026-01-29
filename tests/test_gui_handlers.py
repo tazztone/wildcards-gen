@@ -21,7 +21,7 @@ class TestGUIHandlers(unittest.TestCase):
             False, "none", True, False,
             4, 50, 5, False,  # valid ints + bool
             False, 
-            False, "minilm", 0.1, # semantic args
+            False, "minilm", 0.1, False, 0.1, 5, # semantic args
             None, None
         )
         mock_gen.assert_called_once()

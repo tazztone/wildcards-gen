@@ -218,10 +218,43 @@ def generate_tencent_hierarchy(
                 if config.merge_orphans:
                      # Merge into parent (bubble up these leaves)
                      return None, filtered_leaves
-                else:
-                     # Simple Fix: Keep as small valid list (100% retention)
                      return filtered_leaves, []
+            
+            # Smart Mode: Semantic Arrangement Re-grow
+            if smart and config.enabled and config.semantic_arrangement:
+                from ..smart import apply_semantic_arrangement
+                named_groups, leftovers = apply_semantic_arrangement(filtered_leaves, config)
                 
+                # If we have groups, we need to return a structure (dict) instead of just leaves (list)
+                # But this function returns (filtered_leaves_list_or_None, orphans)
+                # If we return a list, it stays flat.
+                # Only if we return None, it bubbles up.
+                # If we want to return a sub-structure, we must return a dict?
+                # The caller expects `child_val` to be merged. `merge_nodes` handles list vs dict.
+                
+                if named_groups:
+                    # Construct a mini-tree
+                    mini_tree = CommentedMap()
+                    for g_name, g_terms in named_groups.items():
+                        # We need to simulate StructureManager adding these?
+                        # Or just build the dict directly
+                        mini_tree[g_name] = sorted(g_terms, key=str.casefold)
+                        # Instruction? Hard to add here without StructureManager instance
+                    
+                    if leftovers:
+                        # Append leftovers to the tree? Or return as orphans?
+                        # If we return a dict, we can't return a list too.
+                        # We can add leftovers as 'misc' inside the mini_tree?
+                        # Or return them as orphans to bubble up?
+                        # Let's keep them in the tree for now to avoid losing context.
+                        # Wait, if we return a dict, it replaces the current node content.
+                        mini_tree['misc'] = sorted(leftovers, key=str.casefold)
+                        
+                    return mini_tree, []
+                else:
+                    # No groups found, just return the filtered list (leftovers)
+                    return leftovers if leftovers else None, []
+
             return (filtered_leaves if filtered_leaves else None), []
 
         # Build category
@@ -285,6 +318,18 @@ def generate_tencent_hierarchy(
             if smart and config.enabled and config.semantic_cleanup:
                  orphan_leaves = apply_semantic_cleaning(orphan_leaves, config)
 
+            # Semantic Arrangement for Orphans
+            if smart and config.enabled and config.semantic_arrangement:
+                from ..smart import apply_semantic_arrangement
+                named_groups, leftovers = apply_semantic_arrangement(orphan_leaves, config)
+                
+                # Add groups to CM
+                for g_name, g_terms in named_groups.items():
+                    cm[g_name] = sorted(g_terms, key=str.casefold)
+                    valid_items_added += 1
+                
+                orphan_leaves = leftovers
+
             cm['misc'] = orphan_leaves
             valid_items_added += 1
 
@@ -307,6 +352,22 @@ def generate_tencent_hierarchy(
             if smart and config.enabled and len(filtered_leaves) < config.min_leaf_size:
                  return None, filtered_leaves # Bubble further up
             
+            # Semantic Arrangement (Re-grow)
+            if smart and config.enabled and config.semantic_arrangement:
+                 from ..smart import apply_semantic_arrangement
+                 named_groups, leftovers = apply_semantic_arrangement(filtered_leaves, config)
+                 
+                 if named_groups:
+                     mini_tree = CommentedMap()
+                     for g_name, g_terms in named_groups.items():
+                         mini_tree[g_name] = sorted(g_terms, key=str.casefold)
+                     
+                     if leftovers:
+                         mini_tree['misc'] = sorted(leftovers, key=str.casefold)
+                     
+                     return mini_tree, []
+                 return leftovers if leftovers else None, []
+
             return (filtered_leaves if filtered_leaves else None), []
         
         return cm, []
