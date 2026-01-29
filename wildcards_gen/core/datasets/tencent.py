@@ -1,6 +1,7 @@
 
 import logging
 import csv
+import functools
 from collections import defaultdict
 from typing import Dict, Any, List, Optional, Tuple
 from ruamel.yaml import CommentedMap
@@ -11,6 +12,7 @@ from ..presets import DATASET_CATEGORY_OVERRIDES
 
 logger = logging.getLogger(__name__)
 
+@functools.lru_cache(maxsize=1)
 def parse_hierarchy_file(file_path: str) -> Dict[str, Any]:
     """Parse the Tencent hierarchy file into parent-child map."""
     # format: category_index, category_id, index_of_parent_category, category name

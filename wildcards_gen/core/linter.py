@@ -27,6 +27,9 @@ def check_dependencies():
     except ImportError:
         return False
 
+import functools
+
+@functools.lru_cache(maxsize=1)
 def load_embedding_model(model_name: str = "qwen3"):
     """Load embedding model by short name."""
     from sentence_transformers import SentenceTransformer
