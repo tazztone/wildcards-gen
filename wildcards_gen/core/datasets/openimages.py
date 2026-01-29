@@ -86,7 +86,7 @@ def build_wordnet_hierarchy(
     # If smart mode is enabled, we can use the synset hierarchy
     if smart_config and smart_config.enabled:
         logger.info("Building dynamic WordNet-based hierarchy...")
-        from ..smart import should_prune_node
+        from ..smart import should_prune_node, apply_semantic_cleaning
         
         # Build a temporary tree of synsets
         synset_tree = {} # wnid -> {'parent': wnid, 'children': [wnids], 'labels': [names]}
@@ -165,6 +165,11 @@ def build_wordnet_hierarchy(
                 
                 if all_labels:
                     unique_labels = sorted(list(set(all_labels)))
+                    
+                    # Semantic Cleaning
+                    if smart_config.semantic_cleanup:
+                        unique_labels = apply_semantic_cleaning(unique_labels, smart_config)
+
                     # Min leaf size check with orphan bubbling
                     if len(unique_labels) < smart_config.min_leaf_size:
                         if smart_config.merge_orphans:
@@ -191,6 +196,11 @@ def build_wordnet_hierarchy(
                 # Handle collected orphans - add to misc key
                 if collected_orphans and smart_config.merge_orphans:
                     collected_orphans = sorted(list(set(collected_orphans)))
+                    
+                    # Semantic Cleaning for orphans
+                    if smart_config.semantic_cleanup:
+                        collected_orphans = apply_semantic_cleaning(collected_orphans, smart_config)
+
                     if 'misc' in child_map:
                         existing = list(child_map['misc']) if child_map['misc'] else []
                         child_map['misc'] = sorted(list(set(existing + collected_orphans)))
@@ -200,8 +210,13 @@ def build_wordnet_hierarchy(
                 
                 # Add labels directly attached to this synset
                 if node['labels']:
-                    structure_mgr.add_leaf_list(child_map, f"Other {name}", sorted(node['labels']), f"Additional {name} items")
-                    has_valid_children = True
+                    local_labels = sorted(node['labels'])
+                    if smart_config.semantic_cleanup:
+                        local_labels = apply_semantic_cleaning(local_labels, smart_config)
+                    
+                    if local_labels:
+                         structure_mgr.add_leaf_list(child_map, f"Other {name}", local_labels, f"Additional {name} items")
+                         has_valid_children = True
                 
                 if has_valid_children and child_map:
                     parent_map[name] = child_map
@@ -288,7 +303,7 @@ def parse_hierarchy_node(
     should_flatten = False
     
     if smart_config and smart_config.enabled:
-        from ..smart import should_prune_node
+        from ..smart import should_prune_node, apply_semantic_cleaning
         is_root = (depth == 0)
         should_flatten = should_prune_node(
             synset=synset,
@@ -321,6 +336,11 @@ def parse_hierarchy_node(
         # Handle collected orphans - add to misc key
         if collected_orphans and smart_config and smart_config.merge_orphans:
             collected_orphans = sorted(list(set(collected_orphans)))
+            
+            # Semantic Cleaning for Orphans
+            if smart_config.semantic_cleanup:
+                collected_orphans = apply_semantic_cleaning(collected_orphans, smart_config)
+
             if 'misc' in child_map:
                 existing = list(child_map['misc']) if child_map['misc'] else []
                 child_map['misc'] = sorted(list(set(existing + collected_orphans)))
@@ -338,7 +358,13 @@ def parse_hierarchy_node(
             return (True, [])
         else:
             # If we became empty, treat self as leaf
-            structure_mgr.add_leaf_list(parent, name, [name], instruction)
+            leaves = [name]
+            if smart_config and smart_config.enabled and smart_config.semantic_cleanup:
+                # Should we clean a single item list? Usually safe, but apply for consistency
+                # Wait, 'name' is the category name. If it became empty, we use the category name as a leaf.
+                # It's not a list of children. It is valid.
+                pass
+            structure_mgr.add_leaf_list(parent, name, leaves, instruction)
             return (True, [])
             
     # Branch 2: Flatten / Prune
@@ -348,6 +374,10 @@ def parse_hierarchy_node(
         
         # Smart Mode: Min leaf check with orphan bubbling
         if smart_config and smart_config.enabled:
+            # Semantic Cleaning
+            if smart_config.semantic_cleanup:
+                 leaves = apply_semantic_cleaning(leaves, smart_config)
+
             if len(leaves) < smart_config.min_leaf_size:
                 if smart_config.merge_orphans:
                     return (False, leaves)
@@ -356,6 +386,7 @@ def parse_hierarchy_node(
         if leaves:
             structure_mgr.add_leaf_list(parent, name, leaves, instruction)
         else:
+            # If cleaning removed everything, or it was empty
             structure_mgr.add_leaf_list(parent, name, [name], instruction)
         return (True, [])
     
@@ -399,7 +430,10 @@ def generate_openimages_hierarchy(
     min_hyponyms: int = 10,
     min_leaf_size: int = 3,
     merge_orphans: bool = False,
-    bbox_only: bool = False
+    bbox_only: bool = False,
+    semantic_cleanup: bool = False,
+    semantic_model: str = "minilm",
+    semantic_threshold: float = 0.1
 ) -> CommentedMap:
     """
     Generate hierarchy from Open Images dataset.
@@ -422,7 +456,10 @@ def generate_openimages_hierarchy(
         min_depth=min_significance_depth,
         min_hyponyms=min_hyponyms,
         min_leaf_size=min_leaf_size,
-        merge_orphans=merge_orphans
+        merge_orphans=merge_orphans,
+        semantic_cleanup=semantic_cleanup,
+        semantic_model=semantic_model,
+        semantic_threshold=semantic_threshold
     )
     
     logger.info("Generating Open Images hierarchy...")
