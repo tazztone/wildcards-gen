@@ -22,7 +22,10 @@ class SmartConfig:
                  category_overrides: dict = None,
                  semantic_cleanup: bool = False,
                  semantic_model: str = "minilm",
-                 semantic_threshold: float = 0.5):
+                 semantic_threshold: float = 0.5,
+                 semantic_arrangement: bool = False,
+                 semantic_arrangement_threshold: float = 0.1,
+                 semantic_arrangement_min_cluster: int = 5):
         self.enabled = enabled
         self.min_depth = min_depth
         self.min_hyponyms = min_hyponyms
@@ -32,6 +35,9 @@ class SmartConfig:
         self.semantic_cleanup = semantic_cleanup
         self.semantic_model = semantic_model
         self.semantic_threshold = semantic_threshold
+        self.semantic_arrangement = semantic_arrangement
+        self.semantic_arrangement_threshold = semantic_arrangement_threshold
+        self.semantic_arrangement_min_cluster = semantic_arrangement_min_cluster
 
     def get_child_config(self, node_name: str, node_wnid: Optional[str] = None) -> 'SmartConfig':
         """
@@ -72,7 +78,10 @@ class SmartConfig:
             category_overrides=self.category_overrides, # Propagate the full map
             semantic_cleanup=override.get('semantic_cleanup', self.semantic_cleanup),
             semantic_model=override.get('semantic_model', self.semantic_model),
-            semantic_threshold=override.get('semantic_threshold', self.semantic_threshold)
+            semantic_threshold=override.get('semantic_threshold', self.semantic_threshold),
+            semantic_arrangement=override.get('semantic_arrangement', self.semantic_arrangement),
+            semantic_arrangement_threshold=override.get('semantic_arrangement_threshold', self.semantic_arrangement_threshold),
+            semantic_arrangement_min_cluster=override.get('semantic_arrangement_min_cluster', self.semantic_arrangement_min_cluster)
         )
 
 
@@ -198,3 +207,23 @@ def apply_semantic_cleaning(items: List[str], config: SmartConfig) -> List[str]:
     from .linter import clean_list
     cleaned, _ = clean_list(items, _EMBEDDING_MODEL, config.semantic_threshold)
     return cleaned
+
+def apply_semantic_arrangement(items: List[str], config: SmartConfig) -> Tuple[dict, List[str]]:
+    """
+    Arrange a list of items into semantic sub-groups.
+    Returns (named_groups, leftovers).
+    """
+    if not config.enabled or not config.semantic_arrangement or not items:
+        return {}, items
+        
+    init_semantic_model(config.semantic_model)
+    if _EMBEDDING_MODEL is None or _EMBEDDING_MODEL == "DISABLED":
+         return {}, items
+         
+    from .arranger import arrange_list
+    return arrange_list(
+        items, 
+        config.semantic_model, 
+        config.semantic_arrangement_threshold,
+        config.semantic_arrangement_min_cluster
+    )

@@ -175,7 +175,20 @@ def build_wordnet_hierarchy(
                         if smart_config.merge_orphans:
                             return (False, unique_labels)
                         # Otherwise keep as small list
-                    structure_mgr.add_leaf_list(parent_map, name, unique_labels, instruction)
+                        pass
+                    
+                    # Semantic Arrangement (Re-grow)
+                    if smart_config.semantic_arrangement:
+                         named_groups, leftovers = apply_semantic_arrangement(unique_labels, smart_config)
+                         for g_name, g_terms in named_groups.items():
+                             structure_mgr.add_leaf_list(parent_map, g_name, g_terms, f"instruction: items related to {g_name}")
+                         
+                         if leftovers: # Keep leftovers in the main node name, or Misc? 
+                             # Main node name is better context than "misc"
+                             structure_mgr.add_leaf_list(parent_map, name, leftovers, instruction)
+                    else:
+                        structure_mgr.add_leaf_list(parent_map, name, unique_labels, instruction)
+                        
                     return (True, [])
                 return (False, [])
             else:
@@ -200,6 +213,13 @@ def build_wordnet_hierarchy(
                     # Semantic Cleaning for orphans
                     if smart_config.semantic_cleanup:
                         collected_orphans = apply_semantic_cleaning(collected_orphans, smart_config)
+
+                    # Semantic Arrangement for Orphans
+                    if smart_config.semantic_arrangement:
+                        named_groups, leftovers = apply_semantic_arrangement(collected_orphans, smart_config)
+                        for g_name, g_terms in named_groups.items():
+                            structure_mgr.add_leaf_list(child_map, g_name, g_terms, f"instruction: items related to {g_name}")
+                        collected_orphans = leftovers
 
                     if 'misc' in child_map:
                         existing = list(child_map['misc']) if child_map['misc'] else []

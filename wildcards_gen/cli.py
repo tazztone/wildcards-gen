@@ -150,7 +150,10 @@ def cmd_dataset_imagenet(args):
         smart_overrides=overrides,
         semantic_cleanup=args.semantic_clean,
         semantic_model=args.semantic_model,
-        semantic_threshold=args.semantic_threshold
+        semantic_threshold=args.semantic_threshold,
+        semantic_arrangement=args.semantic_arrange,
+        semantic_arrangement_threshold=args.semantic_arrange_threshold,
+        semantic_arrangement_min_cluster=args.semantic_arrange_min_cluster
     )
     
     mgr = StructureManager()
@@ -208,7 +211,10 @@ def cmd_dataset_openimages(args):
         bbox_only=args.bbox_only,
         semantic_cleanup=args.semantic_clean,
         semantic_model=args.semantic_model,
-        semantic_threshold=args.semantic_threshold
+        semantic_threshold=args.semantic_threshold,
+        semantic_arrangement=args.semantic_arrange,
+        semantic_arrangement_threshold=args.semantic_arrange_threshold,
+        semantic_arrangement_min_cluster=args.semantic_arrange_min_cluster
     )
     
     mgr = StructureManager()
@@ -246,7 +252,10 @@ def cmd_dataset_tencent(args):
         smart_overrides=overrides,
         semantic_cleanup=args.semantic_clean,
         semantic_model=args.semantic_model,
-        semantic_threshold=args.semantic_threshold
+        semantic_threshold=args.semantic_threshold,
+        semantic_arrangement=args.semantic_arrange,
+        semantic_arrangement_threshold=args.semantic_arrange_threshold,
+        semantic_arrangement_min_cluster=args.semantic_arrange_min_cluster
     )
     
     mgr = StructureManager()
@@ -411,6 +420,10 @@ def main():
         parser.add_argument('--semantic-clean', action='store_true', help='[Smart] Enable semantic outlier removal from leaf lists using embeddings')
         parser.add_argument('--semantic-model', choices=['minilm', 'mpnet', 'qwen3'], default='minilm', help='[Smart] Model for semantic cleaning (default: minilm)')
         parser.add_argument('--semantic-threshold', type=float, default=0.1, help='[Smart] Outlier detection threshold')
+        # Semantic Arrangement
+        parser.add_argument('--semantic-arrange', action='store_true', help='[Smart] Enable semantic arrangement (re-grouping) of flattened lists')
+        parser.add_argument('--semantic-arrange-threshold', type=float, default=0.1, help='[Smart] Cluster acceptance probability (0-1, higher=stricter) for arrangement')
+        parser.add_argument('--semantic-arrange-min-cluster', type=int, default=5, help='[Smart] Minimum items to form a named cluster')
 
     # ImageNet
     p_imagenet = dataset_sub.add_parser('imagenet', help='ImageNet (WordNet-based) hierarchy')
