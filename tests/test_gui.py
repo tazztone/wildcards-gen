@@ -17,7 +17,7 @@ def test_generate_dataset_handler_logic():
         mock_img.return_value = {"root": ["child"]}
         
         path, content = gui.generate_dataset_handler(
-            "ImageNet", "Standard", "animal.n.01", 3, "out.yaml",
+            "ImageNet", "Standard", "entity.n.01", 3, "out.yaml",
             True, "none", True, False,
             6, 10, 3, False, False,
             None, None
@@ -119,15 +119,15 @@ def test_launch_gui_construction():
 def test_update_ds_filename():
     """Test filename generation logic."""
     # ImageNet: Should include root
-    f1 = gui.update_ds_filename("ImageNet", "animal.n.01", 3, "Standard")
-    assert "imagenet_animal_d3.yaml" == f1
+    f1 = gui.update_ds_filename("ImageNet", "entity.n.01", 3, "Standard")
+    assert "imagenet_entity_d3.yaml" == f1
     
     # OpenImages: Should NOT include root even if passed (as UI might hold old value)
-    f2 = gui.update_ds_filename("Open Images", "animal.n.01", 3, "Standard")
+    f2 = gui.update_ds_filename("Open Images", "entity.n.01", 3, "Standard")
     assert "open_images_d3.yaml" == f2
     
     # OpenImages Smart
-    f3 = gui.update_ds_filename("Open Images", "animal.n.01", 4, "Smart", 4, 50, 5)
+    f3 = gui.update_ds_filename("Open Images", "entity.n.01", 4, "Smart", 4, 50, 5)
     assert "open_images_d4_s4_f50_l5_smart.yaml" == f3
     
     # OpenImages Smart BBox
@@ -135,5 +135,5 @@ def test_update_ds_filename():
     assert "open_images_d4_s4_f50_l5_smart_bbox.yaml" == f4
     
     # Tencent: Should NOT include root
-    f5 = gui.update_ds_filename("Tencent ML-Images", "animal.n.01", 3, "Smart", 4, 100, 3)
+    f5 = gui.update_ds_filename("Tencent ML-Images", "entity.n.01", 3, "Smart", 4, 100, 3)
     assert "tencent_mlimages_d3_s4_f100_l3_smart.yaml" == f5

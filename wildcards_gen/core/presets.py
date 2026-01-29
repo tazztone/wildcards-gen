@@ -6,9 +6,9 @@ Central source of truth for semantic pruning presets and dataset-specific overri
 
 # Universal presets: (min_depth, min_hyponyms, min_leaf, merge_orphans)
 SMART_PRESETS = {
-    "Ultra-Detailed": (8, 5, 1, False),
-    "Detailed": (6, 10, 3, False),
-    "Balanced": (4, 50, 5, False),
+    "Ultra-Detailed": (8, 5, 1, True),
+    "Detailed": (6, 10, 3, True),
+    "Balanced": (4, 50, 5, True),
     "Compact": (3, 100, 8, True),
     "Flat": (2, 500, 10, True),
     "Ultra-Flat": (1, 1000, 20, True),
