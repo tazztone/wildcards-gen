@@ -29,7 +29,7 @@ def test_on_dataset_change_resets_analysis():
         apply_row_update = updates[7]
         
         assert analysis_output_update['value'] == ""
-        assert apply_row_update['visible'] is False
+        assert apply_row_update['interactive'] is False
 
 def test_update_ds_ui_logic():
     """Test the visibility logic for different datasets."""
