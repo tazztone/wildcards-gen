@@ -5,8 +5,11 @@ This module encapsulates the "Semantic Significance" logic used to decide
 whether a node should be a full category or flattened into a list.
 """
 
-from typing import Optional, Any
+from typing import Optional, Any, List, Tuple
 from .wordnet import get_synset_from_wnid, get_primary_synset, get_synset_name, get_synset_wnid
+
+# Lazy-loaded embedding model for semantic cleaning
+_EMBEDDING_MODEL = None
 
 class SmartConfig:
     """Configuration for smart pruning."""
@@ -16,13 +19,19 @@ class SmartConfig:
                  min_hyponyms: int = 10,
                  min_leaf_size: int = 3,
                  merge_orphans: bool = False,
-                 category_overrides: dict = None):
+                 category_overrides: dict = None,
+                 semantic_cleanup: bool = False,
+                 semantic_model: str = "minilm",
+                 semantic_threshold: float = 0.5):
         self.enabled = enabled
         self.min_depth = min_depth
         self.min_hyponyms = min_hyponyms
         self.min_leaf_size = min_leaf_size
         self.merge_orphans = merge_orphans
         self.category_overrides = category_overrides or {}
+        self.semantic_cleanup = semantic_cleanup
+        self.semantic_model = semantic_model
+        self.semantic_threshold = semantic_threshold
 
     def get_child_config(self, node_name: str, node_wnid: Optional[str] = None) -> 'SmartConfig':
         """
@@ -60,7 +69,10 @@ class SmartConfig:
             min_hyponyms=override.get('min_hyponyms', self.min_hyponyms),
             min_leaf_size=override.get('min_leaf_size', self.min_leaf_size),
             merge_orphans=override.get('merge_orphans', self.merge_orphans),
-            category_overrides=self.category_overrides # Propagate the full map
+            category_overrides=self.category_overrides, # Propagate the full map
+            semantic_cleanup=override.get('semantic_cleanup', self.semantic_cleanup),
+            semantic_model=override.get('semantic_model', self.semantic_model),
+            semantic_threshold=override.get('semantic_threshold', self.semantic_threshold)
         )
 
 
@@ -154,3 +166,35 @@ def handle_small_leaves(
             return (leaves if leaves else [], [])
     
     return (leaves if leaves else [], [])
+
+def init_semantic_model(model_name: str = "minilm"):
+    """Initialize the global embedding model if not already loaded."""
+    global _EMBEDDING_MODEL
+    if _EMBEDDING_MODEL is None:
+        from .linter import load_embedding_model, check_dependencies
+        if check_dependencies():
+            _EMBEDDING_MODEL = load_embedding_model(model_name)
+        else:
+            # Log warning or handle gracefully
+            print("Warning: Semantic cleaning enabled but dependencies missing. Skipping.")
+            _EMBEDDING_MODEL = "DISABLED"
+
+def apply_semantic_cleaning(items: List[str], config: SmartConfig) -> List[str]:
+    """
+    Clean a list of items using semantic embeddings if enabled.
+    Returns the cleaned list.
+    """
+    global _EMBEDDING_MODEL
+    
+    if not config.enabled or not config.semantic_cleanup or not items:
+        return items
+        
+    if _EMBEDDING_MODEL is None:
+        init_semantic_model(config.semantic_model)
+        
+    if _EMBEDDING_MODEL == "DISABLED":
+        return items
+        
+    from .linter import clean_list
+    cleaned, _ = clean_list(items, _EMBEDDING_MODEL, config.semantic_threshold)
+    return cleaned

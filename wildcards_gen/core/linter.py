@@ -146,6 +146,26 @@ def clean_structure(structure: Dict[str, Any], report: Dict[str, Any]) -> Dict[s
     traverse_and_clean(clean_data, [])
     return clean_data
 
+def clean_list(terms: List[str], model: Any, threshold: float = 0.1) -> Tuple[List[str], List[str]]:
+    """
+    Clean a single list of terms using the embedding model.
+    Returns (cleaned_terms, outliers).
+    """
+    if len(terms) < 3:
+        return terms, []
+
+    embeddings = compute_list_embeddings(model, terms)
+    outlier_indices_scores = detect_outliers_hdbscan(embeddings, threshold)
+    
+    if not outlier_indices_scores:
+        return terms, []
+    
+    outlier_indices = {idx for idx, _ in outlier_indices_scores}
+    cleaned = [term for i, term in enumerate(terms) if i not in outlier_indices]
+    outliers = [term for i, term in enumerate(terms) if i in outlier_indices]
+    
+    return cleaned, outliers
+
 def print_lint_report(report: Dict[str, Any], output_format: str = 'markdown'):
     """Print the lint report to console."""
     if output_format == 'json':

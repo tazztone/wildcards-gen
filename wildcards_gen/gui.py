@@ -171,31 +171,49 @@ def generate_dataset_handler(
     with_glosses, filter_set, strict_filter, blacklist_abstract,
     min_depth, min_hyponyms, min_leaf, merge_orphans,
     bbox_only,
+    semantic_clean, semantic_model, semantic_threshold,
     exclude_subtree=None, exclude_regex=None,
     progress=gr.Progress()
 ):
     progress(0, desc='Initializing...')
     try:
         is_smart = (strategy == 'Smart')
+        
+        # Common kwargs for smart datasets
+        smart_kwargs = {}
+        if is_smart:
+            smart_kwargs = {
+                'smart': True,
+                'min_significance_depth': int(min_depth),
+                'min_hyponyms': int(min_hyponyms),
+                'min_leaf_size': int(min_leaf),
+                'merge_orphans': merge_orphans,
+                'semantic_cleanup': semantic_clean,
+                'semantic_model': semantic_model,
+                'semantic_threshold': float(semantic_threshold)
+            }
+
         if dataset_name == 'ImageNet':
             if not root:
                 return None, 'Error: Root synset required for ImageNet (e.g. entity.n.01)'
             progress(0.2, desc='Downloading ImageNet metadata...')
-            data = imagenet.generate_imagenet_tree(
-                root,
-                max_depth=int(depth),
-                filter_set=filter_set if filter_set != 'none' else None,
-                with_glosses=with_glosses,
-                strict_filter=strict_filter,
-                blacklist_abstract=blacklist_abstract,
-                smart=is_smart,
-                min_significance_depth=int(min_depth),
-                min_hyponyms=int(min_hyponyms),
-                min_leaf_size=int(min_leaf),
-                merge_orphans=merge_orphans,
-                exclude_regex=exclude_regex,
-                exclude_subtree=exclude_subtree
-            )
+            
+            kwargs = {
+                'root_synset_str': root,
+                'max_depth': int(depth),
+                'filter_set': filter_set if filter_set != 'none' else None,
+                'with_glosses': with_glosses,
+                'strict_filter': strict_filter,
+                'blacklist_abstract': blacklist_abstract,
+                'exclude_regex': exclude_regex,
+                'exclude_subtree': exclude_subtree,
+                'smart': is_smart
+            }
+            if is_smart:
+                kwargs.update(smart_kwargs)
+            
+            data = imagenet.generate_imagenet_tree(**kwargs)
+            
         elif dataset_name == 'COCO':
             progress(0.2, desc='Loading COCO API...')
             data = coco.generate_coco_hierarchy(
@@ -203,27 +221,28 @@ def generate_dataset_handler(
             )
         elif dataset_name == 'Open Images':
             progress(0.2, desc='Loading Open Images metadata...')
-            data = openimages.generate_openimages_hierarchy(
-                max_depth=int(depth),
-                with_glosses=with_glosses,
-                smart=is_smart,
-                min_significance_depth=int(min_depth),
-                min_hyponyms=int(min_hyponyms),
-                min_leaf_size=int(min_leaf),
-                merge_orphans=merge_orphans,
-                bbox_only=bbox_only
-            )
+            kwargs = {
+                'max_depth': int(depth),
+                'with_glosses': with_glosses,
+                'smart': is_smart,
+                'bbox_only': bbox_only
+            }
+            if is_smart:
+                kwargs.update(smart_kwargs)
+                
+            data = openimages.generate_openimages_hierarchy(**kwargs)
+            
         elif dataset_name == 'Tencent ML-Images':
             progress(0.2, desc='Loading Tencent dictionary...')
-            data = tencent.generate_tencent_hierarchy(
-                max_depth=int(depth),
-                with_glosses=with_glosses,
-                smart=is_smart,
-                min_significance_depth=int(min_depth),
-                min_hyponyms=int(min_hyponyms),
-                min_leaf_size=int(min_leaf),
-                merge_orphans=merge_orphans
-            )
+            kwargs = {
+                'max_depth': int(depth),
+                'with_glosses': with_glosses,
+                'smart': is_smart
+            }
+            if is_smart:
+                kwargs.update(smart_kwargs)
+                
+            data = tencent.generate_tencent_hierarchy(**kwargs)
         else:
             return None, f'Unknown dataset: {dataset_name}'
             
@@ -500,6 +519,13 @@ def launch_gui(share=False):
                                 ds_min_leaf = gr.Slider(1, 100, value=5, step=1, label='Min Leaf Size', info='Merge small lists into parent.')
                                 ds_merge_orphans = gr.Checkbox(label='Merge Orphans', value=True, info='Group small pruned lists into a \'misc\' key.')
                                 
+                                gr.Markdown("---")
+                                gr.Markdown("**🛡️ Semantic Cleaning** (Removes outliers from lists)")
+                                with gr.Row():
+                                    ds_semantic_clean = gr.Checkbox(label="Enable Cleaning", value=False, info="Use AI embeddings to remove unrelated terms.")
+                                    ds_semantic_model = gr.Dropdown(['minilm', 'mpnet', 'qwen3'], value='minilm', label="Model", interactive=True)
+                                    ds_semantic_threshold = gr.Slider(0.01, 1.0, value=0.1, step=0.01, label="Threshold", info="Higher = stricter removal.")
+
                                 def apply_smart_preset(p, dataset_name):
                                     # Check dataset-specific overrides first
                                     if dataset_name in DATASET_PRESET_OVERRIDES:
@@ -720,6 +746,7 @@ def launch_gui(share=False):
                 ds_glosses, ds_filter, ds_strict, ds_blacklist, 
                 ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_merge_orphans, 
                 ds_bbox_only,
+                ds_semantic_clean, ds_semantic_model, ds_semantic_threshold,
                 ds_exclude_subtree, ds_exclude_regex
             ],
             outputs=[ds_file, ds_prev]

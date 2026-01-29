@@ -147,7 +147,10 @@ def cmd_dataset_imagenet(args):
         merge_orphans=getattr(args, 'merge_orphans', False),
         exclude_regex=args.exclude_regex,
         exclude_subtree=args.exclude_subtree,
-        smart_overrides=overrides
+        smart_overrides=overrides,
+        semantic_cleanup=args.semantic_clean,
+        semantic_model=args.semantic_model,
+        semantic_threshold=args.semantic_threshold
     )
     
     mgr = StructureManager()
@@ -202,7 +205,10 @@ def cmd_dataset_openimages(args):
         min_hyponyms=args.min_hyponyms,
         min_leaf_size=args.min_leaf,
         merge_orphans=getattr(args, 'merge_orphans', False),
-        bbox_only=args.bbox_only
+        bbox_only=args.bbox_only,
+        semantic_cleanup=args.semantic_clean,
+        semantic_model=args.semantic_model,
+        semantic_threshold=args.semantic_threshold
     )
     
     mgr = StructureManager()
@@ -237,7 +243,10 @@ def cmd_dataset_tencent(args):
         min_hyponyms=args.min_hyponyms,
         min_leaf_size=args.min_leaf,
         merge_orphans=getattr(args, 'merge_orphans', False),
-        smart_overrides=overrides
+        smart_overrides=overrides,
+        semantic_cleanup=args.semantic_clean,
+        semantic_model=args.semantic_model,
+        semantic_threshold=args.semantic_threshold
     )
     
     mgr = StructureManager()
@@ -398,6 +407,10 @@ def main():
         parser.add_argument('--min-leaf', type=int, default=None, help='[Smart] Min items per leaf list (smaller lists are merged upward)')
         parser.add_argument('--merge-orphans', action='store_true', default=None, help='[Smart] Merge small pruned lists into parent misc category')
         parser.add_argument('--smart-config', type=str, default=None, help='[Smart] Path to YAML config file for fine-grained per-category overrides')
+        # Semantic cleaning args
+        parser.add_argument('--semantic-clean', action='store_true', help='[Smart] Enable semantic outlier removal from leaf lists using embeddings')
+        parser.add_argument('--semantic-model', choices=['minilm', 'mpnet', 'qwen3'], default='minilm', help='[Smart] Model for semantic cleaning (default: minilm)')
+        parser.add_argument('--semantic-threshold', type=float, default=0.1, help='[Smart] Outlier detection threshold')
 
     # ImageNet
     p_imagenet = dataset_sub.add_parser('imagenet', help='ImageNet (WordNet-based) hierarchy')

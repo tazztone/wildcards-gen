@@ -112,7 +112,10 @@ def generate_tencent_hierarchy(
     min_hyponyms: int = 10,
     min_leaf_size: int = 3,
     merge_orphans: bool = False,
-    smart_overrides: Optional[Dict] = None
+    smart_overrides: Optional[Dict] = None,
+    semantic_cleanup: bool = False,
+    semantic_model: str = "minilm",
+    semantic_threshold: float = 0.1
 ) -> Dict:
     """Generate Tencent ML-Images hierarchy."""
     file_path = download_tencent_hierarchy()
@@ -136,7 +139,7 @@ def generate_tencent_hierarchy(
         return leaves
 
     from ruamel.yaml.comments import CommentedMap
-    from ..smart import SmartConfig, should_prune_node, handle_small_leaves
+    from ..smart import SmartConfig, should_prune_node, handle_small_leaves, apply_semantic_cleaning
     
     preset_overrides = DATASET_CATEGORY_OVERRIDES.get("Tencent ML-Images", {})
     final_overrides = preset_overrides.copy()
@@ -149,7 +152,10 @@ def generate_tencent_hierarchy(
         min_hyponyms=min_hyponyms,
         min_leaf_size=min_leaf_size,
         merge_orphans=merge_orphans,
-        category_overrides=final_overrides
+        category_overrides=final_overrides,
+        semantic_cleanup=semantic_cleanup,
+        semantic_model=semantic_model,
+        semantic_threshold=semantic_threshold
     )
 
     def merge_nodes(existing: Any, new_val: Any) -> Any:
@@ -203,6 +209,10 @@ def generate_tencent_hierarchy(
             normalized_name = name.lower()
             filtered_leaves = sorted(list(set([l for l in leaves if l.lower() != normalized_name])), key=str.casefold)
             
+            # Semantic cleaning
+            if smart and config.enabled and config.semantic_cleanup:
+                filtered_leaves = apply_semantic_cleaning(filtered_leaves, config)
+
             # Min leaf size check for smart mode
             if smart and config.enabled and len(filtered_leaves) < config.min_leaf_size:
                 if config.merge_orphans:
@@ -266,6 +276,15 @@ def generate_tencent_hierarchy(
         if orphan_leaves:
             # Deduplicate orphans
             orphan_leaves = sorted(list(set(orphan_leaves)), key=str.casefold)
+            
+            # Semantic clean orphans too?
+            # They came from children, maybe cleaned there? 
+            # If they bubble up, they join a new group (misc), so maybe clean again?
+            # Or just clean once at source?
+            # If we merge orphans, they end up in 'misc'. We probably want 'misc' to be clean too.
+            if smart and config.enabled and config.semantic_cleanup:
+                 orphan_leaves = apply_semantic_cleaning(orphan_leaves, config)
+
             cm['misc'] = orphan_leaves
             valid_items_added += 1
 
@@ -280,6 +299,10 @@ def generate_tencent_hierarchy(
             normalized_name = name.lower()
             filtered_leaves = sorted(list(set([l for l in leaves if l.lower() != normalized_name])), key=str.casefold)
             
+            # Semantic cleaning
+            if smart and config.enabled and config.semantic_cleanup:
+                filtered_leaves = apply_semantic_cleaning(filtered_leaves, config)
+
             # Check min leaf size again?
             if smart and config.enabled and len(filtered_leaves) < config.min_leaf_size:
                  return None, filtered_leaves # Bubble further up

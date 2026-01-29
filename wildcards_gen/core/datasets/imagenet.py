@@ -138,6 +138,11 @@ def build_tree_recursive(
     if should_flatten:
         descendants = get_all_descendants(synset, valid_wnids)
         if descendants:
+            # Smart Mode: Semantic Cleaning
+            if smart_config and smart_config.enabled and smart_config.semantic_cleanup:
+                from ..smart import apply_semantic_cleaning
+                descendants = apply_semantic_cleaning(descendants, smart_config)
+
             # Smart Mode: Min leaf size check with orphan bubbling
             if smart_config and smart_config.enabled:
                 if len(descendants) < smart_config.min_leaf_size:
@@ -187,6 +192,12 @@ def build_tree_recursive(
     # Handle collected orphans - add to misc key
     if collected_orphans and smart_config and smart_config.merge_orphans:
         collected_orphans = sorted(list(set(collected_orphans)))
+        
+        # Semantic Cleaning for Orphans
+        if smart_config.semantic_cleanup:
+            from ..smart import apply_semantic_cleaning
+            collected_orphans = apply_semantic_cleaning(collected_orphans, smart_config)
+
         if 'misc' in child_map:
             # Merge with existing misc
             existing = list(child_map['misc']) if child_map['misc'] else []
@@ -224,7 +235,10 @@ def generate_imagenet_tree(
     merge_orphans: bool = False,
     exclude_regex: Optional[List[str]] = None,
     exclude_subtree: Optional[List[str]] = None,
-    smart_overrides: Optional[Dict] = None
+    smart_overrides: Optional[Dict] = None,
+    semantic_cleanup: bool = False,
+    semantic_model: str = "minilm",
+    semantic_threshold: float = 0.1
 ) -> CommentedMap:
     """
     Generate ImageNet hierarchy tree from a root synset.
@@ -257,7 +271,10 @@ def generate_imagenet_tree(
         min_hyponyms=min_hyponyms,
         min_leaf_size=min_leaf_size,
         merge_orphans=merge_orphans,
-        category_overrides=final_overrides
+        category_overrides=final_overrides,
+        semantic_cleanup=semantic_cleanup,
+        semantic_model=semantic_model,
+        semantic_threshold=semantic_threshold
     )
     
     # Load filter set
