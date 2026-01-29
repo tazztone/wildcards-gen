@@ -60,6 +60,53 @@ def test_openimages_smoke_execution_smart_flatten():
         # Verify execution reached arrangement
         assert mock_arrange.called, "Arrangement should have been called"
         assert result is not None
+        
+        # Verify outcome: The arranged cluster should be in the result structure
+        def find_key(data, key):
+            if isinstance(data, dict):
+                if key in data: return True
+                return any(find_key(v, key) for v in data.values())
+            return False
+            
+        assert find_key(result, "Cluster1"), "Arranged cluster 'Cluster1' not found in result"
+
+        # Verify Round-Trip (Catch "MagicMock is not serializable" bugs)
+        try:
+            from ruamel.yaml import YAML
+            yaml = YAML()
+            from io import StringIO
+            stream = StringIO()
+            yaml.dump(result, stream)
+            assert stream.getvalue(), "YAML dump should not be empty"
+        except Exception as e:
+            pytest.fail(f"Result structure is not valid YAML-serializable: {e}")
+
+def test_openimages_smoke_empty_arrangement():
+    """
+    Verify graceful handling when arrangement returns no groups (only leftovers).
+    """
+    mock_hierarchy = {"LabelName": "/m/root", "Subcategory": [{"LabelName": "/m/leaf"}]}
+    mock_id_to_name = {"/m/root": "Entity", "/m/leaf": "Leaf"}
+    mock_synset = MagicMock()
+    mock_synset.pos.return_value = "n"
+    mock_synset.offset.return_value = 11111111
+    mock_synset.hypernym_paths.return_value = [[mock_synset]]
+
+    with patch("wildcards_gen.core.datasets.openimages.load_openimages_data", return_value=(mock_hierarchy, mock_id_to_name)), \
+         patch("wildcards_gen.core.datasets.openimages.ensure_nltk_data"), \
+         patch("wildcards_gen.core.datasets.openimages.get_primary_synset", return_value=mock_synset), \
+         patch("wildcards_gen.core.datasets.openimages.get_synset_gloss", return_value=""), \
+         patch("wildcards_gen.core.datasets.openimages.should_prune_node", return_value=True), \
+         patch("wildcards_gen.core.datasets.openimages.apply_semantic_arrangement") as mock_arrange:
+         
+        # Return empty groups, all items as leftovers
+        mock_arrange.return_value = ({}, ["Leaf"])
+        
+        from wildcards_gen.core.datasets.openimages import generate_openimages_hierarchy
+        result = generate_openimages_hierarchy(smart=True, semantic_arrangement=True)
+        
+        # Should not crash, and "Leaf" should be visible (likely in a flat list or 'misc' depending on implementation)
+        assert result is not None
 
 # === Tencent Smoke Tests ===
 
@@ -102,3 +149,11 @@ def test_tencent_smoke_execution_smart_flatten():
         
         assert mock_arrange.called
         assert result is not None
+        
+        # Verify outcome
+        def find_key(data, key):
+             if isinstance(data, dict):
+                 if key in data: return True
+                 return any(find_key(v, key) for v in data.values())
+             return False
+        assert find_key(result, "GroupX"), "Arranged group 'GroupX' not found in result"
