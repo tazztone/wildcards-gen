@@ -24,7 +24,7 @@ DEFAULT_CONFIG = {
     },
     "datasets": {
         "imagenet": {
-            "root_synset": "animal.n.01",
+            "root_synset": "entity.n.01",
             "filter": None
         },
         "openimages": {
