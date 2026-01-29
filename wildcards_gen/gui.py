@@ -185,6 +185,7 @@ def generate_dataset_handler(
     semantic_clean, semantic_model, semantic_threshold,
     semantic_arrange, semantic_arrange_threshold, semantic_arrange_min_cluster,
     exclude_subtree=None, exclude_regex=None,
+    semantic_arrange_method='eom', debug_arrangement=False,
     progress=gr.Progress()
 ):
     progress(0, desc='Initializing...')
@@ -206,6 +207,8 @@ def generate_dataset_handler(
                 'semantic_arrangement': semantic_arrange,
                 'semantic_arrangement_threshold': float(semantic_arrange_threshold),
                 'semantic_arrangement_min_cluster': int(semantic_arrange_min_cluster),
+                'semantic_arrangement_method': semantic_arrange_method,
+                'debug_arrangement': debug_arrangement,
             }
 
         if dataset_name == 'ImageNet':
@@ -536,8 +539,13 @@ def launch_gui(share=False):
                                 
                                 gr.Markdown("---")
                                 ds_semantic_arrangement = gr.Checkbox(label="Enable Arrangement", value=False)
-                                ds_arrange_threshold = gr.Slider(label="Arrangement Quality", minimum=0.0, maximum=1.0, value=0.1, step=0.05)
-                                ds_arrange_min_cluster = gr.Slider(label="Min Cluster", minimum=2, maximum=20, value=5, step=1)
+                                
+                                with gr.Row():
+                                    ds_arrange_threshold = gr.Slider(label="Quality", minimum=0.0, maximum=1.0, value=0.1, step=0.05, info="Min probability.")
+                                    ds_arrange_min_cluster = gr.Slider(label="Min Cluster", minimum=2, maximum=20, value=5, step=1)
+                                
+                                ds_arrange_method = gr.Dropdown(['eom', 'leaf'], value='eom', label="Cluster Method", info="'leaf' finds smaller groups.")
+                                ds_debug_arrangement = gr.Checkbox(label="Debug Logs", value=False)
                                 
                         # Filters
                         with gr.Accordion('Advanced Filters', open=False, visible=True) as adv_filter_group:
@@ -719,9 +727,9 @@ def launch_gui(share=False):
         def apply_smart_preset(p, dataset_name):
             if dataset_name in DATASET_PRESET_OVERRIDES and p in DATASET_PRESET_OVERRIDES[dataset_name]:
                 return DATASET_PRESET_OVERRIDES[dataset_name][p]
-            return SMART_PRESETS.get(p, [gr.update()]*6)
+            return SMART_PRESETS.get(p, [gr.update()]*7)
             
-        ds_smart_preset.change(apply_smart_preset, inputs=[ds_smart_preset, ds_name], outputs=[ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_merge_orphans, ds_semantic_clean, ds_semantic_arrangement])
+        ds_smart_preset.change(apply_smart_preset, inputs=[ds_smart_preset, ds_name], outputs=[ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_merge_orphans, ds_semantic_clean, ds_semantic_arrangement, ds_arrange_method])
 
         # Dataset Generation components
         all_gen_inputs = [
@@ -731,10 +739,13 @@ def launch_gui(share=False):
             ds_bbox_only,
             ds_semantic_clean, ds_semantic_model, ds_semantic_threshold,
             ds_semantic_arrangement, ds_arrange_threshold, ds_arrange_min_cluster,
-            ds_exclude_subtree, ds_exclude_regex
+            ds_exclude_subtree, ds_exclude_regex,
+            ds_arrange_method, ds_debug_arrangement
         ]
         
         ds_btn.click(generate_dataset_handler, inputs=all_gen_inputs, outputs=[ds_file, ds_prev])
+
+
 
     # Configure logging to reduce spam
     logging.getLogger("transformers").setLevel(logging.ERROR)

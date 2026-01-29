@@ -15,6 +15,7 @@ if not exist ".venv" (
 )
 
 call .venv\Scripts\activate.bat
+set HF_HUB_DISABLE_PROGRESS_BARS=1
 echo 🎨 Launching wildcards-gen GUI...
 python -m wildcards_gen.cli gui
 pause

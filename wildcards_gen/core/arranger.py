@@ -83,94 +83,223 @@ def get_lca_name(terms: List[str]) -> Optional[str]:
         
     return name
 
-def arrange_list(
-    terms: List[str], 
-    model_name: str = "minilm", 
-    threshold: float = 0.1, 
-    min_cluster_size: int = 5
-) -> Tuple[Dict[str, List[str]], List[str]]:
-    """
-    Arrange a flat list into semantic sub-groups.
-    
-    Args:
-        terms: List of strings to arrange
-        model_name: Embedding model name
-        threshold: Cluster Acceptance Cutoff (mean probability >= threshold)
-        min_cluster_size: Min items per cluster
-        
-    Returns:
-        (named_groups, leftovers)
-        named_groups: Dict of {category_name: [terms]}
-        leftovers: List of terms that didn't fit into high-quality clusters
-    """
-    # 1. Pre-checks
-    if not terms or len(terms) < min_cluster_size * 2: # heuristic: need enough items
-        return {}, terms
-        
-    if not check_dependencies():
-        logger.warning("Semantic arrangement requested but dependencies missing.")
-        return {}, terms
+import numpy as np
+from sklearn.metrics.pairwise import euclidean_distances
 
-    # 2. Embeddings
-    model = load_embedding_model(model_name)
-    normalized = [normalize_term(t) for t in terms]
-    embeddings = get_cached_embeddings(model, normalized)
-    
-    if len(embeddings) == 0:
-        return {}, terms
+# ... imports ...
 
-    # 3. Clustering
-    labels, probabilities = get_hdbscan_clusters(embeddings, min_cluster_size)
+def get_medoid_name(cluster_embeddings: np.ndarray, cluster_terms: List[str]) -> Optional[str]:
+    """
+    Finds the medoid (term closest to centroid) and asks WordNet for its hypernym.
+    """
+    if not cluster_terms:
+        return None
+        
+    try:
+        # 1. Compute Centroid
+        centroid = np.mean(cluster_embeddings, axis=0)
+        
+        # 2. Find Medoid (closest term to centroid)
+        distances = euclidean_distances([centroid], cluster_embeddings)
+        medoid_idx = np.argmin(distances)
+        medoid_term = cluster_terms[medoid_idx]
+        
+        # 3. Get WordNet Hypernym of the medoid
+        synset = get_primary_synset(medoid_term)
+        if synset:
+            hypernyms = synset.hypernyms()
+            if hypernyms:
+                # Use the first hypernym
+                name = get_synset_name(hypernyms[0])
+                if name and name.lower() not in {'entity', 'object', 'whole'}:
+                    return name
+                    
+        return None # Fallback
+    except Exception as e:
+        logger.warning(f"Medoid naming failed: {e}")
+        return None
+
+
+def _arrange_single_pass(
+    terms: List[str],
+    embeddings: np.ndarray,
+    min_cluster_size: int,
+    threshold: float,
+    cluster_selection_method: str = 'eom',
+    min_samples: Optional[int] = None
+) -> Tuple[Dict[str, List[str]], List[str], Dict]:
+    """
+    Internal Helper: Run a single pass of HDBSCAN clustering.
+    Returns: (groups, leftovers, stats)
+    """
+    import hdbscan
     
-    # 4. Grouping & Validation
-    clusters: Dict[int, List[int]] = {} # label -> list of indices
-    
+    # Defaults
+    if min_samples is None:
+        min_samples = min_cluster_size
+        
+    stats = {
+        "n_clusters_found": 0,
+        "n_clusters_rejected": 0,
+        "noise_ratio": 0.0,
+        "details": []
+    }
+        
+    if len(terms) < min_cluster_size + 1:
+        return {}, terms, stats
+
+    try:
+        clusterer = hdbscan.HDBSCAN(
+            min_cluster_size=min_cluster_size, 
+            min_samples=min_samples,
+            gen_min_span_tree=True,
+            cluster_selection_method=cluster_selection_method
+        )
+        clusterer.fit(embeddings)
+        labels, probabilities = clusterer.labels_, clusterer.probabilities_
+    except Exception as e:
+        logger.warning(f"HDBSCAN error: {e}")
+        return {}, terms, stats
+
+    # Process clusters
+    clusters: Dict[int, List[int]] = {}
     for idx, label in enumerate(labels):
-        if label != -1: # -1 is noise
-            if label not in clusters:
-                clusters[label] = []
+        if label != -1:
+            if label not in clusters: clusters[label] = []
             clusters[label].append(idx)
             
+    # Stats
+    noise_count = list(labels).count(-1)
+    stats["noise_ratio"] = noise_count / len(labels)
+    stats["n_clusters_found"] = len(clusters)
+
     named_groups = {}
     used_indices = set()
     
-    # Process valid clusters
-    fallback_counter = 1
-    
-    # Sort clusters by size (descending) for stable naming order
+    # Sort for stability
     sorted_labels = sorted(clusters.keys(), key=lambda l: len(clusters[l]), reverse=True)
-    
+    fallback_counter = 1
+
     for label in sorted_labels:
         indices = clusters[label]
-        
-        # Quality Check: Mean Probability
         probs = [probabilities[i] for i in indices]
         mean_prob = sum(probs) / len(probs)
         
+        cluster_items = [terms[i] for i in indices]
+        
+        # Diagnostic Detail
+        stats["details"].append({
+            "size": len(indices),
+            "mean_prob": round(mean_prob, 3),
+            "accepted": mean_prob >= threshold,
+            "sample": cluster_items[:3]
+        })
+        
         if mean_prob < threshold:
-            continue # Dissolve weak cluster
+            stats["n_clusters_rejected"] += 1
+            continue
+
+        # Naming Strategy
+        # 1. Try LCA
+        name = get_lca_name(cluster_items)
+        
+        # 2. Try Medoid Hypernym (New)
+        if not name:
+            cluster_embs = embeddings[indices]
+            name = get_medoid_name(cluster_embs, cluster_items)
             
-        cluster_terms = [terms[i] for i in indices]
-        
-        # Naming
-        name = get_lca_name(cluster_terms)
-        
-        # Fallback Naming
+        # 3. Fallback
         if not name:
             name = f"Group {fallback_counter}"
             fallback_counter += 1
-        
-        # Ensure unique names (append index if conflict)
+            
+        # Unique naming
         original_name = name
         counter = 2
         while name in named_groups:
             name = f"{original_name} {counter}"
             counter += 1
             
-        named_groups[name] = sorted(cluster_terms)
+        named_groups[name] = sorted(cluster_items)
         used_indices.update(indices)
         
-    # 5. Collect Leftovers
     leftovers = [t for i, t in enumerate(terms) if i not in used_indices]
+    return named_groups, sorted(leftovers), stats
+
+
+def arrange_list(
+    terms: List[str], 
+    model_name: str = "minilm", 
+    threshold: float = 0.1, 
+    min_cluster_size: int = 5,
+    cluster_selection_method: str = 'eom',
+    return_stats: bool = False
+) -> Tuple[Dict[str, List[str]], List[str], Optional[Dict]]:
+    """
+    Arrange a flat list into semantic sub-groups using Multi-Pass Clustering.
+    """
+    if not terms or len(terms) < 3:
+        return {}, terms, ({} if return_stats else None)
+        
+    if not check_dependencies():
+        return {}, terms, ({"error": "missing_dependencies"} if return_stats else None)
+
+    # 1. Embeddings (Computed Once)
+    model = load_embedding_model(model_name)
+    normalized = [normalize_term(t) for t in terms]
+    embeddings = get_cached_embeddings(model, normalized)
     
-    return named_groups, sorted(leftovers)
+    if len(embeddings) == 0:
+        return {}, terms, None
+
+    # --- PASS 1: Main Configured Pass ---
+    groups_1, leftovers_1, stats_1 = _arrange_single_pass(
+        terms, embeddings, 
+        min_cluster_size=min_cluster_size, 
+        threshold=threshold,
+        cluster_selection_method=cluster_selection_method
+    )
+    
+    final_groups = groups_1
+    final_leftovers = leftovers_1
+    
+    # --- PASS 2: "Cleanup" on Leftovers ---
+    # Only if leftovers are substantial to avoid fragmented noise
+    # and if the user isn't already using strict settings (min_size=2)
+    stats_2 = None
+    if len(final_leftovers) > 20 and min_cluster_size > 2:
+        
+        # Determine indices of leftovers in original list to slice embeddings
+        leftover_indices = [i for i, t in enumerate(terms) if t in final_leftovers]
+        leftover_embeddings = embeddings[leftover_indices]
+        
+        groups_2, leftovers_2, stats_2 = _arrange_single_pass(
+            final_leftovers, leftover_embeddings,
+            min_cluster_size=2,          # Use smallest possible size
+            min_samples=2,               # Strict
+            threshold=max(0.15, threshold * 1.5), # Higher threshold safeguard
+            cluster_selection_method='leaf' # 'leaf' is better for micro-clusters
+        )
+        
+        # Merge Results
+        # Handle naming collisions
+        for name, items in groups_2.items():
+            final_name = name
+            counter = 2
+            while final_name in final_groups:
+                final_name = f"{name} {counter}"
+                counter += 1
+            final_groups[final_name] = items
+            
+        final_leftovers = leftovers_2
+
+    # Consolidate Stats
+    full_stats = {
+        "pass_1": stats_1,
+        "pass_2": stats_2
+    } if return_stats else None
+
+    if return_stats:
+        return final_groups, final_leftovers, full_stats
+    else:
+        return final_groups, final_leftovers

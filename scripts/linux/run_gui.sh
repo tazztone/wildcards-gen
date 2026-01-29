@@ -13,5 +13,6 @@ if [ ! -d ".venv" ]; then
 fi
 
 source .venv/bin/activate
+export HF_HUB_DISABLE_PROGRESS_BARS=1
 echo "🎨 Launching wildcards-gen GUI..."
 python -m wildcards_gen.cli gui
