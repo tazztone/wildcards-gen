@@ -7,11 +7,11 @@ def test_cli_semantic_arrange_args():
     Verify CLI accepts the --semantic-arrange flag and dependencies can be imported.
     Run via subprocess to ensure clean environment (simulating CLI usage).
     """
-    # 1. Skip if lint extras (sentence-transformers) are not installed
+    # 1. Skip if lint extras (sentence-transformers, hdbscan, etc.) are not installed
     try:
-        import sentence_transformers
+        from wildcards_gen.core import arranger
     except ImportError:
-        pytest.skip("lint extras (sentence-transformers) not installed")
+        pytest.skip("lint/arranger extras not installed")
 
     # 2. Verify CLI accepts the flags (using --help to avoid execution/download)
     # This ensures argparse is configured correctly for --semantic-arrange
