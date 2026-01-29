@@ -36,47 +36,38 @@ def get_api_key() -> Optional[str]:
     if config.api_key:
         return config.api_key
     return os.environ.get('OPENROUTER_API_KEY')
-
-
-# Smart presets: (min_depth, min_hyponyms, min_leaf, merge_orphans)
-# Smart presets: (min_depth, min_hyponyms, min_leaf, merge_orphans)
-SMART_PRESETS = {
-    "ultra-detailed": (8, 5, 1, False),
-    "detailed": (6, 10, 3, False),
-    "balanced": (4, 50, 5, False),
-    "compact": (3, 100, 8, True),
-    "flat": (2, 500, 10, True),
-    "ultra-flat": (1, 1000, 20, True),
-}
-
-DATASET_PRESET_OVERRIDES = {
-    "openimages": {
-        "balanced": (4, 50, 5, True),
-        "compact": (3, 200, 10, True),
-        "flat": (2, 1500, 15, True),
-    },
-    "tencent": {
-        "balanced": (4, 30, 5, True),
-        "compact": (3, 100, 10, True),
-        "flat": (2, 600, 20, True),
-    },
-}
-
-
+from .core.presets import SMART_PRESETS, DATASET_PRESET_OVERRIDES
 def apply_smart_preset(args):
     """Apply preset values to args, with explicit flags taking precedence."""
     preset_name = getattr(args, 'preset', None)
     
+    # Map CLI lowercase to Preset TitleCase
+    # (min_depth, min_hyponyms, min_leaf, merge_orphans)
+    preset_map = {k.lower(): v for k, v in SMART_PRESETS.items()}
+    
     # Determine defaults (check overrides first)
-    defaults = SMART_PRESETS['balanced']
-    dataset = getattr(args, 'dataset_type', None)
+    defaults = preset_map['balanced']
+    dataset_type = getattr(args, 'dataset_type', None)
+    
+    # Map CLI dataset to Preset dataset name
+    ds_map = {
+        "openimages": "Open Images",
+        "tencent": "Tencent ML-Images",
+        "imagenet": "ImageNet"
+    }
+    ds_key = ds_map.get(dataset_type)
     
     if preset_name:
+        preset_key = preset_name.lower()
         # Check overrides
-        if dataset and dataset in DATASET_PRESET_OVERRIDES and preset_name in DATASET_PRESET_OVERRIDES[dataset]:
-            defaults = DATASET_PRESET_OVERRIDES[dataset][preset_name]
+        if ds_key and ds_key in DATASET_PRESET_OVERRIDES:
+            overrides = {k.lower(): v for k, v in DATASET_PRESET_OVERRIDES[ds_key].items()}
+            if preset_key in overrides:
+                defaults = overrides[preset_key]
+            else:
+                defaults = preset_map.get(preset_key, defaults)
         else:
-            defaults = SMART_PRESETS.get(preset_name, defaults)
+            defaults = preset_map.get(preset_key, defaults)
     
     if getattr(args, 'min_depth', None) is None:
         args.min_depth = defaults[0]
@@ -364,7 +355,7 @@ def main():
     def add_smart_args(parser):
         parser.add_argument('--smart', action='store_true', help='Use semantic significance pruning (ignoring --depth)')
         parser.add_argument('--analyze', action='store_true', help='Dry-run: Analyze logical structure and suggest smart thresholds')
-        parser.add_argument('--preset', choices=list(SMART_PRESETS.keys()), default=None,
+        parser.add_argument('--preset', choices=[k.lower() for k in SMART_PRESETS.keys()], default=None,
                             help='Smart tuning preset (sets defaults for other smart args)')
         parser.add_argument('--min-depth', type=int, default=None, help='[Smart] Max WordNet depth for significance (lower = more fundamental categories)')
         parser.add_argument('--min-hyponyms', type=int, default=None, help='[Smart] Min descendants to keep as category (higher = fewer, larger categories)')

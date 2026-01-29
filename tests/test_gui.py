@@ -1,12 +1,8 @@
-
 import pytest
 from unittest.mock import patch, MagicMock, mock_open
 import sys
 
-# Completely mock gradio before importing gui
-mock_gr = MagicMock()
-sys.modules['gradio'] = mock_gr
-
+# We don't hack sys.modules anymore because other tests load real gradio
 from wildcards_gen import gui
 
 def test_generate_dataset_handler_logic():
@@ -97,23 +93,23 @@ def test_create_handler_logic():
 def test_launch_gui_construction():
     """
     Test that the GUI layout can be constructed without errors.
-    This ensures that all variable references in the layout (like outputs=[...]) 
-    are defined and valid.
     """
-    with patch('wildcards_gen.gui.config') as mock_config:
+    with patch('wildcards_gen.gui.gr') as mock_gr, \
+         patch('wildcards_gen.gui.config') as mock_config:
+        
         # Setup config mocks
         mock_config.api_key = "test_key"
         mock_config.model = "test_model"
         mock_config.get.return_value = "info"
         
-        # We don't want to actually launch the server, just build the blocks
-        # The module-level mock_gr handles the components
+        # Configure the mock chain for unpacking
+        # When ds_smart_preset.change() is called, it returns 4 items
+        mock_gr.Radio.return_value.change.return_value = (MagicMock(), MagicMock(), MagicMock(), MagicMock())
         
         # Call the launch function
         gui.launch_gui(share=False)
         
         # Verify that Blocks was used (entered)
-        # mock_gr.Blocks is a class, so return_value is the instance
         mock_gr.Blocks.return_value.__enter__.assert_called()
         
         # Verify launch was called on the demo instance
