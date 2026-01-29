@@ -36,7 +36,13 @@ def load_embedding_model(model_name: str = "qwen3"):
     
     model_id = MODELS.get(model_name, MODELS["qwen3"])
     logger.info(f"Loading embedding model: {model_id}...")
-    return SentenceTransformer(model_id, trust_remote_code=True)
+    
+    try:
+        # Try finding it locally first to avoid "unauthenticated request" warnings
+        return SentenceTransformer(model_id, trust_remote_code=True, local_files_only=True)
+    except Exception:
+        # Fallback to downloading
+        return SentenceTransformer(model_id, trust_remote_code=True)
 
 def compute_list_embeddings(model, terms: List[str]):
     """Encode terms using selected embedding model."""
