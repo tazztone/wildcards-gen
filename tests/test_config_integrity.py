@@ -10,7 +10,7 @@ class TestConfigIntegrity(unittest.TestCase):
         MAX_LEAF = 100
         
         for name, values in SMART_PRESETS.items():
-            depth, hyp, leaf, orphan = values
+            depth, hyp, leaf, orphan, clean, arrange = values
             self.assertLessEqual(depth, MAX_DEPTH, f"Preset {name} depth {depth} > {MAX_DEPTH}")
             self.assertLessEqual(hyp, MAX_HYPONYMS, f"Preset {name} hyponyms {hyp} > {MAX_HYPONYMS}")
             self.assertLessEqual(leaf, MAX_LEAF, f"Preset {name} leaf {leaf} > {MAX_LEAF}")
@@ -23,7 +23,7 @@ class TestConfigIntegrity(unittest.TestCase):
         
         for ds_name, presets in DATASET_PRESET_OVERRIDES.items():
             for p_name, values in presets.items():
-                depth, hyp, leaf, orphan = values
+                depth, hyp, leaf, orphan, clean, arrange = values
                 self.assertLessEqual(depth, MAX_DEPTH, f"Override {ds_name}:{p_name} depth {depth} > {MAX_DEPTH}")
                 self.assertLessEqual(hyp, MAX_HYPONYMS, f"Override {ds_name}:{p_name} hyponyms {hyp} > {MAX_HYPONYMS}")
                 self.assertLessEqual(leaf, MAX_LEAF, f"Override {ds_name}:{p_name} leaf {leaf} > {MAX_LEAF}")

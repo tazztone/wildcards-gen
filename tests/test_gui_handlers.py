@@ -69,8 +69,8 @@ class TestGUIHandlers(unittest.TestCase):
         mock_suggest.return_value = {'min_depth': 4, 'min_hyponyms': 50, 'min_leaf_size': 5}
         
         # Call handler
-        report, d, h, l = gui.analyze_handler(
-            "ImageNet", "root.n.01", 10, "none", True, False, False
+        report, d, h, l, hist, stale = gui.analyze_handler(
+            "ImageNet", "root.n.01", 10, "none", True, False, False, []
         )
         
         self.assertIn("Analysis Report", report)
