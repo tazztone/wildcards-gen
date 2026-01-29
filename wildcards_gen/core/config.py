@@ -141,5 +141,15 @@ class ConfigManager:
     def downloads_dir(self) -> str:
         return self.get("paths.downloads_dir")
 
+    def save(self):
+        """Save current configuration to wildcards-gen.yaml in current directory."""
+        project_config_path = os.path.join(os.getcwd(), "wildcards-gen.yaml")
+        try:
+            with open(project_config_path, 'w', encoding='utf-8') as f:
+                yaml.dump(self._config, f, default_flow_style=False)
+            logger.info(f"Saved configuration to {project_config_path}")
+        except Exception as e:
+            logger.error(f"Failed to save configuration: {e}")
+
 # Singleton instance
 config = ConfigManager()
