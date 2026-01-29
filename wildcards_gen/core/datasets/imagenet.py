@@ -143,6 +143,22 @@ def build_tree_recursive(
                 from ..smart import apply_semantic_cleaning
                 descendants = apply_semantic_cleaning(descendants, smart_config)
 
+            # Smart Mode: Semantic Arrangement (Re-grow)
+            # If we flattened a potentially large list, try to re-group meaningful parts
+            if smart_config and smart_config.enabled and smart_config.semantic_arrangement:
+                from ..smart import apply_semantic_arrangement
+                named_groups, leftovers = apply_semantic_arrangement(descendants, smart_config)
+                
+                # Add named groups as sub-categories
+                for group_name, terms in named_groups.items():
+                    # We create a simple leaf list for each group
+                    # Instruction? Maybe "semantically grouped terms from {name}"?
+                    # For now, no specific instruction, just the terms.
+                    structure_mgr.add_leaf_list(parent, group_name, terms, f"instruction: items related to {group_name}")
+                
+                # Replace descendants with leftovers for the main list
+                descendants = leftovers
+
             # Smart Mode: Min leaf size check with orphan bubbling
             if smart_config and smart_config.enabled:
                 if len(descendants) < smart_config.min_leaf_size:
@@ -151,7 +167,8 @@ def build_tree_recursive(
                         return (False, descendants)
                     # Otherwise, keep as small list (100% retention)
             
-            structure_mgr.add_leaf_list(parent, name, descendants, instruction)
+            if descendants:
+                structure_mgr.add_leaf_list(parent, name, descendants, instruction)
             return (True, [])
         elif valid_wnids is None or is_in_valid_set(synset, valid_wnids):
             structure_mgr.add_leaf_list(parent, name, [name], instruction)
@@ -198,12 +215,25 @@ def build_tree_recursive(
             from ..smart import apply_semantic_cleaning
             collected_orphans = apply_semantic_cleaning(collected_orphans, smart_config)
 
-        if 'misc' in child_map:
-            # Merge with existing misc
-            existing = list(child_map['misc']) if child_map['misc'] else []
-            child_map['misc'] = sorted(list(set(existing + collected_orphans)))
-        else:
-            child_map['misc'] = collected_orphans
+        # Semantic Arrangement for Orphans (Misc)
+        if smart_config.semantic_arrangement:
+            from ..smart import apply_semantic_arrangement
+            named_groups, leftovers = apply_semantic_arrangement(collected_orphans, smart_config)
+            
+            # Add named groups as peer categories to 'misc'
+            for group_name, terms in named_groups.items():
+                structure_mgr.add_leaf_list(child_map, group_name, terms, f"instruction: items related to {group_name}")
+            
+            # Leftovers become the new misc
+            collected_orphans = leftovers
+
+        if collected_orphans: # Only add misc if there are still items
+            if 'misc' in child_map:
+                # Merge with existing misc
+                existing = list(child_map['misc']) if child_map['misc'] else []
+                child_map['misc'] = sorted(list(set(existing + collected_orphans)))
+            else:
+                child_map['misc'] = collected_orphans
         has_valid_children = True
     
     if has_valid_children:
@@ -274,7 +304,9 @@ def generate_imagenet_tree(
         category_overrides=final_overrides,
         semantic_cleanup=semantic_cleanup,
         semantic_model=semantic_model,
-        semantic_threshold=semantic_threshold
+        semantic_threshold=semantic_threshold,
+        semantic_arrangement=smart_overrides.get('semantic_arrangement') if smart_overrides else semantic_cleanup, # Default inheritance? No, passed separately
+        # Wait, wrapper logic below handles CLI args -> SmartConfig, but we need to pass them in generate_imagenet_tree args too
     )
     
     # Load filter set

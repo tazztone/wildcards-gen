@@ -20,7 +20,7 @@ def test_generate_dataset_handler_logic():
             "ImageNet", "Standard", "entity.n.01", 3, "out.yaml",
             True, "none", True, False,
             6, 10, 3, False, False,
-            None, None
+            None, None, 0.1, False, 0.1, 5
         )
         
         assert path is not None
@@ -36,7 +36,7 @@ def test_generate_dataset_handler_error():
             "ImageNet", "Standard", "root", 3, "out.yaml",
             True, "none", True, False,
             6, 10, 3, False, False,
-            None, None
+            None, None, 0.1, False, 0.1, 5
         )
         assert path is None
         assert "Boom" in content
@@ -57,7 +57,7 @@ def test_generate_dataset_handler_openimages():
             "Open Images", "Smart", "", 3, "out.yaml",
             True, "none", False, False,
             4, 10, 3, False, True,
-            None, None
+            None, None, 0.1, False, 0.1, 5
         )
         
         assert path is not None

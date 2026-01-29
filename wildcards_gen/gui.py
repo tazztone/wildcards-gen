@@ -172,6 +172,7 @@ def generate_dataset_handler(
     min_depth, min_hyponyms, min_leaf, merge_orphans,
     bbox_only,
     semantic_clean, semantic_model, semantic_threshold,
+    semantic_arrange, semantic_arrange_threshold, semantic_arrange_min_cluster,
     exclude_subtree=None, exclude_regex=None,
     progress=gr.Progress()
 ):
@@ -190,7 +191,10 @@ def generate_dataset_handler(
                 'merge_orphans': merge_orphans,
                 'semantic_cleanup': semantic_clean,
                 'semantic_model': semantic_model,
-                'semantic_threshold': float(semantic_threshold)
+                'semantic_threshold': float(semantic_threshold),
+                'semantic_arrangement': semantic_arrange,
+                'semantic_arrangement_threshold': float(semantic_arrange_threshold),
+                'semantic_arrangement_min_cluster': int(semantic_arrange_min_cluster),
             }
 
         if dataset_name == 'ImageNet':
@@ -525,6 +529,16 @@ def launch_gui(share=False):
                                     ds_semantic_clean = gr.Checkbox(label="Enable Cleaning", value=False, info="Use AI embeddings to remove unrelated terms.")
                                     ds_semantic_model = gr.Dropdown(['minilm', 'mpnet', 'qwen3'], value='minilm', label="Model", interactive=True)
                                     ds_semantic_threshold = gr.Slider(0.01, 1.0, value=0.1, step=0.01, label="Threshold", info="Higher = stricter removal.")
+                                    ds_semantic_arrangement = gr.Checkbox(label="Enable Arrangement", value=False, info="Re-group flattened lists into meaningful sub-categories.")
+                                    ds_arrange_threshold = gr.Slider(label="Arrangement Quality", minimum=0.0, maximum=1.0, value=0.1, step=0.05, info="Cluster quality (0=permissive, 1=strict).")
+                                    ds_arrange_min_cluster = gr.Slider(label="Min Cluster", minimum=2, maximum=20, value=5, step=1, info="Min items to name a group")
+                                    
+                                    # Visibility logic
+                                    def toggle_arrange(x):
+                                        return [gr.update(visible=x)] * 2
+                                    ds_semantic_arrangement.change(toggle_arrange, inputs=[ds_semantic_arrangement], outputs=[ds_arrange_threshold, ds_arrange_min_cluster])
+
+
 
                                 def apply_smart_preset(p, dataset_name):
                                     # Check dataset-specific overrides first
@@ -747,6 +761,7 @@ def launch_gui(share=False):
                 ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_merge_orphans, 
                 ds_bbox_only,
                 ds_semantic_clean, ds_semantic_model, ds_semantic_threshold,
+                ds_semantic_arrangement, ds_arrange_threshold, ds_arrange_min_cluster,
                 ds_exclude_subtree, ds_exclude_regex
             ],
             outputs=[ds_file, ds_prev]

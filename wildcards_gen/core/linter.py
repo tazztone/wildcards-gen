@@ -41,6 +41,30 @@ def compute_list_embeddings(model, terms: List[str]):
         return np.array([])
     return model.encode(terms, show_progress_bar=False)
 
+def get_hdbscan_clusters(embeddings: np.ndarray, min_cluster_size: int = 2) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Run HDBSCAN on embeddings.
+    Returns:
+        (labels, probabilities)
+        labels: Cluster labels (-1 is noise)
+        probabilities: Membership probabilities
+    """
+    import hdbscan
+    
+    if len(embeddings) < min_cluster_size + 1:
+        # Not enough data to cluster meaningfully
+        return np.array([-1] * len(embeddings)), np.array([0.0] * len(embeddings))
+
+    try:
+        # min_cluster_size=2 allows detecting even small anomalies in small lists
+        clusterer = hdbscan.HDBSCAN(min_cluster_size=min_cluster_size, gen_min_span_tree=True)
+        clusterer.fit(embeddings)
+        return clusterer.labels_, clusterer.probabilities_
+    except Exception as e:
+        logger.warning(f"HDBSCAN failed: {e}")
+        return np.array([-1] * len(embeddings)), np.array([0.0] * len(embeddings))
+
+
 def detect_outliers_hdbscan(embeddings: np.ndarray, threshold: float = 0.1) -> List[Tuple[int, float]]:
     """
     HDBSCAN* outlier scoring.
@@ -52,7 +76,6 @@ def detect_outliers_hdbscan(embeddings: np.ndarray, threshold: float = 0.1) -> L
         return []
 
     try:
-        # min_cluster_size=2 allows detecting even small anomalies in small lists
         clusterer = hdbscan.HDBSCAN(min_cluster_size=2, gen_min_span_tree=True)
         clusterer.fit(embeddings)
         
