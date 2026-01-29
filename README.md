@@ -73,169 +73,98 @@ datasets:
 
 ---
 
-## 📖 Usage Guide & Examples
+## ⚡ Quick Start
 
-### 1. Generating form CV Datasets (WordNet)
-*Best for: Realistic objects, animals, distinct physical concepts.*
-
-**Scenario: Building a Creature Generator**
-You want a massive list of animals, organized scientifically, with descriptions for an AI to use.
+### 1. Generate Skeletons (CV Datasets)
 ```bash
-# General Note: We recommend running all commands via `uv run` if not in an active venv.
-# Example: uv run wildcards-gen dataset ...
+# Standard: ImageNet animals, 4 levels deep
+wildcards-gen dataset imagenet --root animal.n.01 --depth 4 -o output/animals.yaml
 
-# Generate a hierarchy of all animals, 4 levels deep
-wildcards-gen dataset imagenet --root animal.n.01 --depth 4 -o output/creatures.yaml
+# Smart Mode: Universal skeleton with semantic pruning (Recommended)
+wildcards-gen dataset tencent --smart --preset balanced -o output/universal.yaml
+
+# Open Images: Full 20k labels vs Legacy BBox
+wildcards-gen dataset openimages --smart --preset detailed -o output/oi_full.yaml
+wildcards-gen dataset openimages --bbox-only --smart -o output/oi_bbox.yaml
 ```
 
-**Scenario: The "Ultimate" Universal Skeleton (Smart Mode)**
-You want a single, massive file containing *everything*—objects, scenes, animals, and concepts—hierarchically organized. Using `--smart` mode (recommended) uses WordNet semantics to prune irrelevant nodes and keep meaningful categories.
+### 2. LLM Power Tools
 ```bash
-# Generate a smart, semantically-pruned skeleton (Recommended)
-wildcards-gen dataset tencent --smart -o output/universal_skeleton.yaml
-```
-
-**Scenario: Open Images (Full vs. BBox)**
-Open Images V7 contains over 20,000 image-level labels. By default, we generate a massive, deep hierarchy from all of them.
-```bash
-# Default: Full 20k labels (Deep hierarchy)
-wildcards-gen dataset openimages --smart -o output/openimages_full.yaml
-
-# Legacy: 600 Bounding Box classes (Shallow hierarchy)
-wildcards-gen dataset openimages --bbox-only --smart -o output/openimages_bbox.yaml
-```
-
-#### 🎚️ Tuning Smart Mode
-When using `--smart`, you can fine-tune what becomes a category vs. what gets flattened into a list:
-
-| Flag | Default | Effect |
-|------|---------|--------|
-| `--preset` | `balanced` | Quick tune: `ultra-detailed`, `detailed`, `balanced`, `compact`, `flat`, `ultra-flat` |
-| `--min-depth` | `6` | Nodes shallower than this in WordNet are always kept as categories. **Lower = fewer top-level categories** |
-| `--min-hyponyms` | `10` | Nodes with more descendants than this are kept as categories. **Higher = more flattening** |
-| `--min-leaf` | `3` | Minimum items per leaf list. Smaller lists are kept as-is (or merged with `--merge-orphans`) |
-| `--merge-orphans` | off | Merge small pruned lists into parent's `misc:` key instead of keeping them |
-
-##### Practical Examples
-
-```bash
-# Default: Detailed hierarchy (~10k lines, ~2000 categories)
-wildcards-gen dataset tencent --smart --preset detailed -o output/skeleton_detailed.yaml
-
-# Balanced: Good for most use cases (~5k lines, ~500 categories)
-wildcards-gen dataset tencent --smart --preset balanced -o output/skeleton_balanced.yaml
-
-# Flat: Minimal categories, maximum flattening (~2k lines, ~50 categories)
-wildcards-gen dataset tencent --smart --preset flat -o output/skeleton_flat.yaml
-```
-
-##### Output Comparison
-
-| Preset | `--min-depth` | `--min-hyponyms` | `--min-leaf` | Merge Orphans |
-|--------|---------------|------------------|--------------|---------------|
-| `ultra-detailed` | 8 | 5 | 1 | No |
-| `detailed` | 6 | 10 | 3 | No |
-| `balanced` | 4 | 50 | 5 | No |
-| `compact` | 3 | 100 | 8 | Yes |
-| `flat` | 2 | 500 | 10 | Yes |
-| `ultra-flat` | 1 | 1000 | 20 | Yes |
-
-#### 🔧 Advanced: Granular Group Tuning
-You can apply different smart settings to specific subtrees using a configuration YAML file and the `--smart-config` flag. This allows you to flatten specific dense branches (like "person") while keeping others detailed.
-
-**overrides.yaml:**
-```yaml
-# Apply strict flattening to 'person' subtree
-person:
-  min_hyponyms: 1000
-  min_leaf_size: 20
-
-# Keep 'vehicle' very detailed
-vehicle:
-  min_hyponyms: 5
-  min_depth: 10
-
-# Target by WordNet ID for precision
-n02084071: # 'dog'
-  merge_orphans: false
-```
-
-**Usage:**
-```bash
-wildcards-gen dataset imagenet --smart --smart-config overrides.yaml -o output/custom_skeleton.yaml
-```
-
-> [!TIP]
-> **Smart Mode** is also available for `imagenet` and `openimages` commands!
-
-### 2. LLM-Powered Creation
-*Best for: Abstract concepts, fiction, artistic styles.*
-
-**Scenario: Organizing a Messy List**
-You have a text file `artists.txt` with 500 mixed artist names.
-```bash
+# Categorize a raw text list
 wildcards-gen categorize input/artists.txt -o output/art_styles.yaml
-```
 
-**Scenario: Designing a Magic System**
-You want to invent a structure for "Magic Spells" from scratch.
-```bash
-wildcards-gen create --topic "Magic Spells and Incantations" -o output/magic.yaml
-```
+# Create from scratch
+wildcards-gen create --topic "Magic Spells" -o output/magic.yaml
 
-### 3. Enrichment
-*Best for: Fixing generic wildcards.*
-
-**Scenario: Improving Legacy Files**
-You have an old YAML file that lacks instructions. The AI generates generic output because it doesn't know what "Synthwave" means.
-```bash
-# Adds "# instruction: A retro-futuristic aesthetic..." to every key
+# Add instructions to legacy files
 wildcards-gen enrich old_styles.yaml -o new_styles.yaml
 ```
 
-### 4. Visual GUI
-Prefer clicking? Launch the web interface:
-
-**Linux/macOS:**
+### 3. Utilities
 ```bash
-bash scripts/linux/run_gui.sh
+wildcards-gen lint output/skeleton.yaml
 ```
 
-**Windows:**
-```powershell
+### 4. Visual GUI
+Launch the web interface (Builder, Tools, Settings):
+```bash
+bash scripts/linux/run_gui.sh
+# or
 .\scripts\windows\run_gui.bat
 ```
 
-Alternatively, if your environment is activated: `wildcards-gen gui`
+---
+
+## 🎚️ Smart Mode Tuning
+
+Use `--preset` to control granularity.
+
+| Preset | Details |
+|--------|---------|
+| `ultra-detailed` | Maximum depth, minimal pruning. |
+| `detailed` | Good for specific domains (e.g. "Vehicles"). |
+| `balanced` | **Recommended default.** |
+| `compact` | Flattens redundant intermediates. |
+| `flat` / `ultra-flat` | Highly compressed, few categories. |
+
+<details>
+<summary>Advanced: Fine-Tuning Parameters</summary>
+
+| Flag | Default | Effect |
+|------|---------|--------|
+| `--min-depth` | `6` | Nodes shallower than this are always kept. |
+| `--min-hyponyms` | `10` | Nodes with many descendants are kept. |
+| `--min-leaf` | `3` | Small lists are merged upwards. |
+| `--merge-orphans` | `True` | Merge pruned lists into `misc:` key. |
+
+You can also use `--smart-config overrides.yaml` for granular subtree control.
+</details>
 
 ---
 
 ## 🛠️ Installation & Setup
 
 ### 🚀 Easy Start (Recommended)
-We provide helper scripts that handle virtual environment creation and dependency installation automatically.
-
-**Linux/macOS:**
 ```bash
+# Linux/macOS
 bash scripts/linux/install.sh
-```
 
-**Windows:**
-```powershell
+# Windows
 .\scripts\windows\install.bat
 ```
 
 ### 🧠 Quick Universal Skeleton
-To generate the recommended "Universal" smart skeleton (based on Tencent ML-Images):
+```bash
+# Linux/macOS
+bash scripts/linux/gen_universal.sh
 
-**Linux/macOS:** `bash scripts/linux/gen_universal.sh`
-**Windows:** `.\scripts\windows\gen_universal.bat`
+# Windows
+.\scripts\windows\gen_universal.bat
+```
 
 ---
 
 ### Manual Installation
-If you prefer to manage your environment manually:
-
 ```bash
 git clone https://github.com/tazztone/wildcards-gen.git
 cd wildcards-gen
