@@ -29,14 +29,27 @@ flowchart LR
 
 ---
 
+## 🧠 Concept: Hybrid Taxonomy Induction
+
+`wildcards-gen` solves the "messy ontology" problem. Raw dataset labels are often flat lists or technically deep but semantically noisy (e.g. `n02121808` -> `lion`).
+
+We bridge this using a **Hybrid ML Approach**:
+*   **Symbolic AI (WordNet)**: Provides the "prior" for structure and meaning. It tells us that a "Tabasco" is a type of "condiment".
+*   **Statistical Semantics (Embeddings + HDBSCAN)**: Provides data-driven grouping. When WordNet fails or lists become too flat, we cluster items based on their vector similarity.
+
+This "Taxonomy Induction + Structure Regularization" pipeline turns chaos into navigable, comment-preserving YAML skeletons.
+
+---
+
 ## Key Features
 
 ### 🚀 Unified Workflow
 One tool for all your taxonomy needs. Replaces disparate scripts with a robust CLI and GUI.
 
 ### 🧠 Hybrid Intelligence
-*   **Dataset Mode (Deterministic)**: Extracts precise hierarchies from **ImageNet**, **COCO**, **Open Images**, and **Tencent ML-Images**. Uses **WordNet glosses** to automatically derive instructions. **(No LLM used, 100% offline & free)**.
-*   **LLM Mode (Generative)**: Uses OpenRouter (default: `google/gemma-3-27b-it:free`) to categorize messy lists, create taxonomies from scratch, or "enrich" existing skeletons. **(Requires API Key)**.
+*   **Dataset Mode (Deterministic)**: Extracts hierarchies from **ImageNet**, **COCO**, **Open Images**, and **Tencent**. Uses **WordNet glosses** for instructions.
+*   **LLM Mode (Generative)**: Uses Large Language Models to categorize messy lists or create taxonomies from scratch.
+*   **Semantic Arrangement**: Automatically groups flat lists (like "food items") into meaningful sub-clusters (e.g., "condiments", "fruits") using **Multi-Pass Clustering** and **Medoid Naming**.
 
 ### 🛡️ Robust & Verified
 *   **Structure Preservation**: Built on `ruamel.yaml` to ensure instructions are never lost.
@@ -136,6 +149,8 @@ Use `--preset` to control granularity.
 | `--min-hyponyms` | `10` | Nodes with many descendants are kept. |
 | `--min-leaf` | `3` | Small lists are merged upwards. |
 | `--merge-orphans` | `True` | Merge pruned lists into `misc:` key. |
+| `--arrange-threshold` | `0.1` | Quality threshold for semantic grouping. |
+| `--min-cluster` | `5` | Minimum size for a semantic sub-group. |
 
 You can also use `--smart-config overrides.yaml` for granular subtree control.
 </details>
@@ -252,18 +267,21 @@ Current status and planned features. We focus on **automation**, **structure arc
 
 ---
 
-## 🔬 Semantic Linter
+## 🔬 Semantic Intelligence
 
-The Semantic Linter uses embedding models to detect outliers in your wildcard lists. Items that are semantically inconsistent with their siblings are flagged for review.
+We use embedding models (Sentence Transformers) for both cleaning and organization.
 
-### CLI Usage
+### 1. Semantic Linter
+Detects outliers in your wildcard lists. Items that are semantically inconsistent with their siblings are flagged for review.
 ```bash
-# Lint a skeleton file using the default model (Qwen3)
-wildcards-gen lint output/skeleton.yaml
-
-# Use a faster model with custom threshold
+# Lint a skeleton file
 wildcards-gen lint output/skeleton.yaml --model minilm --threshold 0.2
 ```
+
+### 2. Semantic Arrangement
+Automatically discovers structure in flat lists. It uses **HDBSCAN** clustering to find sub-groups and **WordNet** logic to name them (e.g., finding that "basil, thyme, sage" -> "Herb").
+*   **Multi-Pass Clustering**: Iteratively finds strong clusters then sweeps for smaller micro-clusters.
+*   **Determinism**: Uses a fixed seed and stable sorting to ensuring reproducible outputs.
 
 ### Available Models
 | Model | Speed | Quality | Best For |

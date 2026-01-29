@@ -153,7 +153,9 @@ def cmd_dataset_imagenet(args):
         semantic_threshold=args.semantic_threshold,
         semantic_arrangement=args.semantic_arrange,
         semantic_arrangement_threshold=args.semantic_arrange_threshold,
-        semantic_arrangement_min_cluster=args.semantic_arrange_min_cluster
+        semantic_arrangement_min_cluster=args.semantic_arrange_min_cluster,
+        semantic_arrangement_method=args.semantic_arrange_method,
+        debug_arrangement=args.debug_arrangement
     )
     
     mgr = StructureManager()
@@ -214,7 +216,9 @@ def cmd_dataset_openimages(args):
         semantic_threshold=args.semantic_threshold,
         semantic_arrangement=args.semantic_arrange,
         semantic_arrangement_threshold=args.semantic_arrange_threshold,
-        semantic_arrangement_min_cluster=args.semantic_arrange_min_cluster
+        semantic_arrangement_min_cluster=args.semantic_arrange_min_cluster,
+        semantic_arrangement_method=args.semantic_arrange_method,
+        debug_arrangement=args.debug_arrangement
     )
     
     mgr = StructureManager()
@@ -255,7 +259,9 @@ def cmd_dataset_tencent(args):
         semantic_threshold=args.semantic_threshold,
         semantic_arrangement=args.semantic_arrange,
         semantic_arrangement_threshold=args.semantic_arrange_threshold,
-        semantic_arrangement_min_cluster=args.semantic_arrange_min_cluster
+        semantic_arrangement_min_cluster=args.semantic_arrange_min_cluster,
+        semantic_arrangement_method=args.semantic_arrange_method,
+        debug_arrangement=args.debug_arrangement
     )
     
     mgr = StructureManager()
@@ -424,6 +430,8 @@ def main():
         parser.add_argument('--semantic-arrange', action='store_true', help='[Smart] Enable semantic arrangement (re-grouping) of flattened lists')
         parser.add_argument('--semantic-arrange-threshold', type=float, default=0.1, help='[Smart] Cluster acceptance probability (0-1, higher=stricter) for arrangement')
         parser.add_argument('--semantic-arrange-min-cluster', type=int, default=5, help='[Smart] Minimum items to form a named cluster')
+        parser.add_argument('--semantic-arrange-method', choices=['eom', 'leaf'], default='eom', help='[Smart] Clustering method: eom (stable) or leaf (granular)')
+        parser.add_argument('--debug-arrangement', action='store_true', help='[Smart] Show arrangement stats')
 
     # ImageNet
     p_imagenet = dataset_sub.add_parser('imagenet', help='ImageNet (WordNet-based) hierarchy')

@@ -51,3 +51,29 @@ def test_generate_tencent_hierarchy(mock_ensure, mock_gloss, mock_get_synset, mo
     
     assert "thing:" in output
     assert "# instruction:" in output 
+
+@patch('wildcards_gen.core.datasets.tencent.download_tencent_hierarchy')
+@patch('wildcards_gen.core.datasets.tencent.get_synset_from_wnid')
+@patch('wildcards_gen.core.datasets.tencent.get_synset_gloss')
+@patch('wildcards_gen.core.datasets.tencent.ensure_nltk_data')
+@patch('wildcards_gen.core.smart.SmartConfig')
+def test_generate_tencent_hierarchy_with_smart_flags(mock_smart_config, mock_ensure, mock_gloss, mock_get_synset, mock_download, mock_tencent_file):
+    """Verify that new smart/arrangement flags are accepted and passed to SmartConfig."""
+    mock_download.return_value = mock_tencent_file
+    mock_get_synset.return_value = MagicMock()
+    
+    # Call with new flags
+    tencent.generate_tencent_hierarchy(
+        smart=True,
+        semantic_arrangement=True,
+        semantic_arrangement_method="leaf",
+        debug_arrangement=True
+    )
+    
+    # Check that SmartConfig was initialized with all flags
+    mock_smart_config.assert_called()
+    _, kwargs = mock_smart_config.call_args
+    assert kwargs['enabled'] is True
+    assert kwargs['semantic_arrangement'] is True
+    assert kwargs['semantic_arrangement_method'] == "leaf"
+    assert kwargs['debug_arrangement'] is True

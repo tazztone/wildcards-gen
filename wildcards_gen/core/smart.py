@@ -24,7 +24,9 @@ class SmartConfig:
                  semantic_threshold: float = 0.5,
                  semantic_arrangement: bool = False,
                  semantic_arrangement_threshold: float = 0.1,
-                 semantic_arrangement_min_cluster: int = 5):
+                 semantic_arrangement_min_cluster: int = 5,
+                 semantic_arrangement_method: str = "eom",
+                 debug_arrangement: bool = False):
         self.enabled = enabled
         self.min_depth = min_depth
         self.min_hyponyms = min_hyponyms
@@ -37,6 +39,8 @@ class SmartConfig:
         self.semantic_arrangement = semantic_arrangement
         self.semantic_arrangement_threshold = semantic_arrangement_threshold
         self.semantic_arrangement_min_cluster = semantic_arrangement_min_cluster
+        self.semantic_arrangement_method = semantic_arrangement_method
+        self.debug_arrangement = debug_arrangement
 
     def get_child_config(self, node_name: str, node_wnid: Optional[str] = None) -> 'SmartConfig':
         """
@@ -80,8 +84,48 @@ class SmartConfig:
             semantic_threshold=override.get('semantic_threshold', self.semantic_threshold),
             semantic_arrangement=override.get('semantic_arrangement', self.semantic_arrangement),
             semantic_arrangement_threshold=override.get('semantic_arrangement_threshold', self.semantic_arrangement_threshold),
-            semantic_arrangement_min_cluster=override.get('semantic_arrangement_min_cluster', self.semantic_arrangement_min_cluster)
+            semantic_arrangement_min_cluster=override.get('semantic_arrangement_min_cluster', self.semantic_arrangement_min_cluster),
+            semantic_arrangement_method=override.get('semantic_arrangement_method', self.semantic_arrangement_method),
+            debug_arrangement=override.get('debug_arrangement', self.debug_arrangement)
         )
+
+
+# ... (skipping unchanged functions) ...
+
+def apply_semantic_arrangement(items: List[str], config: SmartConfig) -> Tuple[dict, List[str]]:
+    """
+    Arrange a list of items into semantic sub-groups.
+    Returns (named_groups, leftovers).
+    """
+    if not config.enabled or not config.semantic_arrangement or not items:
+        return {}, items
+        
+    from .linter import load_embedding_model, check_dependencies
+    
+    if not check_dependencies():
+         return {}, items
+    
+    from .arranger import arrange_list
+    
+    result = arrange_list(
+        items, 
+        config.semantic_model, 
+        config.semantic_arrangement_threshold,
+        config.semantic_arrangement_min_cluster,
+        config.semantic_arrangement_method,
+        return_stats=config.debug_arrangement
+    )
+    
+    groups, leftovers, stats = result
+    
+    if config.debug_arrangement and stats:
+        print(f"\n[DEBUG] Arrangement Stats ({len(items)} items):")
+        print(f"  Noise Ratio: {stats.get('pass_1', {}).get('noise_ratio', 0):.2%}")
+        if stats.get('pass_2'):
+            print(f"  Pass 2 Added: {stats['pass_2']['n_clusters_found']} clusters")
+            
+    return groups, leftovers
+
 
 
 def is_synset_significant(synset: Any, config: SmartConfig) -> bool:
@@ -192,38 +236,4 @@ def apply_semantic_cleaning(items: List[str], config: SmartConfig) -> List[str]:
     cleaned, _ = clean_list(items, model, config.semantic_threshold)
     return cleaned
 
-def apply_semantic_arrangement(items: List[str], config: SmartConfig) -> Tuple[dict, List[str]]:
-    """
-    Arrange a list of items into semantic sub-groups.
-    Returns (named_groups, leftovers).
-    """
-    if not config.enabled or not config.semantic_arrangement or not items:
-        return {}, items
-        
-    from .linter import load_embedding_model, check_dependencies
-    
-    if not check_dependencies():
-         return {}, items
-    
-    # Ensure model is primed (arranger might need it, or we pass it? 
-    # Arranger likely loads it independently or we should update arranger too?
-    # Let's check arranger usage. It takes model_name string usually?
-    # Wait, earlier I saw arranger import. Let's assume arranger handles it or we pass the model object.
-    # Looking at previous code calling `arrange_list(items, config.semantic_model...)`
-    # It seems `arrange_list` takes the model NAME. 
-    # If `arrange_list` loads the model itself, we should make sure IT uses the cached loader.
-    # But `smart.py` previously called `init_semantic_model`?
-    # Let's verify `wildcards_gen/core/arranger.py` if possible.
-    # Assuming `arrange_list` is smart enough or we update it.
-    # Actually, the previous code called `init_semantic_model` which set `_EMBEDDING_MODEL` global, 
-    # but `arrange_list` call didn't seem to use that global?
-    # Ah, `arrange_list` was imported from `.arranger`.
-    # Anyhow, let's keep it consistent.
-    
-    from .arranger import arrange_list
-    return arrange_list(
-        items, 
-        config.semantic_model, 
-        config.semantic_arrangement_threshold,
-        config.semantic_arrangement_min_cluster
-    )
+

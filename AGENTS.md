@@ -33,6 +33,18 @@ To prevent "directory bloat" and noisy hierarchies, the tool uses an intelligent
 *   **Orphan Bubbling**: Small lists (`min_leaf`) are bubbled up to the parent's `misc:` key (via `--merge-orphans`) instead of being discarded.
 *   **Self-Reference Filtering**: Ensures leaf nodes never contain their own parent name (e.g., `nose:` instead of `nose: - nose`).
 
+### 5. Semantic Arrangement (Entropy Reduction)
+When a list becomes too large and "flat" (e.g., 200 "foodstuffs"), it loses utility. The arrangement feature (`core/arranger.py`) restores structure using a **Hybrid** approach:
+*   **Clustering**: Runs HDBSCAN on item embeddings to find density-based groups.
+*   **Multi-Pass Refinement**:
+    *   *Pass 1*: Finds clear, dense clusters (size >= 3).
+    *   *Pass 2*: Scans "leftovers" for smaller micro-clusters (size >= 2) using stricter similarity thresholds.
+*   **Medoid Naming**: To name a cluster without an LLM:
+    1.  Calculates the centroid.
+    2.  Identifies the "medoid" term.
+    3.  Queries WordNet for its hypernym (e.g., "basil" -> "herb").
+    4.  Falls back to LCA or "Group X" if needed.
+
 ## Supported Datasets
 
 1.  **ImageNet**: The default CV standard. Supports ~21k classes.
@@ -97,4 +109,5 @@ When a command like `wildcards-gen dataset tencent` is run, the backend follows 
 5.  **Inline Structure Building & Smart Pruning**: We use `ruamel.yaml`'s `CommentedMap`. The builder evaluates each node's significance:
     *   **In Traditional Mode**: Truncates strictly at `max_depth`.
     *   **In Smart Mode**: Evaluates semantic value. If a node is significant and branching, it becomes a key; otherwise, its descendants are flattened into a leaf list.
-6.  **Serialization**: The final structure is saved via `StructureManager`, ensuring that the complex `CommentedMap` is serialized back to clean YAML while preserving all metadata instructions and alphabetical sorting at every level.
+6.  **Semantic Arrangement (Optional)**: If enabled, flattened lists are passed to `arranger.py`. Vectors are computed, clusters are identified, and the flat list is replaced by a dictionary of named subgroups + leftovers.
+7.  **Serialization**: The final structure is saved via `StructureManager`, ensuring that the complex `CommentedMap` is serialized back to clean YAML while preserving all metadata instructions and alphabetical sorting at every level.

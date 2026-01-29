@@ -271,7 +271,9 @@ def generate_imagenet_tree(
     semantic_threshold: float = 0.1,
     semantic_arrangement: bool = False,
     semantic_arrangement_threshold: float = 0.1,
-    semantic_arrangement_min_cluster: int = 5
+    semantic_arrangement_min_cluster: int = 5,
+    semantic_arrangement_method: str = "eom",
+    debug_arrangement: bool = False
 ) -> CommentedMap:
     """
     Generate ImageNet hierarchy tree from a root synset.
@@ -294,6 +296,8 @@ def generate_imagenet_tree(
         semantic_arrangement: Enable semantic clustering
         semantic_arrangement_threshold: Threshold for clustering
         semantic_arrangement_min_cluster: Min cluster size
+        semantic_arrangement_method: Method 'eom' or 'leaf'
+        debug_arrangement: Return arrangement stats
     """
     ensure_nltk_data()
     
@@ -316,7 +320,9 @@ def generate_imagenet_tree(
         semantic_threshold=semantic_threshold,
         semantic_arrangement=semantic_arrangement,
         semantic_arrangement_threshold=semantic_arrangement_threshold,
-        semantic_arrangement_min_cluster=semantic_arrangement_min_cluster
+        semantic_arrangement_min_cluster=semantic_arrangement_min_cluster,
+        semantic_arrangement_method=semantic_arrangement_method,
+        debug_arrangement=debug_arrangement
     )
     
     # Load filter set

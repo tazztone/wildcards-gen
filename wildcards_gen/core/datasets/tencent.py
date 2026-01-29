@@ -120,7 +120,9 @@ def generate_tencent_hierarchy(
     semantic_threshold: float = 0.1,
     semantic_arrangement: bool = False,
     semantic_arrangement_threshold: float = 0.1,
-    semantic_arrangement_min_cluster: int = 5
+    semantic_arrangement_min_cluster: int = 5,
+    semantic_arrangement_method: str = "eom",
+    debug_arrangement: bool = False
 ) -> Dict:
     """Generate Tencent ML-Images hierarchy."""
     file_path = download_tencent_hierarchy()
@@ -163,7 +165,9 @@ def generate_tencent_hierarchy(
         semantic_threshold=semantic_threshold,
         semantic_arrangement=semantic_arrangement,
         semantic_arrangement_threshold=semantic_arrangement_threshold,
-        semantic_arrangement_min_cluster=semantic_arrangement_min_cluster
+        semantic_arrangement_min_cluster=semantic_arrangement_min_cluster,
+        semantic_arrangement_method=semantic_arrangement_method,
+        debug_arrangement=debug_arrangement
     )
 
     def merge_nodes(existing: Any, new_val: Any) -> Any:
