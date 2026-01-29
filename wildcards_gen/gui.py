@@ -654,10 +654,19 @@ def launch_gui(share=False):
                     set_save_keys = gr.Button('Update Keys')
                     
                     def update_keys(ak, hft):
-                        # In a real app, save to config file here
+                        if ak:
+                            config.set('api_key', ak)
+                            # Update config object for runtime
+                            config._config['api_key'] = ak
+                        
                         if hft:
                             os.environ['HF_TOKEN'] = hft
-                        return ak, f"🔑 API: {'✅ Set' if ak else '❌ Not Set'}"
+                            config.set('hf_token', hft)
+                            
+                        # Save to file
+                        config.save()
+                        
+                        return ak, f"🔑 API: {'✅ Set' if ak else '❌ Not Set'} (Saved)"
                         
                     set_save_keys.click(update_keys, inputs=[set_key, set_hf_token], outputs=[api_key_state, api_status])
                 
