@@ -250,23 +250,6 @@ Current status and planned features. We focus on **automation**, **structure arc
 - [x] **Semantic Linter** — Analyze skeletons to detect semantically inconsistent items using embedding models
 - [x] **Robustness Testing Suite** — Static & dynamic analysis to prevent UI/CLI/Mapping regressions
 
-### 🚧 In Progress / Short-Term
-- [ ] **Batch Pipeline** — Automated generation from a list of topics or roots (e.g. `input_topics.txt` → `multiple_skeletons/`)
-- [ ] **Migration Utilities** — CLI tool to reverse-engineer legacy `.txt` wildcard folders into a single structured `.yaml` skeleton
-- [ ] **Skeleton Merge/Split** — Tools to combine multiple skeletons or break a massive one into sub-modules
-
-### 🔮 Planned / Long-Term
-- [ ] **Custom Data Sources** — Plugins for Wikidata/DBpedia ingestion to complement WordNet
-- [ ] **LLM Caching & Cost Optimization** — Local caching to minimize API usage during enrichment processes
-- [ ] **CI/CD Integration** — Headless modes for validating skeleton integrity in build pipelines
-- [ ] **Async/Parallel Processing** — Optimized engines for processing massive graph traversals (e.g. full WordNet exports)
-
-### 💡 Ideas (Architecture & Data)
-- **Domain Vocabularies**: Pre-packaged, curated WordNet subsets (e.g. "Bio-Diversity", "Fashion", "Military Hardware")
-- **Auto-Enrichment**: recursive "deepening" of leaf nodes that are too broad
-
-> Have a feature request? Open an issue on [GitHub](https://github.com/tazztone/wildcards-gen/issues)!
-
 ---
 
 ## 🔬 Semantic Intelligence
