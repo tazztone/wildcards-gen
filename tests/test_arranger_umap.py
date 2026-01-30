@@ -4,11 +4,19 @@ import numpy as np
 from unittest.mock import MagicMock, patch
 import sys
 
-# Mock hdbscan and umap modules before importing arranger
-sys.modules["hdbscan"] = MagicMock()
-sys.modules["umap"] = MagicMock()
+from unittest.mock import MagicMock, patch
+import sys
+
+# Remove global sys.modules hacking
+# The tests should handle mocking contextually
 
 from wildcards_gen.core.arranger import compute_umap_embeddings, _arrange_single_pass
+
+@pytest.fixture(autouse=True)
+def mock_ml_modules():
+    """Mock hdbscan and umap for all tests in this module."""
+    with patch.dict(sys.modules, {"hdbscan": MagicMock(), "umap": MagicMock()}):
+        yield
 
 def test_compute_umap_embeddings_success():
     """Test that UMAP is called with correct parameters."""
@@ -51,6 +59,9 @@ def test_compute_umap_embeddings_import_error():
 
 def test_arrange_single_pass_calls_umap():
     """Verify _arrange_single_pass calls compute_umap_embeddings."""
+    # Clear cache to ensure UMAP is called
+    from wildcards_gen.core import arranger
+    arranger._UMAP_CACHE.clear()
     from wildcards_gen.core import arranger
     arranger._UMAP_CACHE.clear()
     

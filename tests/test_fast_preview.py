@@ -28,7 +28,10 @@ def test_imagenet_limit(mock_wn, mock_get_synset, mock_ensure_data):
         c.offset.return_value = i
         l = MagicMock()
         l.name.return_value = f"child_{i}"
+        l.name.return_value = f"child_{i}"
         c.lemmas.return_value = [l]
+        # Make sortable
+        c.__lt__ = lambda self, other: self.name() < other.name()
         children.append(c)
     root_synset.hyponyms.return_value = children
     mock_wn.synset.return_value = root_synset

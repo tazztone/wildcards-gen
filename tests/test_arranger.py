@@ -12,12 +12,14 @@ class TestArranger(unittest.TestCase):
     @patch('wildcards_gen.core.arranger.check_dependencies', return_value=True)
     @patch('wildcards_gen.core.arranger.load_embedding_model')
     @patch('wildcards_gen.core.arranger.get_cached_embeddings')
+    @patch('wildcards_gen.core.arranger.compute_umap_embeddings')
     @patch('wildcards_gen.core.arranger.get_lca_name')
     @patch('wildcards_gen.core.arranger.get_medoid_name')
-    def test_arrange_list_basic(self, mock_get_medoid, mock_get_lca, mock_get_embeddings, mock_load_model, mock_check_deps):
+    def test_arrange_list_basic(self, mock_get_medoid, mock_get_lca, mock_umap, mock_get_embeddings, mock_load_model, mock_check_deps):
         # Setup Mocks
         mock_load_model.return_value = MagicMock()
-        mock_get_embeddings.return_value = np.zeros((5, 10)) # Dummy embeddings
+        mock_get_embeddings.return_value = np.zeros((5, 10))
+        mock_umap.return_value = np.zeros((5, 5)) # Reduced embeddings
         
         # Patch HDBSCAN via sys.modules or direct patch?
         # Since hdbscan is imported inside, we need to mock the module or the class if available.
@@ -48,10 +50,12 @@ class TestArranger(unittest.TestCase):
     @patch('wildcards_gen.core.arranger.check_dependencies', return_value=True)
     @patch('wildcards_gen.core.arranger.load_embedding_model')
     @patch('wildcards_gen.core.arranger.get_cached_embeddings')
+    @patch('wildcards_gen.core.arranger.compute_umap_embeddings')
     @patch('wildcards_gen.core.arranger.get_lca_name')
-    def test_arrange_list_threshold_filtering(self, mock_get_name, mock_get_embeddings, mock_load_model, mock_check_deps):
+    def test_arrange_list_threshold_filtering(self, mock_get_name, mock_umap, mock_get_embeddings, mock_load_model, mock_check_deps):
         mock_load_model.return_value = MagicMock()
         mock_get_embeddings.return_value = np.zeros((5, 10))
+        mock_umap.return_value = np.zeros((5, 5))
         
         with patch('hdbscan.HDBSCAN') as MockHDBSCAN:
             mock_clusterer = MockHDBSCAN.return_value
@@ -78,11 +82,13 @@ class TestArranger(unittest.TestCase):
     @patch('wildcards_gen.core.arranger.check_dependencies', return_value=True)
     @patch('wildcards_gen.core.arranger.load_embedding_model')
     @patch('wildcards_gen.core.arranger.get_cached_embeddings')
+    @patch('wildcards_gen.core.arranger.compute_umap_embeddings')
     @patch('wildcards_gen.core.arranger.get_lca_name')
     @patch('wildcards_gen.core.arranger.get_medoid_name')
-    def test_arrange_list_fallback_naming(self, mock_get_medoid, mock_get_lca, mock_get_embeddings, mock_load_model, mock_check_deps):
+    def test_arrange_list_fallback_naming(self, mock_get_medoid, mock_get_lca, mock_umap, mock_get_embeddings, mock_load_model, mock_check_deps):
         mock_load_model.return_value = MagicMock()
         mock_get_embeddings.return_value = np.zeros((4, 10))
+        mock_umap.return_value = np.zeros((4, 5))
         
         with patch('hdbscan.HDBSCAN') as MockHDBSCAN:
             mock_clusterer = MockHDBSCAN.return_value
@@ -115,10 +121,12 @@ class TestArranger(unittest.TestCase):
     @patch('wildcards_gen.core.arranger.check_dependencies', return_value=True)
     @patch('wildcards_gen.core.arranger.load_embedding_model')
     @patch('wildcards_gen.core.arranger.get_cached_embeddings')
+    @patch('wildcards_gen.core.arranger.compute_umap_embeddings')
     @patch('wildcards_gen.core.arranger.get_lca_name')
-    def test_return_metadata(self, mock_get_lca, mock_get_embeddings, mock_load_model, mock_check_deps):
+    def test_return_metadata(self, mock_get_lca, mock_umap, mock_get_embeddings, mock_load_model, mock_check_deps):
         mock_load_model.return_value = MagicMock()
         mock_get_embeddings.return_value = np.zeros((3, 10))
+        mock_umap.return_value = np.zeros((3, 5))
         mock_get_lca.return_value = "fruit"
         
         with patch('hdbscan.HDBSCAN') as MockHDBSCAN:
@@ -138,11 +146,13 @@ class TestArranger(unittest.TestCase):
     @patch('wildcards_gen.core.arranger.check_dependencies', return_value=True)
     @patch('wildcards_gen.core.arranger.load_embedding_model')
     @patch('wildcards_gen.core.arranger.get_cached_embeddings')
+    @patch('wildcards_gen.core.arranger.compute_umap_embeddings')
     @patch('wildcards_gen.core.arranger.get_lca_name')
     @patch('wildcards_gen.core.arranger.get_medoid_name')
-    def test_hybrid_naming_collision(self, mock_get_medoid, mock_get_lca, mock_get_embeddings, mock_load_model, mock_check_deps):
+    def test_hybrid_naming_collision(self, mock_get_medoid, mock_get_lca, mock_umap, mock_get_embeddings, mock_load_model, mock_check_deps):
         mock_load_model.return_value = MagicMock()
         mock_get_embeddings.return_value = np.zeros((4, 10))
+        mock_umap.return_value = np.zeros((4, 5))
         
         with patch('hdbscan.HDBSCAN') as MockHDBSCAN:
             mock_clusterer = MockHDBSCAN.return_value
