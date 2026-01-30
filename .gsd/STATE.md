@@ -2,14 +2,15 @@
 
 ## Current Position
 - **Milestone**: v0.4.0 - Data Science Core
-- **Phase**: Phase 5: Integration & Polish
+- **Phase**: Phase 6: Gap Closure (Integration Fixes)
 - **Status**: Complete
-- **Goal**: Integrate all DS components into the main pipeline.
+- **Goal**: Fix regressions in OpenImages/Tencent and complete unification.
 
 ## Last Accomplishment
-- Integrated `ConstraintShaper` and Recursive Arrangement into `imagenet.py`.
-- Verified with `tests/test_integration_pipeline.py`.
-- **Milestone v0.4.0 Complete!**
+- Fixed `openimages.py` and `tencent.py` API breaks.
+- Integrated `ConstraintShaper`.
+- Verified fixes with `tests/test_dataset_fixes.py`.
+- **Milestone v0.4.0 Gap Closure Completed!**
 
 ## Next Steps
 - Release v0.4.0.
