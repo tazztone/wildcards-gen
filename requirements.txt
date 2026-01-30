@@ -1,5 +1,0 @@
-ruamel.yaml
-nltk
-requests
-tqdm
-gradio
