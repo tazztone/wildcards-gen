@@ -35,6 +35,11 @@ def test_openimages_smoke_execution_smart_flatten():
     mock_synset.offset.return_value = 12345678 # Returns int for :08d formatting
     mock_synset.hypernym_paths.return_value = [[mock_synset]] # Path includes self
     
+    # Configure lemmas for get_synset_name
+    mock_lemma = MagicMock()
+    mock_lemma.name.return_value = "lemma_name"
+    mock_synset.lemmas.return_value = [mock_lemma]
+    
     # Patch load_openimages_data to bypass File I/O
     # Patch ensure_nltk_data to bypass NLTK loading
     # Patch WordNet lookups to return dummy synsets or None
@@ -45,16 +50,21 @@ def test_openimages_smoke_execution_smart_flatten():
          patch("wildcards_gen.core.datasets.openimages.should_prune_node", return_value=True), \
          patch("wildcards_gen.core.datasets.openimages.apply_semantic_arrangement") as mock_arrange:
         
+        # Clear cache to avoid pollution from other tests
+        from wildcards_gen.core.datasets import openimages
+        openimages._get_cached_synset_tree.cache_clear()
+        
         # Mock arrangement to return a dummy group
         # Returns (named_groups, leftovers)
-        mock_arrange.return_value = ({"Cluster1": ["Object2"]}, [], {})
+        mock_arrange.return_value = ({"Cluster1": ["Object2", "Object2b"], "Cluster2": ["Object3", "Object3b"]}, [])
         
         from wildcards_gen.core.datasets.openimages import generate_openimages_hierarchy
         
         result = generate_openimages_hierarchy(
             smart=True,
             semantic_arrangement=True,
-            semantic_arrangement_min_cluster=1
+            semantic_arrangement_min_cluster=1,
+            min_leaf_size=0 # Disable shaper to verify raw structure
         )
         
         # Verify execution reached arrangement
@@ -100,7 +110,7 @@ def test_openimages_smoke_empty_arrangement():
          patch("wildcards_gen.core.datasets.openimages.apply_semantic_arrangement") as mock_arrange:
          
         # Return empty groups, all items as leftovers
-        mock_arrange.return_value = ({}, ["Leaf"], {})
+        mock_arrange.return_value = ({}, ["Leaf"])
         
         from wildcards_gen.core.datasets.openimages import generate_openimages_hierarchy
         result = generate_openimages_hierarchy(smart=True, semantic_arrangement=True)
@@ -138,13 +148,14 @@ def test_tencent_smoke_execution_smart_flatten():
          patch("wildcards_gen.core.smart.should_prune_node", return_value=True), \
          patch("wildcards_gen.core.smart.apply_semantic_arrangement") as mock_arrange:
          
-        mock_arrange.return_value = ({"GroupX": ["Grandchild"]}, [], {})
+        mock_arrange.return_value = ({"GroupX": ["Grandchild", "G2"], "GroupY": ["Sibling", "S2"]}, [], {})
         
         from wildcards_gen.core.datasets.tencent import generate_tencent_hierarchy
         
         result = generate_tencent_hierarchy(
             smart=True,
-            semantic_arrangement=True
+            semantic_arrangement=True,
+            min_leaf_size=0 # Disable shaper
         )
         
         assert mock_arrange.called

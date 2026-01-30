@@ -30,7 +30,16 @@
 
 **Gaps to Close:**
 - [ ] **WordNet Caching**: Cache expensive graph traversals (`get_all_descendants`).
-- [ ] **Performance Verification**: Benchmark "Deep Tuning" latency.
+- [x] **Performance Verification**: Benchmark "Deep Tuning" latency.
+
+### Phase 5: Regression Repair
+**Status**: ⬜ Not Started
+**Objective**: Fix regressions in Tencent dataset, imports, and test suite identified during full suite run.
+
+**Gaps to Close:**
+- [ ] **Fix Imports**: `Tuple` missing in `progress.py`.
+- [ ] **Fix Tencent**: `AttributeError` in flattening logic.
+- [ ] **Fix Test Suite**: `cache_clear()` calls and Mock interactions.
 
 
 ---
