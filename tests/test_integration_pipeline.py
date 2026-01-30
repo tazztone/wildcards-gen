@@ -13,6 +13,7 @@ import pytest
 from ruamel.yaml.comments import CommentedMap
 from wildcards_gen.core.datasets.imagenet import generate_imagenet_tree
 from wildcards_gen.core.structure import StructureManager
+from wildcards_gen.core.wordnet import get_primary_synset
 
 
 # Setup mock synsets
@@ -133,8 +134,13 @@ def test_integration_pipeline_shaping():
  
 
 
-    # Patch the 'wn' object inside the imagenet module
+    # Clear cache to avoid contamination from previous tests or unmocked calls
+    get_primary_synset.cache_clear()
+
+    # Patch the 'wn' object inside the imagenet AND wordnet modules
+    # We must patch core.wordnet.wn because get_primary_synset uses it
     with patch("wildcards_gen.core.datasets.imagenet.wn", mock_wn), \
+         patch("wildcards_gen.core.wordnet.wn", mock_wn), \
          patch("wildcards_gen.core.datasets.imagenet.ensure_nltk_data"), \
          patch("wildcards_gen.core.datasets.imagenet.load_imagenet_1k_wnids", return_value=None):
          
