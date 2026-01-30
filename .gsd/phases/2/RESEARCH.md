@@ -4,55 +4,46 @@ level: 2
 researched_at: 2026-01-30
 ---
 
-# Phase 2 Research: Geometry-First Clustering
+# Phase 2 Research: UI Refresh & Feature Exposure
 
 ## Questions Investigated
-1. Is `umap-learn` compatible with our current stack?
-2. How should UMAP be integrated into the existing `linter`/`arranger` pipeline?
-3. What are the appropriate hyperparameters for UMAP in this context?
+1. Which core engine parameters are currently hardcoded/hidden from the user?
+2. How to implement the requested "Compact UI" using Gradio 4 features?
 
 ## Findings
 
-### Dependency Analysis
-- `hdbscan` is already installed (v0.8.41).
-- `umap-learn` is NOT installed.
-- **Action**: Must add `umap-learn>=0.5.0` to `pyproject.toml` under `lint` extras.
+### Hidden Parameters
+The following parameters are currently hardcoded in `arranger.py` or `smart.py` and need to be exposed:
 
-### Pipeline Integration
-Current flow in `arranger.py` (assumed future location):
-`Embeddings (384d)` -> `HDBSCAN` -> `Cluster Labels`
+| Parameter | Current Value | Target Location |
+|-----------|---------------|-----------------|
+| `umap_n_neighbors` | `15` | `SmartConfig` -> GUI |
+| `umap_min_dist` | `0.1` | `SmartConfig` -> GUI |
+| `umap_n_components` | `5` | `SmartConfig` -> GUI |
+| `hdbscan_min_samples` | `= min_cluster_size` | `SmartConfig` -> GUI |
+| `orphans_label_template` | `"misc"` (implicit) | `SmartConfig` -> GUI |
 
-Proposed flow:
-`Embeddings (384d)` -> `UMAP (5d)` -> `HDBSCAN` -> `Cluster Labels`
-
-**Why 5 dimensions?**
-- HDBSCAN struggles with "curse of dimensionality" above ~10-15 dims.
-- UMAP is excellent at preserving local neighborhood structure, which is what semantic clustering cares about.
-- Reducing to 5 dims creates a dense "manifold" where density-based clustering works best.
-
-### Configuration
-Recommended defaults for typical wildcard list sizes (50-2000 items):
-- **n_neighbors**: 15 (default value, good balance of local/global).
-- **min_dist**: 0.0 or 0.1 (tighter packing for clustering).
-- **n_components**: 5 (target dimension).
-- **metric**: 'cosine' (best for semantic embeddings).
+### UI Layout Options
+Gradio 4.0+ supports `gr.Sidebar()`, which is perfect for the "Configuration" panel.
+- **Current**: 2 Columns (50/50 split). Config takes up half the screen even when just viewing output.
+- **Proposed**: `gr.Sidebar()` for Configuration. `gr.Column()` for Preview/Analysis.
+    - **Benefit**: User can collapse settings to see full-width preview.
 
 ## Decisions Made
+
 | Decision | Choice | Rationale |
 |----------|--------|-----------|
-| **Manifold Learner** | **UMAP** | State-of-the-art for preserving structure; standard pair with HDBSCAN. |
-| **Target Dim** | **5** | Low enough for HDBSCAN efficiency, high enough to keep info. |
-| **Dependency** | **umap-learn** | Required addition. |
+| **Layout** | `gr.Sidebar` | Maximizes preview space while keeping controls accessible. |
+| **Param Storage** | `SmartConfig` | Centralize all tuning in the config object rather than loose kwargs. |
+| **Grouping** | "Advanced" Accordion | New params are niche; hide them by default to avoid overwhelming users. |
 
 ## Patterns to Follow
-- **Optional Import**: Like `hdbscan`, `umap` should be imported inside the function or checked via `check_dependencies`.
-- **Fallback**: If `umap` fails (e.g., too few samples), fallback to raw embeddings or PCA.
+- **Config Propagation**: Update `SmartConfig.__init__` -> `dataset.generate_...` -> `arranger` -> `umap/hdbscan`.
+- **Debounced Preview**: Ensure the new sliders trigger Fast Preview (if enabled).
 
-## Risks
-- **Performance**: UMAP can be slow on very large datasets (>10k items).
-    - *Mitigation*: Our leaf nodes are typically < 2000 items. Performance should be sub-second.
+## Dependencies Identified
+- No new packages needed (Gradio, UMAP, HDBSCAN already installed).
 
-## Ready for Planning
-- [x] Questions answered
-- [x] Approach selected
-- [x] Dependencies identified
+## Setup for Phase 2
+- [x] Parameters identified
+- [x] Layout strategy selected
