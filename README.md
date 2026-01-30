@@ -24,8 +24,10 @@ flowchart LR
 ```
 
 *   **You Provide**: A topic ("Fantasy RPG"), a dataset ("ImageNet"), or a raw list of terms.
-*   **We Generate**: A nested YAML file where every category includes an `# instruction:` comment (e.g., "a medieval warrior specialized in melee combat"). Context is preserved even for dynamically generated clusters using **Instruction Injection**.
-*   **The Result**: A context-rich structure specific enough to guide an AI, but broad enough to be populated with thousands of items.
+*   **The Structure**:
+    *   **Categories** (YAML Keys): These receive `# instruction:` comments to guide the downhill AI.
+    *   **Wildcards** (YAML Lists): These are the actual prompt terms.
+*   **The Result**: A context-rich **skeleton** specific enough to guide an AI, but broad enough to be populated with thousands of items.
 
 ---
 
@@ -52,8 +54,15 @@ One tool for all your taxonomy needs. Replaces disparate scripts with a robust C
 *   **Semantic Arrangement**: Automatically groups flat lists (like "food items") into meaningful sub-clusters (e.g., "condiments", "fruits") using **Multi-Pass Clustering** and **Hybrid Naming** (e.g. `bird (eagle)` to avoid collisions).
 
 ### 🛡️ Robust & Verified
-*   **Structure Preservation**: Built on `ruamel.yaml` to ensure instructions are never lost.
-*   **Deep Hierarchies**: Supports arbitrary nesting depth.
+*   **Structure Preservation**: Built on `ruamel.yaml` to ensure instructions are never lost. **NEVER use standard `PyYAML`** on these files.
+*   **Smart Pruning Nuances**: 
+    *   **Linear Chain Removal**: Automatically collapses categories with only one child to reduce nesting fatigue.
+    *   **Structural Skipping**: Prunes deep taxonomical "wrapper" nodes (e.g. `placental`) while promoting their children.
+    *   **Orphan Bubbling**: Merges tiny lists into parent-aware keys (e.g. `other_bird`) instead of discarding them.
+    *   **Self-Reference Filtering**: Prevents redundant entries by removing leaves identical to their category name.
+*   **Semantic Intelligence**: 
+    *   **Hybrid Medoid Naming**: Groups are named using the cluster's medoid synset + hypernym (e.g. `bird (eagle)`) to avoid generic collisions.
+    *   **Instruction Injection**: Automatically fetches WordNet definitions for generated sub-groups.
 
 ### 🔍 How it generates:
 1. **Download**: Grabs raw dataset metadata.
@@ -279,3 +288,61 @@ Automatically discovers structure in flat lists. It uses **HDBSCAN** clustering 
 
 ### GUI
 The Linter is also available in the GUI under the "🔬 Semantic Linter" tab. Upload a YAML file, select a model, and click "Run Linter" to see the report.
+
+---
+
+## 🛠️ Developer & Agent Architecture
+
+Detailed technical documentation for those contributing to or building on top of the `wildcards-gen` engine.
+
+### 🏗️ Core Principles
+
+#### 1. The "Skeleton" Concept
+This tool produces **skeletons**: structured YAML files with categories and instructions, but often minimal leaf nodes. These skeletons are imported into the `wildcards-generator` SPA, where the AI populates them with extensive wildcards.
+- **Goal**: Precise structure, helpful context instructions.
+- **Non-Goal**: Generating millions of wildcards (that's the SPA's job).
+
+#### 2. Strict Comment Preservation
+The `# instruction:` comment is the payload. It tells the downhill AI what a category *means*.
+- **Implementation**: We use `ruamel.yaml` via the `StructureManager` class (`core/structure.py`).
+- **Rule**: NEVER use standard `yaml` or `PyYAML` libraries, as they strip comments.
+
+#### 3. Hybrid Data Sources
+- **WordNet (Trusted)**: Used for `dataset` commands. We map dataset IDs (WNID, Freebase) to WordNet Synsets to extract definitions.
+- **LLM (Flexible)**: Used for `categorize/create`. We use a custom `LLMEngine` that handles prompt loading and response cleaning (stripping markdown backticks).
+
+### 🗺️ Codebase Map
+
+*   **`wildcards_gen/cli.py`**: The single entry point. Defined using `argparse`.
+*   **`wildcards_gen/gui.py`**: Gradio-based web interface.
+*   **`wildcards_gen/core/`**:
+    *   `config.py`: Hierarchical configuration manager.
+    *   `structure.py`: Wrapper for `ruamel.yaml` logic.
+    *   `llm.py`: OpenRouter interaction and response cleaning.
+    *   `wordnet.py`: NLTK WordNet wrappers.
+    *   `smart.py`: Common logic for semantic pruning and leaf bubbling.
+    *   `presets.py`: Single Source of Truth for pruning presets.
+    *   `datasets/`: Logic for specific datasets (ImageNet, Tencent, OpenImages).
+
+### 🎨 UI/UX Principles (GUI)
+
+*   **Consolidated Workflow**: Builder (Generation), Tools (Post-processing), Settings (Configuration).
+*   **Progressive Disclosure**: Advanced tuning parameters are hidden behind `gr.Accordion` by default.
+*   **Contextual Help**: Uses `info=` arguments in Gradio components for embedded documentation.
+
+### 🔬 Technical Execution Trace
+
+When a command like `wildcards-gen dataset tencent` is run:
+
+1.  **Orchestration**: `cli.py` initializes the `ConfigManager` and identifies the generator.
+2.  **Data Acquisition**: `downloaders.py` manages local caching from source repositories.
+3.  **Parsing**: Dataset modules (e.g., `tencent.py`) parse raw files into a Directed Graph.
+4.  **Semantic Enrichment**: The builder recurses through the graph, querying **WordNet** for "Gloss" (definitions).
+5.  **Smart Pruning**: Evaluates nodes for semantic significance, flattening obscure nodes or bubbling orphans.
+6.  **Serialization**: `StructureManager` ensures the `CommentedMap` is serialized back to clean YAML while preserving all metadata instructions.
+
+### 👷 Maintenance & Contribution
+
+*   **Adding Datasets**: Implement a new module in `core/datasets/` that returns a dictionary.
+*   **Testing**: Run `uv run pytest tests/` to ensure contract validation.
+*   **Requirements**: Python `>=3.10` is required for the semantic linter and arrangement features.
