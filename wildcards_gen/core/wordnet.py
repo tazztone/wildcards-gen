@@ -95,22 +95,15 @@ def is_in_valid_set(synset, valid_wnids: Optional[Set[str]]) -> bool:
     return get_synset_wnid(synset) in valid_wnids
 
 
-def get_all_descendants(
+@functools.lru_cache(maxsize=1024)
+def _get_all_descendants_cached(
     synset,
-    valid_wnids: Optional[Set[str]] = None
+    valid_wnids: Optional[frozenset] = None
 ) -> List[str]:
-    """
-    Get all descendant names of a synset.
-    
-    Args:
-        synset: The parent synset
-        valid_wnids: Optional filter set
-        
-    Returns:
-        Sorted list of descendant names
-    """
+    """Cached implementation of descendant traversal."""
     descendants = set()
     try:
+        # closure() can be slow for high-up nodes like 'entity.n.01'
         for s in synset.closure(lambda s: s.hyponyms()):
             name = get_synset_name(s)
             if valid_wnids:
@@ -122,6 +115,18 @@ def get_all_descendants(
         logger.warning(f"Error traversing descendants of {synset}: {e}")
 
     return sorted(list(descendants))
+
+
+def get_all_descendants(
+    synset,
+    valid_wnids: Optional[Set[str]] = None
+) -> List[str]:
+    """
+    Get all descendant names of a synset.
+    Wrapper that handles caching by freezing the validation set.
+    """
+    frozen_valid = frozenset(valid_wnids) if valid_wnids else None
+    return _get_all_descendants_cached(synset, frozen_valid)
 
 
 # Categories to optionally blacklist (too abstract)
