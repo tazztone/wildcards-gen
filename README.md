@@ -24,7 +24,7 @@ flowchart LR
 ```
 
 *   **You Provide**: A topic ("Fantasy RPG"), a dataset ("ImageNet"), or a raw list of terms.
-*   **We Generate**: A nested YAML file where every category includes an `# instruction:` comment (e.g., "a medieval warrior specialized in melee combat").
+*   **We Generate**: A nested YAML file where every category includes an `# instruction:` comment (e.g., "a medieval warrior specialized in melee combat"). Context is preserved even for dynamically generated clusters using **Instruction Injection**.
 *   **The Result**: A context-rich structure specific enough to guide an AI, but broad enough to be populated with thousands of items.
 
 ---
@@ -49,7 +49,7 @@ One tool for all your taxonomy needs. Replaces disparate scripts with a robust C
 ### 🧠 Hybrid Intelligence
 *   **Dataset Mode (Deterministic)**: Extracts hierarchies from **ImageNet**, **COCO**, **Open Images**, and **Tencent**. Uses **WordNet glosses** for instructions.
 *   **LLM Mode (Generative)**: Uses Large Language Models to categorize messy lists or create taxonomies from scratch.
-*   **Semantic Arrangement**: Automatically groups flat lists (like "food items") into meaningful sub-clusters (e.g., "condiments", "fruits") using **Multi-Pass Clustering** and **Medoid Naming**.
+*   **Semantic Arrangement**: Automatically groups flat lists (like "food items") into meaningful sub-clusters (e.g., "condiments", "fruits") using **Multi-Pass Clustering** and **Hybrid Naming** (e.g. `bird (eagle)` to avoid collisions).
 
 ### 🛡️ Robust & Verified
 *   **Structure Preservation**: Built on `ruamel.yaml` to ensure instructions are never lost.
@@ -148,9 +148,11 @@ Use `--preset` to control granularity.
 | `--min-depth` | `6` | Nodes shallower than this are always kept. |
 | `--min-hyponyms` | `10` | Nodes with many descendants are kept. |
 | `--min-leaf` | `3` | Small lists are merged upwards. |
-| `--merge-orphans` | `True` | Merge pruned lists into `misc:` key. |
+| `--merge-orphans` | `True` | Merge pruned lists into context-aware keys (e.g. `other_bird`). |
 | `--arrange-threshold` | `0.1` | Quality threshold for semantic grouping. |
 | `--min-cluster` | `5` | Minimum size for a semantic sub-group. |
+| `--skip-nodes` | `None` | Structural skipping (elision) of specific wrapper nodes. |
+| `--orphans-label-template` | `None` | Template for orphan categories (e.g. `other_{}`). |
 
 You can also use `--smart-config overrides.yaml` for granular subtree control.
 </details>
@@ -281,6 +283,8 @@ wildcards-gen lint output/skeleton.yaml --model minilm --threshold 0.2
 ### 2. Semantic Arrangement
 Automatically discovers structure in flat lists. It uses **HDBSCAN** clustering to find sub-groups and **WordNet** logic to name them (e.g., finding that "basil, thyme, sage" -> "Herb").
 *   **Multi-Pass Clustering**: Iteratively finds strong clusters then sweeps for smaller micro-clusters.
+*   **Hybrid Naming**: Uses **Medoid Hypernyms** mixed with **Lowest Common Ancestors** to create descriptive, unique names like `bird (eagle)` vs `bird (hawk)`, avoiding generic numbering.
+*   **Instruction Injection**: Dynamically constructs `# instruction:` comments for new clusters by aggregating definitions from WordNet.
 *   **Determinism**: Uses a fixed seed and stable sorting to ensuring reproducible outputs.
 
 ### Available Models

@@ -26,7 +26,30 @@ class SmartConfig:
                  semantic_arrangement_threshold: float = 0.1,
                  semantic_arrangement_min_cluster: int = 5,
                  semantic_arrangement_method: str = "eom",
-                 debug_arrangement: bool = False):
+                 debug_arrangement: bool = False,
+                 skip_nodes: list = None,
+                 orphans_label_template: str = "misc"):
+        """
+        Initializes the SmartConfig.
+
+        Args:
+            enabled (bool): Whether smart pruning is enabled.
+            min_depth (int): Minimum WordNet depth for a synset to be considered significant.
+            min_hyponyms (int): Minimum number of hyponyms for a synset to be considered significant.
+            min_leaf_size (int): Minimum number of items a leaf node must have to not be merged.
+            merge_orphans (bool): Whether to merge "orphan" items (those not fitting into any category).
+            category_overrides (dict): Specific configuration overrides for certain categories.
+            semantic_cleanup (bool): Whether to perform semantic cleanup on categories.
+            semantic_model (str): Name of the semantic model to use for embeddings.
+            semantic_threshold (float): Similarity threshold for semantic cleanup.
+            semantic_arrangement (bool): Whether to semantically arrange items into sub-categories.
+            semantic_arrangement_threshold (float): Similarity threshold for semantic arrangement.
+            semantic_arrangement_min_cluster (int): Minimum items for a semantic arrangement cluster.
+            semantic_arrangement_method (str): Method for semantic arrangement (e.g., "eom").
+            debug_arrangement (bool): Show arrangement stats.
+            skip_nodes (list): Nodes to structurally skip (elide) while promoting children.
+            orphans_label_template (str): Template for orphan categories (e.g. "other_{}").
+        """
         self.enabled = enabled
         self.min_depth = min_depth
         self.min_hyponyms = min_hyponyms
@@ -41,6 +64,8 @@ class SmartConfig:
         self.semantic_arrangement_min_cluster = semantic_arrangement_min_cluster
         self.semantic_arrangement_method = semantic_arrangement_method
         self.debug_arrangement = debug_arrangement
+        self.skip_nodes = set(skip_nodes) if skip_nodes else set()
+        self.orphans_label_template = orphans_label_template
 
     def get_child_config(self, node_name: str, node_wnid: Optional[str] = None) -> 'SmartConfig':
         """
@@ -86,24 +111,34 @@ class SmartConfig:
             semantic_arrangement_threshold=override.get('semantic_arrangement_threshold', self.semantic_arrangement_threshold),
             semantic_arrangement_min_cluster=override.get('semantic_arrangement_min_cluster', self.semantic_arrangement_min_cluster),
             semantic_arrangement_method=override.get('semantic_arrangement_method', self.semantic_arrangement_method),
-            debug_arrangement=override.get('debug_arrangement', self.debug_arrangement)
+
+            debug_arrangement=override.get('debug_arrangement', self.debug_arrangement),
+            skip_nodes=override.get('SKIP_NODES', self.skip_nodes),
+            orphans_label_template=override.get('orphans_label_template', self.orphans_label_template)
         )
 
 
 # ... (skipping unchanged functions) ...
 
-def apply_semantic_arrangement(items: List[str], config: SmartConfig, stats: Optional[Any] = None, context: Optional[str] = None) -> Tuple[dict, List[str]]:
+def apply_semantic_arrangement(
+    items: List[str], 
+    config: SmartConfig, 
+    stats: Optional[Any] = None, 
+    context: Optional[str] = None,
+    return_metadata: bool = False
+) -> Tuple:
     """
     Arrange a list of items into semantic sub-groups.
-    Returns (named_groups, leftovers).
+    Returns (named_groups, leftovers) or (named_groups, leftovers, metadata) if requested.
     """
     if not config.enabled or not config.semantic_arrangement or not items:
         return {}, items
         
     from .linter import load_embedding_model, check_dependencies
     
+    
     if not check_dependencies():
-         return {}, items
+         return ({}, items, {}) if return_metadata else ({}, items)
     
     from .arranger import arrange_list
     
@@ -114,14 +149,24 @@ def apply_semantic_arrangement(items: List[str], config: SmartConfig, stats: Opt
         config.semantic_arrangement_threshold,
         config.semantic_arrangement_min_cluster,
         config.semantic_arrangement_method,
-        return_stats=request_stats
+        return_stats=request_stats,
+        return_metadata=return_metadata
     )
     
+    metadata = {}
     if request_stats:
-        groups, leftovers, s_data = result
+        if return_metadata:
+            groups, leftovers, s_data, metadata = result
+        else:
+            groups, leftovers, s_data = result
+            metadata = None
     else:
-        groups, leftovers = result
-        s_data = None
+        if return_metadata:
+            groups, leftovers, metadata = result
+            s_data = None
+        else:
+            groups, leftovers = result
+            s_data = None
     
     if stats and s_data:
         p1 = s_data.get('pass_1', {})
@@ -140,6 +185,8 @@ def apply_semantic_arrangement(items: List[str], config: SmartConfig, stats: Opt
             }
         )
             
+    if return_metadata:
+        return groups, leftovers, metadata
     return groups, leftovers
 
 
@@ -193,6 +240,27 @@ def should_prune_node(
     if is_root:
         return False
         
+    # 0. Skip List / Force Prune Check
+    if config.skip_nodes:
+        # Check by name
+        # We need the node name? Is 'synset' name?
+        # Synset name is like 'entity.n.01', not 'entity'.
+        # We rely on exact name match or WNID.
+        # However, `synset` object is passed here.
+        # Check WNID
+        try:
+             wnid = get_synset_wnid(synset)
+             if wnid and wnid in config.skip_nodes:
+                 return True
+        except: pass
+        
+        # Check Name (Lemma)
+        if synset:
+             # Check lemma names
+             for lemma in synset.lemma_names():
+                 if lemma in config.skip_nodes or lemma.replace('_', ' ') in config.skip_nodes:
+                     return True
+    
     # 1. Linear Chain Check
     # If it only has 1 child, it's just adding noise depth. Prune it.
     # UNLESS it's extremely significant? 

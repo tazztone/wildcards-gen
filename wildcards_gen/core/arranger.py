@@ -18,6 +18,7 @@ import hashlib
 
 from .wordnet import get_primary_synset, get_synset_name, is_abstract_category
 from .linter import check_dependencies, load_embedding_model, compute_list_embeddings, get_hdbscan_clusters
+from .wordnet import get_primary_synset, get_synset_name, is_abstract_category, get_synset_wnid
 
 logger = logging.getLogger(__name__)
 
@@ -119,6 +120,70 @@ def get_medoid_name(cluster_embeddings: np.ndarray, cluster_terms: List[str]) ->
         logger.warning(f"Medoid naming failed: {e}")
         return None
 
+def _generate_descriptive_name(
+    lca_name: Optional[str], 
+    cluster_embeddings: np.ndarray, 
+    cluster_terms: List[str]
+) -> Tuple[str, dict]:
+    """
+    Generate a descriptive name using Hybrid Strategy (LCA + Medoid).
+    Returns (name, metadata).
+    """
+    metadata = {
+        "wnid": None,
+        "source": "fallback",
+        "examples": cluster_terms[:3]
+    }
+    
+    # 1. Try LCA
+    if lca_name:
+        # Check if LCA is specific enough (not in blacklist is already checked by get_lca_name)
+        # If the cluster is small/tight, LCA might be perfect.
+        # But if we have multiple clusters with SAME LCA, we need distinction.
+        # For now, we return LCA, and let the caller handle collision logic by appending medoid.
+        pass
+
+    # 2. Medoid
+    medoid_hypernym = get_medoid_name(cluster_embeddings, cluster_terms)
+    
+    # Decision Logic
+    # If we have LCA, use it as base.
+    # If we have Medoid, it can be a qualifier.
+    
+    if lca_name:
+        name = lca_name
+        metadata["source"] = "lca"
+        # Try to get WNID for LCA
+        # This is a bit inefficient re-lookup, but safe
+        s = get_primary_synset(lca_name)
+        if s:
+            metadata["wnid"] = get_synset_wnid(s)
+            
+    elif medoid_hypernym:
+        name = medoid_hypernym
+        metadata["source"] = "medoid_hypernym"
+        s = get_primary_synset(medoid_hypernym)
+        if s:
+            metadata["wnid"] = get_synset_wnid(s)
+    else:
+        name = "Group"
+        metadata["source"] = "fallback"
+
+    # Hybrid Data for collision handling (passed in metadata)
+    if medoid_hypernym:
+         metadata["medoid_hypernym"] = medoid_hypernym
+         
+    # Also find the actual medoid term for "Examples"
+    try:
+        centroid = np.mean(cluster_embeddings, axis=0)
+        distances = euclidean_distances([centroid], cluster_embeddings)
+        medoid_idx = np.argmin(distances)
+        metadata["medoid_term"] = cluster_terms[medoid_idx]
+    except:
+        pass
+
+    return name, metadata
+
 
 def _arrange_single_pass(
     terms: List[str],
@@ -127,10 +192,10 @@ def _arrange_single_pass(
     threshold: float,
     cluster_selection_method: str = 'eom',
     min_samples: Optional[int] = None
-) -> Tuple[Dict[str, List[str]], List[str], Dict]:
+) -> Tuple[Dict[str, List[str]], List[str], Dict, Dict[str, Dict]]:
     """
     Internal Helper: Run a single pass of HDBSCAN clustering.
-    Returns: (groups, leftovers, stats)
+    Returns: (groups, leftovers, stats, group_metadata)
     """
     import hdbscan
     
@@ -144,9 +209,11 @@ def _arrange_single_pass(
         "noise_ratio": 0.0,
         "details": []
     }
+    
+    group_metadata = {}
         
     if len(terms) < min_cluster_size + 1:
-        return {}, terms, stats
+        return {}, terms, stats, {}
 
     try:
         clusterer = hdbscan.HDBSCAN(
@@ -159,7 +226,9 @@ def _arrange_single_pass(
         labels, probabilities = clusterer.labels_, clusterer.probabilities_
     except Exception as e:
         logger.warning(f"HDBSCAN error: {e}")
-        return {}, terms, stats
+    except Exception as e:
+        logger.warning(f"HDBSCAN error: {e}")
+        return {}, terms, stats, {}
 
     # Process clusters
     clusters: Dict[int, List[int]] = {}
@@ -201,19 +270,27 @@ def _arrange_single_pass(
 
         # Naming Strategy
         # 1. Try LCA
-        name = get_lca_name(cluster_items)
+        lca_name = get_lca_name(cluster_items)
+        cluster_embs = embeddings[indices]
         
-        # 2. Try Medoid Hypernym (New)
-        if not name:
-            cluster_embs = embeddings[indices]
-            name = get_medoid_name(cluster_embs, cluster_items)
-            
-        # 3. Fallback
-        if not name:
-            name = f"Group {fallback_counter}"
-            fallback_counter += 1
-            
-        # Unique naming
+        base_name, meta = _generate_descriptive_name(lca_name, cluster_embs, cluster_items)
+        
+        # Collision Handling (Hybrid Naming)
+        name = base_name
+        
+        # If name exists or is "Group", try to enhance it
+        if name in named_groups or name == "Group":
+            # Hybrid: Name + (Medoid Term)
+            # Limit medoid term length to keep it readable
+            medoid_term = meta.get("medoid_term", "")
+            if medoid_term and medoid_term != name:
+                # Clean up medoid (remove parens, keep short)
+                clean_medoid = re.sub(r'\([^)]*\)', '', medoid_term).strip()
+                if len(clean_medoid.split()) <= 2:
+                    name = f"{base_name} ({clean_medoid})"
+                    meta["is_hybrid"] = True
+                
+        # Final unique check with counters if Hybrid failed or collided too
         original_name = name
         counter = 2
         while name in named_groups:
@@ -221,10 +298,11 @@ def _arrange_single_pass(
             counter += 1
             
         named_groups[name] = sorted(cluster_items)
+        group_metadata[name] = meta
         used_indices.update(indices)
         
     leftovers = [t for i, t in enumerate(terms) if i not in used_indices]
-    return named_groups, sorted(leftovers), stats
+    return named_groups, sorted(leftovers), stats, group_metadata
 
 
 def arrange_list(
@@ -233,20 +311,23 @@ def arrange_list(
     threshold: float = 0.1, 
     min_cluster_size: int = 5,
     cluster_selection_method: str = 'eom',
-    return_stats: bool = False
-) -> Tuple[Dict[str, List[str]], List[str], Optional[Dict]]:
+    return_stats: bool = False,
+    return_metadata: bool = False
+) -> Tuple[Dict[str, List[str]], List[str], Optional[Dict], Optional[Dict[str, Dict]]]:
     """
     Arrange a flat list into semantic sub-groups using Multi-Pass Clustering.
+    If return_metadata is True, returns (groups, leftovers, stats, metadata).
+    Otherwise returns standard (groups, leftovers) or (..., stats).
     """
     if not terms or len(terms) < 3:
         if return_stats:
-            return {}, terms, {}
-        return {}, terms
+            return ({}, terms, {}, {}) if return_metadata else ({}, terms, {})
+        return ({}, terms, {}) if return_metadata else ({}, terms)
         
     if not check_dependencies():
         if return_stats:
-            return {}, terms, {"error": "missing_dependencies"}
-        return {}, terms
+            return ({}, terms, {"error": "missing_dependencies"}, {}) if return_metadata else ({}, terms, {"error": "missing_dependencies"})
+        return ({}, terms, {}) if return_metadata else ({}, terms)
 
     # 1. Embeddings (Computed Once)
     model = load_embedding_model(model_name)
@@ -255,11 +336,11 @@ def arrange_list(
     
     if len(embeddings) == 0:
         if return_stats:
-            return {}, terms, {"error": "no_embeddings"}
-        return {}, terms
+            return ({}, terms, {"error": "no_embeddings"}, {}) if return_metadata else ({}, terms, {"error": "no_embeddings"})
+        return ({}, terms, {}) if return_metadata else ({}, terms)
 
     # --- PASS 1: Main Configured Pass ---
-    groups_1, leftovers_1, stats_1 = _arrange_single_pass(
+    groups_1, leftovers_1, stats_1, meta_1 = _arrange_single_pass(
         terms, embeddings, 
         min_cluster_size=min_cluster_size, 
         threshold=threshold,
@@ -268,6 +349,7 @@ def arrange_list(
     
     final_groups = groups_1
     final_leftovers = leftovers_1
+    final_metadata = meta_1
     
     # --- PASS 2: "Cleanup" on Leftovers ---
     # Only if leftovers are substantial to avoid fragmented noise
@@ -279,7 +361,8 @@ def arrange_list(
         leftover_indices = [i for i, t in enumerate(terms) if t in final_leftovers]
         leftover_embeddings = embeddings[leftover_indices]
         
-        groups_2, leftovers_2, stats_2 = _arrange_single_pass(
+        
+        groups_2, leftovers_2, stats_2, meta_2 = _arrange_single_pass(
             final_leftovers, leftover_embeddings,
             min_cluster_size=2,          # Use smallest possible size
             min_samples=2,               # Strict
@@ -297,6 +380,10 @@ def arrange_list(
                 counter += 1
             final_groups[final_name] = items
             
+            # Merge Metadata
+            if name in meta_2:
+                final_metadata[final_name] = meta_2[name]
+            
         final_leftovers = leftovers_2
 
     # Consolidate Stats
@@ -306,6 +393,10 @@ def arrange_list(
     } if return_stats else None
 
     if return_stats:
+        if return_metadata:
+            return final_groups, final_leftovers, full_stats, final_metadata
         return final_groups, final_leftovers, full_stats
     else:
+        if return_metadata:
+             return final_groups, final_leftovers, final_metadata
         return final_groups, final_leftovers

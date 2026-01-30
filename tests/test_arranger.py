@@ -102,8 +102,79 @@ class TestArranger(unittest.TestCase):
             )
             
             self.assertEqual(len(groups), 1)
-            self.assertIn("Group 1", groups) # Fallback
-            self.assertEqual(sorted(groups["Group 1"]), ["a", "b", "c", "d"])
+            # Expect "Group (a)" because 'a' is the medoid (first item in sorted list usually or mock embeddings make it so?)
+            # Medoid calculation uses embeddings. All zero. 
+            # If all zero, first item is medoid? 
+            # medoid_idx = np.argmin(distances). distances all 0. argmin=0.
+            # term[0] is "a".
+            self.assertIn("Group (a)", groups) 
+            self.assertEqual(sorted(groups["Group (a)"]), ["a", "b", "c", "d"])
+
+
+
+    @patch('wildcards_gen.core.arranger.check_dependencies', return_value=True)
+    @patch('wildcards_gen.core.arranger.load_embedding_model')
+    @patch('wildcards_gen.core.arranger.get_cached_embeddings')
+    @patch('wildcards_gen.core.arranger.get_lca_name')
+    def test_return_metadata(self, mock_get_lca, mock_get_embeddings, mock_load_model, mock_check_deps):
+        mock_load_model.return_value = MagicMock()
+        mock_get_embeddings.return_value = np.zeros((3, 10))
+        mock_get_lca.return_value = "fruit"
+        
+        with patch('hdbscan.HDBSCAN') as MockHDBSCAN:
+            mock_clusterer = MockHDBSCAN.return_value
+            mock_clusterer.labels_ = np.array([0, 0, 0])
+            mock_clusterer.probabilities_ = np.array([1.0, 1.0, 1.0])
+            
+            # Default call (no metadata)
+            res = arrange_list(self.items[:3], model_name="dummy", return_metadata=False, min_cluster_size=2)
+            self.assertEqual(len(res), 2) # groups, leftovers
+            
+            # Call with metadata
+            groups, leftovers, metadata = arrange_list(self.items[:3], model_name="dummy", return_metadata=True, min_cluster_size=2)
+            self.assertIn("fruit", metadata)
+            self.assertEqual(metadata["fruit"]["source"], "lca")
+
+    @patch('wildcards_gen.core.arranger.check_dependencies', return_value=True)
+    @patch('wildcards_gen.core.arranger.load_embedding_model')
+    @patch('wildcards_gen.core.arranger.get_cached_embeddings')
+    @patch('wildcards_gen.core.arranger.get_lca_name')
+    @patch('wildcards_gen.core.arranger.get_medoid_name')
+    def test_hybrid_naming_collision(self, mock_get_medoid, mock_get_lca, mock_get_embeddings, mock_load_model, mock_check_deps):
+        mock_load_model.return_value = MagicMock()
+        mock_get_embeddings.return_value = np.zeros((4, 10))
+        
+        with patch('hdbscan.HDBSCAN') as MockHDBSCAN:
+            mock_clusterer = MockHDBSCAN.return_value
+            # Two clusters
+            mock_clusterer.labels_ = np.array([0, 0, 1, 1])
+            mock_clusterer.probabilities_ = np.array([1.0, 1.0, 1.0, 1.0])
+            
+            # Both return SAME LCA "bird"
+            mock_get_lca.return_value = "bird"
+            
+            # Define side effect for get_medoid for the two clusters (approx)
+            # Actually arranger calls get_medoid inside _generate_descriptive_name or only if LCA fails? 
+            # It calls it inside now if needed? No, logic is:
+            # 1. Base name = LCA (if exists).
+            # 2. Collision check: if name in named_groups -> try hybrid.
+            
+            # Mock `check_dependencies` is already True.
+            
+            # We need to simulate that the first cluster grabs "bird", 
+            # and the second cluster also gets "bird", triggers collision, 
+            # and uses medoid from metadata to resolve it.
+            
+            # The cluster terms are needed to mock medoid term extraction.
+            # But here we just want to verify the key.
+            
+            res = arrange_list(["a", "b", "c", "d"], model_name="dummy", min_cluster_size=2)
+            groups, leftovers = res
+            
+            # We expect "bird" and "bird (something)" or "bird 2"
+            keys = sorted(groups.keys())
+            self.assertTrue(any(k.startswith("bird") for k in keys))
+            self.assertEqual(len(keys), 2)
 
 if __name__ == '__main__':
     unittest.main()
