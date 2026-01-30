@@ -2,14 +2,14 @@
 
 ## Current Position
 - **Milestone**: v0.4.0 - Data Science Core
-- **Phase**: Phase 2: Geometry-First Clustering
+- **Phase**: Phase 3: Recursive Hierarchy & Formatting
 - **Status**: Complete
-- **Goal**: Implement the UMAP dimensionality reduction pipeline feeding into HDBSCAN.
+- **Goal**: Implement recursive clustering for large leaves and deterministic TF-IDF naming.
 
 ## Last Accomplishment
-- Integrated UMAP into `arranger.py`.
-- Verified with unit tests and smoke tests.
-- Updated `pyproject.toml`.
+- Implemented `arrange_hierarchy` in `arranger.py`.
+- Implemented `extract_unique_keywords` (TF-IDF) for fallback naming.
+- Verified with unit tests (`tests/test_arranger_recursion.py`).
 
 ## Next Steps
-- Begin **Phase 3: Recursive Hierarchy & Formatting**.
+- Begin **Phase 4: Constraints & Shaping**.
