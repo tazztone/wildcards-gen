@@ -4,46 +4,59 @@ level: 2
 researched_at: 2026-01-30
 ---
 
-# Phase 3 Research: Recursive Hierarchy & Formatting
+# Phase 3 Research: Fast Preview Engine
 
-## Questions Investigated
-1. How to handle "Group N" fallback naming deterministically?
-2. How to split large clusters recursively?
-3. Should we use an external library (KeyBERT) or simple TF-IDF?
+## Goal
+Sub-second response times in GUI when adjusting "Deep Tuning" sliders (UMAP/HDBSCAN), enabling real-time feedback.
 
-## Findings
+## Current Bottlenecks
 
-### Deterministic Naming
-- **Problem**: When WordNet (LCA/Hypernym) fails, we fallback to "Group 1", "Group 2". This is unstable (indexes change) and uninformative.
-- **Solution**: **TF-IDF Keyword Extraction**.
-    - Treat the cluster as a "document" and the rest of the terms as "corpus".
-    - Extract top 1-2 unique tokens.
-    - Example: `["golden retriever", "labrador retriever"]` -> **"Retriever"**.
-- **Libraries**: `scikit-learn` (already installed) is sufficient. `KeyBERT` is heavy (requires BERT model) and likely overkill for short phrases.
+1.  **UMAP Reduction**:
+    - `compute_umap_embeddings` runs every time.
+    - Input: High-dim embeddings (e.g., 384-dim for 500-20k items).
+    - Output: Low-dim embedding (5-dim).
+    - Cost: Expensive for >1k items.
+    - Status: **Uncached**.
 
-### Recursive Clustering
-- **Current**: 2-pass system (Main + Leftovers).
-- **Proposed**: `arrange_hierarchy(terms, depth=0)`
-    - Base case: `len(terms) < min_size` or `depth > max_depth`.
-    - Recursion: After clustering, if a cluster size > `max_leaf_size` (e.g., 50), call `arrange_hierarchy` on that cluster's items.
-    - Nesting: The YAML structure naturally supports this. `arranger` needs to return a nested dict structure, not just a flat group map.
+2.  **HDBSCAN Clustering**:
+    - Runs every time.
+    - Cost: Moderate.
+    - Status: **Uncached**.
 
-### Formatting
-- The current `StructureManager` handles comment preservation well.
-- New requirement: Ensure "Instruction" comments can be generated for sub-groups if needed? (Probably out of scope for auto-generation, but good to keep in mind).
+3.  **Embeddings**:
+    - `get_cached_embeddings` uses `_EMBEDDING_CACHE` (Global Dict).
+    - Status: **Cached** (Good).
 
-## Decisions Made
-| Decision | Choice | Rationale |
-|----------|--------|-----------|
-| **Naming Fallback** | **TF-IDF** | Deterministic, informative, zero extra weight (using sklearn). |
-| **Structure** | **Recursive** | Allows handling 1000+ item lists by breaking them down into manageable chunks of ~50. |
-| **Max Depth** | **3** | Prevent infinite loops or unusable deep nesting. |
+4.  **Tree Reconstruction**:
+    - `generate_openimages_hierarchy` rebuilds tree structure from JSON every call.
+    - Cost: Low (<0.1s for skeleton), but high if re-generating full list before clustering.
 
-## Patterns to Follow
-- **Safety**: Always have a depth limit for recursion.
-- **Stability**: Sort terms before processing to ensure deterministic TF-IDF scores.
+## Optimization Strategy
 
-## Ready for Planning
-- [x] Questions answered
-- [x] Approach selected
-- [x] Dependencies identified
+### 1. Cache UMAP Results
+Since UMAP is deterministic (with `random_state=42`), we can cache the result keyed by:
+- Input Embeddings Hash (SHA/MD5 of array buffer)
+- `n_neighbors`
+- `min_dist`
+- `n_components`
+
+**Implementation**:
+- Add `_UMAP_CACHE` to `arranger.py`.
+- Helper `hash_array(arr)` for numpy arrays.
+
+### 2. Fast Path in GUI
+- When `live_preview_handler` is triggered by *tuning sliders* (not dataset change), we should ideally skip tree reconstruction if possible.
+- However, since `generate_dataset_handler` is stateless, it's hard to skip reconstruction without a persistent state object.
+- **Compromise**: The tree build is fast. The *Arrangement* is slow. Caching UMAP/Clustering at the `arranger` level is sufficient.
+
+## Plan
+1.  **Implement `hash_array`** utility.
+2.  **Add `_UMAP_CACHE`** in `arranger.py`.
+3.  **Decorate/Wrap `compute_umap_embeddings`** to use cache.
+
+## Risks
+- Memory usage for cache.
+- **Mitigation**: Use `LRUCache` with size limit (e.g. 10 most recent UMAPs).
+
+## Verification
+- Measure time for `arrange_list` on 2nd run with different HDBSCAN params (should skip UMAP).
