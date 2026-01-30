@@ -200,7 +200,11 @@ def generate_dataset_handler(
         stats.set_metadata("output", output_name)
         stats.set_metadata("fast_preview", fast_preview)
 
-        preview_limit = 500 if fast_preview else None
+        if fast_preview:
+             limit = config.get('generation.preview_limit', 500)
+             preview_limit = int(limit)
+        else:
+             preview_limit = None
         
         # Common kwargs for smart datasets
         smart_kwargs = {'stats': stats} # Always pass stats if available
@@ -305,6 +309,28 @@ def generate_dataset_handler(
     except Exception as e:
         logger.exception('Dataset generation failed')
         return f'Error: {str(e)}', '', []
+
+def live_preview_handler(*args):
+    """Wrapper for auto-generation that only fires if Fast Preview is checked."""
+    # Robust argument handling: Look for boolean at end, or scan args
+    # args structure matches all_gen_inputs order
+    # fast_preview is the last component in all_gen_inputs
+    
+    try:
+        is_fast_preview = bool(args[-1])
+    except:
+        is_fast_preview = False
+
+    if not is_fast_preview:
+        return gr.update(), gr.update(), gr.update()
+    
+    # Call the main handler but suppress error spam in preview
+    try:
+        preview, summary_md, _ = generate_dataset_handler(*args)
+        return preview, summary_md, gr.update()
+    except Exception as e:
+        # Don't break the UI, just show nothing or a subtle message
+        return f"# Error during preview: {str(e)}", "", gr.update()
 
 def analyze_handler(
     dataset_name, root, depth, filter_set, strict_filter, blacklist_abstract, bbox_only,
@@ -741,6 +767,39 @@ def launch_gui(share=False):
         for comp in [ds_root, ds_depth, ds_strategy, ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_filter, ds_strict]:
             comp.change(mark_stale, outputs=[stale_warning, ds_apply_suggest])
         
+        # Dataset Generation components
+        all_gen_inputs = [
+            ds_name, ds_strategy, ds_root, ds_depth, ds_out_name,
+            gr.State(True), ds_filter, ds_strict, ds_blacklist, # with_glosses=True default
+            ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_merge_orphans,
+            ds_bbox_only,
+            ds_semantic_clean, ds_semantic_model, ds_semantic_threshold,
+            ds_semantic_arrangement, ds_arrange_threshold, ds_arrange_min_cluster,
+            ds_exclude_subtree, ds_exclude_regex,
+            ds_arrange_method, ds_debug_arrangement,
+            ds_fast_preview
+        ]
+        
+        # --- Live Preview (Instant Feedback) ---
+        # When Fast Preview is ON, sliding should trigger generation with debounce
+        live_preview_triggers = [
+            ds_depth.change, ds_min_depth.change, ds_min_hyponyms.change, ds_min_leaf.change,
+            ds_semantic_threshold.change, ds_arrange_threshold.change, ds_arrange_min_cluster.change,
+            ds_merge_orphans.change, ds_semantic_clean.change, ds_semantic_arrangement.change
+        ]
+        
+        # Wire each trigger to the live_preview_handler with debounce
+        for trigger in live_preview_triggers:
+            trigger(
+                live_preview_handler, 
+                inputs=all_gen_inputs, 
+                outputs=[ds_prev, ds_summary, ds_file],
+                trigger_mode="debounce", 
+                trigger_scale=1.0,
+                concurrency_limit=1,
+                show_progress="hidden"
+            )
+        
         # Analysis
         ds_analyze_btn.click(
             analyze_handler,
@@ -770,18 +829,6 @@ def launch_gui(share=False):
             
         ds_smart_preset.change(apply_smart_preset, inputs=[ds_smart_preset, ds_name], outputs=[ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_merge_orphans, ds_semantic_clean, ds_semantic_arrangement, ds_arrange_method])
 
-        # Dataset Generation components
-        all_gen_inputs = [
-            ds_name, ds_strategy, ds_root, ds_depth, ds_out_name,
-            gr.State(True), ds_filter, ds_strict, ds_blacklist, # with_glosses=True default
-            ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_merge_orphans,
-            ds_bbox_only,
-            ds_semantic_clean, ds_semantic_model, ds_semantic_threshold,
-            ds_semantic_arrangement, ds_arrange_threshold, ds_arrange_min_cluster,
-            ds_exclude_subtree, ds_exclude_regex,
-            ds_arrange_method, ds_debug_arrangement,
-            ds_fast_preview
-        ]
         
         ds_btn.click(generate_dataset_handler, inputs=all_gen_inputs, outputs=[ds_prev, ds_summary, ds_file])
 
