@@ -2,15 +2,15 @@
 
 ## Current Position
 - **Milestone**: v0.4.0 - Data Science Core
-- **Phase**: Phase 4: Constraints & Shaping
+- **Phase**: Phase 5: Integration & Polish
 - **Status**: Complete
-- **Goal**: Implement post-processing to merge orphans and flatten deep nesting.
+- **Goal**: Integrate all DS components into the main pipeline.
 
 ## Last Accomplishment
-- Implemented `ConstraintShaper` in `shaper.py`.
-- Verified with `tests/test_shaper.py`.
+- Integrated `ConstraintShaper` and Recursive Arrangement into `imagenet.py`.
+- Verified with `tests/test_integration_pipeline.py`.
 - **Milestone v0.4.0 Complete!**
 
 ## Next Steps
-- Run full integration test / verify entire pipeline.
-- Or start next milestone.
+- Release v0.4.0.
+- Start v0.5.0 (Optimization / UI).

@@ -13,12 +13,23 @@ class ConstraintShaper:
     def __init__(self, tree: Dict[str, Any]):
         self.tree = tree
 
-    def shape(self, min_leaf_size: int = 10, flatten_singles: bool = True) -> Dict[str, Any]:
-        """Run all shaping passes."""
+    def shape(self, min_leaf_size: int = 10, flatten_singles: bool = True, preserve_roots: bool = True) -> Dict[str, Any]:
+        """
+        Run all shaping passes.
+        preserve_roots: if True, do not flatten the top-level dictionary even if it has 1 key.
+        """
         processed = self._merge_orphans(self.tree, min_leaf_size)
         if flatten_singles:
-            processed = self._flatten_singles(processed)
+            if preserve_roots and isinstance(processed, dict) and len(processed) == 1:
+                # Only recursively flatten the *values*, keep the root key.
+                # Since _flatten_singles recurses, we just manually recurse on the value.
+                key = list(processed.keys())[0]
+                val = processed[key]
+                processed[key] = self._flatten_singles(val)
+            else:
+                processed = self._flatten_singles(processed)
         return processed
+
 
     def _merge_orphans(self, node: Any, min_size: int) -> Any:
         """
@@ -31,9 +42,10 @@ class ConstraintShaper:
             return node
 
         # 1. Recurse down first
-        processed_node = {}
+        processed_node = type(node)() if isinstance(node, dict) else {}
         for k, v in node.items():
             processed_node[k] = self._merge_orphans(v, min_size)
+
             
         # 2. Process current level
         # Identify small groups (that are lists, i.e., leaves)
@@ -113,22 +125,20 @@ class ConstraintShaper:
             return node
             
         # Recurse values first
-        new_node = {}
+        new_node = type(node)() if isinstance(node, dict) else {}
         for k, v in node.items():
             new_node[k] = self._flatten_singles(v)
+
             
         # Check if single child
         if len(new_node) == 1:
             key = list(new_node.keys())[0]
             val = new_node[key]
             
-            # If the single child is a dict (sub-structure), promote it.
-            # e.g. Node={A: {B: ...}} -> returns {B: ...}
-            # This effectively deletes "A".
-            # CAUTION: If "A" was important? 
-            # Usually "Group" -> "Subgroup" -> "Items". We want "Subgroup" -> "Items".
-            # Or "Dog" -> "Dog Structure" -> "Items".
-            if isinstance(val, dict):
-                 return val
+            # Promote single child content (whether dict or list)
+            # This effectively removes the current node's wrapper (key).
+            # e.g. {Sub: [items]} -> [items]
+            return val
+
                  
         return new_node
