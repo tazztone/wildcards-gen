@@ -38,18 +38,9 @@
 - [x] Ensure instantaneous preview generation for huge datasets
 
 ### Phase 4: Verification & Audit
-**Status**: 🚧 In Progress
+**Status**: ✅ Done
 **Objective**: Ensure the system is robust for handoff.
 **Tasks**:
 - [x] Full regression test suite run
 - [x] Manual GUI verification of preview mode
 - [x] Final state dump and journal entry
-
-### Phase 5: Gap Closure
-**Status**: ⬜ Not Started
-**Objective**: Address gaps from milestone audit
-
-**Gaps to Close:**
-- [ ] Refactor `generate_dataset_handler` to use a configuration dataclass <!-- id: gap-handler-bloat -->
-- [ ] Implement asynchronous YAML writing for GUI saves <!-- id: gap-sync-io -->
-- [ ] Investigate/Mitigate WordNet initial load delay <!-- id: gap-wn-lag -->
