@@ -1,45 +1,55 @@
 ---
 phase: 1
-level: 1
+level: 2
 researched_at: 2026-01-30
 ---
 
-# Phase 1 Research: GUI Layout Refactoring
+# Phase 1 Research: Stability Metrics
 
 ## Questions Investigated
-1. **How to implement a "Toolbar" layout in Gradio?**
-   - We can place `gr.Button` and `gr.Checkbox` inside a `gr.Row()` at the top of the right column.
-   - Using `scale` and `min_width` in `gr.Column` within the row can help align them.
-2. **How to make the Analysis panel compact?**
-   - Wrapping the entire Analysis `gr.Group` in a `gr.Accordion(open=False)` will hide the complexity until needed.
-   - We can move the "Stale Warning" to be visible even if the accordion is closed, OR place it inside the header of the accordion (though Gradio header support is limited). Better: keep it as a small indicator outside or just inside.
-3. **Where to place the "Generation Completed" status for best visibility?**
-   - Placing it immediately below the "Generate" toolbar but above the "Analysis" accordion ensures it's the first thing users see after clicking.
+1. What are the best metrics to measure taxonomy stability across runs?
+2. How should the hierarchical YAML structure be represented for these metrics?
+3. Are the necessary libraries available in the current stack?
 
 ## Findings
 
-### Layout Optimizations
-- **Action Toolbar**: Moving the primary action group (Generate, Fast Preview, Download) to the top right creates a clear "Configuration (Left) -> Action (Top Right) -> Output (Bottom Right)" workflow.
-- **Visual Hierarchy**: The YAML preview is the secondary output; the primary output is the success status and the file. Swapping their vertical priority (Status above Preview) improves scanability.
+### Metric Selection
+We need to measure two different aspects of stability:
+1. **Content Stability**: Did the same terms appear in the output?
+   - **Recommendation**: **Jaccard Index** on the set of unique terms.
+2. **Structural Stability**: Did the terms group together in the same way?
+   - **Recommendation**: **Adjusted Rand Index (ARI)**.
+   - **Why**: ARI is robust to cluster naming. If `["dog", "cat"]` are in "Group 1" in run A, and in "Group Alpha" in run B, ARI is 1.0 (perfect match). This is critical for our semantic arranger which may fallback to non-deterministic names.
 
-### Gradio Components
-- `gr.Accordion`: Perfect for the Analysis section.
-- `gr.File`: Can be made more compact by limiting height (already done with `height=100`).
+**Sources:**
+- [scikit-learn Clustering Performance Evaluation](https://scikit-learn.org/stable/modules/clustering.html#clustering-performance-evaluation)
+
+### Data Representation
+To use ARI with a hierarchy, we must "flatten" the tree.
+- **Approach**: Improve `StructureManager.extract_terms` to return `(term, path)` pairs.
+- **Labeling**: The `path` string (e.g., `animal/mammal/canine`) serves as the "cluster label" for the term.
+- **Handling Disjoint Sets**: ARI requires the same set of samples. We will compute ARI only on the **intersection** of terms between two runs. Terms present in one but not the other are penalized by the Content Stability metric (Jaccard).
+
+### Dependencies
+`scikit-learn` provides efficient implementations of `adjusted_rand_score` and `jaccard_score`.
+- It is already defined in `pyproject.toml` under `optional-dependencies.lint`.
+- The new `analytics` module should probably require this optional group or raise a friendly error.
 
 ## Decisions Made
 | Decision | Choice | Rationale |
 |----------|--------|-----------|
-| **Toolbar Placement** | Top of Right Column | Follows IDE patterns; reduces scrolling. |
-| **Analysis Layout** | Accordion (Default Closed) | Reduces "noisy" stats that aren't always needed. |
-| **Status Placement** | Between Toolbar and Preview | Immediate feedback loop. |
+| **Structural Metric** | **ARI** | Ignores cluster naming differences, focuses on grouping logic. |
+| **Content Metric** | **Jaccard** | Standard measure for set similarity. |
+| **Library** | **scikit-learn** | Standard, reliable, already in dependency tree. |
+| **Flattening** | **Path strings** | Simple linear representation of hierarchy for clustering metrics. |
 
 ## Patterns to Follow
-- **ID-based Styling**: Keep using `elem_id` and `elem_classes` for custom CSS.
-- **Modular Events**: Ensure `on_dataset_change` and other event handlers are updated if component references change (though they shouldn't since we are just moving them).
+- **Graceful Failure**: If `scikit-learn` is missing, the `analyze` command should warn and exit, not crash the main app.
+- **Immutable Inputs**: The comparator should not modify the input structures.
 
 ## Risks
-- **Mobile/Narrow Screens**: Moving components to a multi-column toolbar might wrap poorly on narrow screens.
-- **Mitigation**: Use `min_width=0` or `scale` carefully; Gradio handles wrapping reasonably well.
+- **Nested Structures**: "Soft" modifications (moving a sub-category up one level) might result in a drastic ARI drop if the path changes entirely.
+    - *Mitigation*: This is acceptable. A path change *is* a structural change. We want to detect that.
 
 ## Ready for Planning
 - [x] Questions answered
