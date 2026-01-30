@@ -346,3 +346,10 @@ When a command like `wildcards-gen dataset tencent` is run:
 *   **Adding Datasets**: Implement a new module in `core/datasets/` that returns a dictionary.
 *   **Testing**: Run `uv run pytest tests/` to ensure contract validation.
 *   **Requirements**: Python `>=3.10` is required for the semantic linter and arrangement features.
+
+### 🤖 AI-Native Development (GSD)
+
+This project follows the **GSD (Get Shit Done)** methodology. If you are an AI assistant working on this codebase:
+- **Project State**: Always refer to `.gsd/STATE.md` and `.gsd/ROADMAP.md` before starting work.
+- **Workflow**: Create an implementation plan and update the journal after significant changes.
+- **Rules**: Check `.gsd/SPEC.md` for project-wide constraints and non-goals.
