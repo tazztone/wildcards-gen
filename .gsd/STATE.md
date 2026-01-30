@@ -2,14 +2,15 @@
 
 ## Current Position
 - **Milestone**: v0.4.0 - Data Science Core
-- **Phase**: Phase 3: Recursive Hierarchy & Formatting
+- **Phase**: Phase 4: Constraints & Shaping
 - **Status**: Complete
-- **Goal**: Implement recursive clustering for large leaves and deterministic TF-IDF naming.
+- **Goal**: Implement post-processing to merge orphans and flatten deep nesting.
 
 ## Last Accomplishment
-- Implemented `arrange_hierarchy` in `arranger.py`.
-- Implemented `extract_unique_keywords` (TF-IDF) for fallback naming.
-- Verified with unit tests (`tests/test_arranger_recursion.py`).
+- Implemented `ConstraintShaper` in `shaper.py`.
+- Verified with `tests/test_shaper.py`.
+- **Milestone v0.4.0 Complete!**
 
 ## Next Steps
-- Begin **Phase 4: Constraints & Shaping**.
+- Run full integration test / verify entire pipeline.
+- Or start next milestone.
