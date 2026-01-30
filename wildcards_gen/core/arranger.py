@@ -236,33 +236,61 @@ def extract_unique_keywords(cluster_terms: List[str], all_terms: List[str], top_
         return []
 
 
-def compute_umap_embeddings(embeddings: np.ndarray, n_components: int = 5) -> np.ndarray:
+# UMAP Cache
+# Key: (hash(embeddings), n_neighbors, min_dist, n_components)
+_UMAP_CACHE = {}
+_UMAP_CACHE_MAX_SIZE = 10
+
+def _hash_array(arr: np.ndarray) -> str:
+    """Create a stable hash for a numpy array."""
+    # Use SHA256 of the buffer
+    return hashlib.sha256(arr.tobytes()).hexdigest()
+
+def compute_umap_embeddings(embeddings: np.ndarray, n_components: int = 5, n_neighbors: int = 15, min_dist: float = 0.1) -> np.ndarray:
     """
     Reduce embedding dimensionality using UMAP for better density-based clustering.
     Falls back to original embeddings if UMAP is missing or fails.
     """
-
-
     try:
         import umap
         
         # UMAP needs enough neighbors. Default is 15.
-        # If we have fewer samples than neighbors, we can't effectively run it 
-        # with default settings.
         n_samples = embeddings.shape[0]
         if n_samples < 16:
-            # Too small for meaningful manifold structure
             return embeddings
+
+        # Check Cache
+        arr_hash = _hash_array(embeddings)
+        cache_key = (arr_hash, n_neighbors, float(min_dist), n_components)
+        
+        if cache_key in _UMAP_CACHE:
+            logger.debug(f"UMAP cache hit for {n_samples} items")
+            return _UMAP_CACHE[cache_key]
 
         # 5 components is a sweet spot for HDBSCAN (dense but not too high-dim)
         reducer = umap.UMAP(
-            n_neighbors=15, 
+            n_neighbors=n_neighbors, 
             n_components=n_components, 
-            min_dist=0.1, 
+            min_dist=min_dist, 
             metric='cosine',
             random_state=42 # Try to keep it somewhat deterministic
         )
-        return reducer.fit_transform(embeddings)
+        result = reducer.fit_transform(embeddings)
+        
+        # Update Cache (LRU-style eviction not strictly implemented, just simple cap)
+        if len(_UMAP_CACHE) >= _UMAP_CACHE_MAX_SIZE:
+            # Remove oldest (insertion order in Python 3.7+ dicts)
+            _UMAP_CACHE.pop(next(iter(_UMAP_CACHE)))
+            
+        _UMAP_CACHE[cache_key] = result
+        return result
+
+    except ImportError:
+        logger.debug("umap-learn not installed. Skipping dimensionality reduction.")
+        return embeddings
+    except Exception as e:
+        logger.warning(f"UMAP reduction failed: {e}. Using raw embeddings.")
+        return embeddings
 
     except ImportError:
         logger.debug("umap-learn not installed. Skipping dimensionality reduction.")
@@ -319,7 +347,12 @@ def _arrange_single_pass(
         
         # Reduce dimensionality first using UMAP if available
         # This creates a denser manifold for HDBSCAN to find clusters in
-        clustering_data = compute_umap_embeddings(embeddings)
+        clustering_data = compute_umap_embeddings(
+             embeddings, 
+             n_components=umap_n_components,
+             n_neighbors=umap_n_neighbors,
+             min_dist=umap_min_dist
+        )
         
         clusterer.fit(clustering_data)
         
@@ -435,7 +468,8 @@ def arrange_list(
     min_cluster_size: int = 5,
     cluster_selection_method: str = 'eom',
     return_stats: bool = False,
-    return_metadata: bool = False
+    return_metadata: bool = False,
+    **kwargs
 ) -> Tuple[Dict[str, List[str]], List[str], Optional[Dict], Optional[Dict[str, Dict]]]:
     """
     Arrange a flat list into semantic sub-groups using Multi-Pass Clustering.
@@ -467,7 +501,8 @@ def arrange_list(
         terms, embeddings, 
         min_cluster_size=min_cluster_size, 
         threshold=threshold,
-        cluster_selection_method=cluster_selection_method
+        cluster_selection_method=cluster_selection_method,
+        **kwargs
     )
     
     final_groups = groups_1
