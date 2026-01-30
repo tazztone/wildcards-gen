@@ -13,35 +13,38 @@
 ### Production
 | Package | Version | Purpose |
 |---------|---------|---------|
-| ruamel.yaml | >=0.17.0 | Comment-preserving YAML parser |
-| nltk | >=3.8.0 | WordNet access and semantic definitions |
-| requests | >=2.28.0 | API calls to OpenRouter |
-| tqdm | >=4.64.0 | Progress tracking |
-| gradio | >=4.0.0 | UI Framework |
+| ruamel.yaml | >=0.17.0 | YAML parsing with comment preservation |
+| nltk | >=3.8.0 | WordNet access |
+| requests | >=2.28.0 | Downloading resources |
+| tqdm | >=4.64.0 | Progress bars |
+| gradio | >=4.0.0 | GUI interface |
 
-### Development / ML Optional
+### Optional / Data Science ("lint")
 | Package | Version | Purpose |
 |---------|---------|---------|
-| sentence-transformers | >=2.7.0 | Vector embeddings |
-| transformers | >=4.51.0 | Model management |
-| hdbscan | >=0.8.33 | Semantic clustering |
-| pytest | >=9.0.2 | Testing framework |
+| sentence-transformers | >=2.7.0 | Text embeddings |
+| transformers | >=4.51.0 | HF Models |
+| hdbscan | >=0.8.33 | Density-based clustering |
+| umap-learn | >=0.5.0 | Dimensionality reduction |
+| scikit-learn | >=1.2.0 | ML utilities |
+| numpy | >=1.24.0 | Math |
 
-## Infrastructure
-
-| Service | Provider | Purpose |
-|---------|----------|---------|
-| Prompt LLM | OpenRouter | Semantic generation |
-| Dataset Source | Various | Metadata for CV datasets |
+### Development
+| Package | Version | Purpose |
+|---------|---------|---------|
+| pytest | >=7.0.0 | Testing framework |
+| black/ruff | (Implicit via uv/pre-commit) | Linting/Formatting |
 
 ## Configuration
 
 | Variable | Purpose | Location |
 |----------|---------|----------|
-| `api_key` | OpenRouter API access | `config.yaml` / ENV |
-| `model` | LLM model selection | `config.yaml` |
-| `output_dir` | Default save location | `config.yaml` |
-| `SMART_PRESETS`| Semantic pruning configs | `core/presets.py` |
+| `pyproject.toml` | Build/Dep config | Root |
+| `wildcards_gen/core/presets.py` | Smart Defaults | Core |
 
-## Outdated Packages
-*(Run `pip list --outdated` to populate)*
+## Infrastructure
+
+| Service | Provider | Purpose |
+|---------|----------|---------|
+| HuggingFace Hub | External | Source for embeddings/models |
+| NLTK Data | External | WordNet data source |
