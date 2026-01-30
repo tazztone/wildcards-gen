@@ -4,6 +4,7 @@ from unittest.mock import patch, MagicMock
 import os
 import shutil
 from wildcards_gen.core.datasets import imagenet, coco, openimages
+from wildcards_gen.core import wordnet
 from wildcards_gen.core.structure import StructureManager
 
 @pytest.fixture
@@ -15,6 +16,14 @@ def mock_wn_fixture():
          patch('wildcards_gen.core.datasets.downloaders.download_file'), \
          patch('wildcards_gen.core.datasets.downloaders.unzip_file'):
         
+        # Clear caches
+        wordnet.get_primary_synset.cache_clear()
+        wordnet.get_synset_from_wnid.cache_clear()
+        imagenet.load_imagenet_1k_wnids.cache_clear()
+        imagenet.load_imagenet_21k_wnids.cache_clear()
+        openimages.load_openimages_data.cache_clear()
+        openimages._get_cached_synset_tree.cache_clear()
+
         # Setup basic synset
         mock_synset = MagicMock()
         mock_synset.name.return_value = 'dog.n.01'

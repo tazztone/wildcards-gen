@@ -392,11 +392,11 @@ def arrange_list(
         "pass_2": stats_2
     } if return_stats else None
 
+    # Build return tuple based on flags
+    result = [final_groups, final_leftovers]
     if return_stats:
-        if return_metadata:
-            return final_groups, final_leftovers, full_stats, final_metadata
-        return final_groups, final_leftovers, full_stats
-    else:
-        if return_metadata:
-             return final_groups, final_leftovers, final_metadata
-        return final_groups, final_leftovers
+        result.append(full_stats)
+    if return_metadata:
+        result.append(final_metadata)
+        
+    return tuple(result)
