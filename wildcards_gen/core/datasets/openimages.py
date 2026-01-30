@@ -129,7 +129,8 @@ def build_wordnet_hierarchy(
     structure_mgr: StructureManager,
     with_glosses: bool = True,
     smart_config: Any = None,
-    stats: Optional[Any] = None
+    stats: Optional[Any] = None,
+    budget: Optional = None
 ) -> CommentedMap:
     """
     Build a hierarchy for all labels using WordNet hypernym paths.
@@ -143,8 +144,13 @@ def build_wordnet_hierarchy(
         
 
         # Recursive function to convert synset_tree to CommentedMap
-        def build_recursive(wnid, parent_map, depth, stats=stats):
+        def build_recursive(wnid, parent_map, depth, stats=stats, budget=budget):
             """Returns (success, orphans) tuple."""
+            if budget and not budget.consume(1):
+                if budget.is_exhausted() and stats:
+                    stats.log_event("limit_reached", message=f"Traversal limit {budget.limit} reached during build_recursive", data={"limit": budget.limit})
+                return (False, [])
+            
             node = synset_tree[wnid]
             synset = node['synset']
             name = get_synset_name(synset) if synset else wnid.capitalize()
@@ -186,7 +192,7 @@ def build_wordnet_hierarchy(
                     
                     # Semantic Arrangement (Re-grow)
                     if smart_config.semantic_arrangement:
-                         named_groups, leftovers = apply_semantic_arrangement(unique_labels, smart_config, stats=stats, context=name)
+                         named_groups, leftovers, metadata = apply_semantic_arrangement(unique_labels, smart_config, stats=stats, context=name)
                          for g_name, g_terms in named_groups.items():
                              structure_mgr.add_leaf_list(parent_map, g_name, g_terms, f"instruction: items related to {g_name}")
                          
@@ -207,7 +213,7 @@ def build_wordnet_hierarchy(
                 
                 has_valid_children = False
                 for child_wnid in sorted_children:
-                    success, orphans = build_recursive(child_wnid, child_map, depth + 1, stats=stats)
+                    success, orphans = build_recursive(child_wnid, child_map, depth + 1, stats=stats, budget=budget)
                     if success:
                         has_valid_children = True
                     if orphans:
@@ -223,7 +229,7 @@ def build_wordnet_hierarchy(
 
                     # Semantic Arrangement for Orphans
                     if smart_config.semantic_arrangement:
-                        named_groups, leftovers = apply_semantic_arrangement(collected_orphans, smart_config, stats=stats, context=f"orphans of {name}")
+                        named_groups, leftovers, metadata = apply_semantic_arrangement(collected_orphans, smart_config, stats=stats, context=f"orphans of {name}")
                         for g_name, g_terms in named_groups.items():
                             structure_mgr.add_leaf_list(child_map, g_name, g_terms, f"instruction: items related to {g_name}")
                         collected_orphans = leftovers
@@ -258,7 +264,7 @@ def build_wordnet_hierarchy(
         # Start from roots (nodes with parent None)
         roots = [wnid for wnid, n in synset_tree.items() if n['parent'] is None]
         for root in sorted(roots):
-            build_recursive(root, result, 0, stats=stats)
+            build_recursive(root, result, 0, stats=stats, budget=budget)
             
     else:
         # Simple mode: Group by first letter or just one big list?
@@ -293,7 +299,8 @@ def parse_hierarchy_node(
     max_depth: int,
     with_glosses: bool = True,
     smart_config: Any = None,
-    stats: Optional[Any] = None
+    stats: Optional[Any] = None,
+    budget: Optional = None
 ) -> tuple:
     """
     Recursively parse an Open Images hierarchy node.
@@ -301,6 +308,11 @@ def parse_hierarchy_node(
     Returns:
         Tuple[bool, List[str]]: (success, orphans_to_bubble_up)
     """
+    if budget and not budget.consume(1):
+        if budget.is_exhausted() and stats:
+            stats.log_event("limit_reached", message=f"Traversal limit {budget.limit} reached during parse_hierarchy_node", data={"limit": budget.limit})
+        return (False, [])
+
     label_id = node.get('LabelName')
     name = id_to_name.get(label_id, label_id)
     
@@ -356,7 +368,7 @@ def parse_hierarchy_node(
         for subcat in child_nodes:
             success, orphans = parse_hierarchy_node(
                 subcat, id_to_name, structure_mgr, child_map,
-                depth + 1, max_depth, with_glosses, smart_config, stats=stats
+                depth + 1, max_depth, with_glosses, smart_config, stats=stats, budget=budget
             )
             if success:
                 has_valid_children = True
@@ -471,7 +483,8 @@ def generate_openimages_hierarchy(
     debug_arrangement: bool = False,
     skip_nodes: Optional[List[str]] = None,
     orphans_label_template: Optional[str] = None,
-    stats: Optional[Any] = None
+    stats: Optional[Any] = None,
+    preview_limit: Optional[int] = None
 ) -> CommentedMap:
     """
     Generate hierarchy from Open Images dataset.
@@ -488,7 +501,7 @@ def generate_openimages_hierarchy(
     """
     ensure_nltk_data()
     
-    from ..smart import SmartConfig
+    from ..smart import SmartConfig, TraversalBudget
     smart_config = SmartConfig(
         enabled=smart,
         min_depth=min_significance_depth,
@@ -504,8 +517,11 @@ def generate_openimages_hierarchy(
         semantic_arrangement_method=semantic_arrangement_method,
         debug_arrangement=debug_arrangement,
         skip_nodes=skip_nodes,
-        orphans_label_template=orphans_label_template
+        orphans_label_template=orphans_label_template,
+        preview_limit=preview_limit
     )
+
+    budget = TraversalBudget(preview_limit)
     
     logger.info("Generating Open Images hierarchy...")
     
@@ -520,7 +536,7 @@ def generate_openimages_hierarchy(
         parse_hierarchy_node(
             hierarchy, id_to_name, structure_mgr, result,
             depth=0, max_depth=max_depth, with_glosses=with_glosses,
-            smart_config=smart_config, stats=stats
+            smart_config=smart_config, stats=stats, budget=budget
         )
     else:
         logger.info("Using full image-level mode (20k+ labels)")
@@ -531,7 +547,8 @@ def generate_openimages_hierarchy(
             id_to_name, structure_mgr, 
             with_glosses=with_glosses, 
             smart_config=smart_config,
-            stats=stats
+            stats=stats,
+            budget=budget
         )
     
     return result

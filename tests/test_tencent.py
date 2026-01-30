@@ -63,7 +63,7 @@ def test_generate_tencent_hierarchy_with_smart_flags(mock_cleaning, mock_arrange
     """Verify that new smart/arrangement flags are accepted and passed to SmartConfig."""
     mock_download.return_value = mock_tencent_file
     mock_get_synset.return_value = MagicMock()
-    mock_arrangement.return_value = ({}, [])
+    mock_arrangement.return_value = ({}, [], {})
     mock_cleaning.side_effect = lambda x, c: x
     
     # Configure mock

@@ -10,6 +10,43 @@ from .wordnet import get_synset_from_wnid, get_primary_synset, get_synset_name, 
 
 
 
+class TraversalBudget:
+    """
+    Simple budget tracker for Fast Preview mode.
+    Thread-safe enough for recursive calls (not concurrent threads).
+    """
+    def __init__(self, limit: Optional[int]):
+        self.limit = limit
+        self.current = 0
+        self._exhausted = False
+
+    def consume(self, amount: int = 1) -> bool:
+        """
+        Consume 'amount' from budget. 
+        Returns True if budget was available (success).
+        Returns False if budget is exhausted (should stop).
+        """
+        if self.limit is None:
+            return True
+        
+        if self._exhausted:
+            return False
+            
+        self.current += amount
+        if self.current > self.limit:
+            self._exhausted = True
+            return False
+            
+        if self.current == self.limit:
+            self._exhausted = True
+            
+        return True
+
+    def is_exhausted(self) -> bool:
+        if self.limit is None:
+            return False
+        return self._exhausted
+
 class SmartConfig:
     """Configuration for smart pruning."""
     def __init__(self, 
@@ -28,7 +65,8 @@ class SmartConfig:
                  semantic_arrangement_method: str = "eom",
                  debug_arrangement: bool = False,
                  skip_nodes: list = None,
-                 orphans_label_template: str = "misc"):
+                 orphans_label_template: str = "misc",
+                 preview_limit: Optional[int] = None):
         """
         Initializes the SmartConfig.
 
@@ -49,6 +87,7 @@ class SmartConfig:
             debug_arrangement (bool): Show arrangement stats.
             skip_nodes (list): Nodes to structurally skip (elide) while promoting children.
             orphans_label_template (str): Template for orphan categories (e.g. "other_{}").
+            preview_limit (int): Max items/nodes to process (Fast Preview). None = unlimited.
         """
         self.enabled = enabled
         self.min_depth = min_depth
@@ -66,6 +105,7 @@ class SmartConfig:
         self.debug_arrangement = debug_arrangement
         self.skip_nodes = set(skip_nodes) if skip_nodes else set()
         self.orphans_label_template = orphans_label_template
+        self.preview_limit = preview_limit
 
     def get_child_config(self, node_name: str, node_wnid: Optional[str] = None) -> 'SmartConfig':
         """
@@ -132,7 +172,7 @@ def apply_semantic_arrangement(
     Returns (named_groups, leftovers) or (named_groups, leftovers, metadata) if requested.
     """
     if not config.enabled or not config.semantic_arrangement or not items:
-        return {}, items
+        return ({}, items, {}) if return_metadata else ({}, items)
         
     from .linter import load_embedding_model, check_dependencies
     
@@ -143,7 +183,7 @@ def apply_semantic_arrangement(
     from .arranger import arrange_list
     
     request_stats = config.debug_arrangement or stats is not None
-    result = arrange_list(
+    groups, leftovers, s_data, metadata = arrange_list(
         items, 
         config.semantic_model, 
         config.semantic_arrangement_threshold,
@@ -152,21 +192,6 @@ def apply_semantic_arrangement(
         return_stats=request_stats,
         return_metadata=return_metadata
     )
-    
-    metadata = {}
-    if request_stats:
-        if return_metadata:
-            groups, leftovers, s_data, metadata = result
-        else:
-            groups, leftovers, s_data = result
-            metadata = None
-    else:
-        if return_metadata:
-            groups, leftovers, metadata = result
-            s_data = None
-        else:
-            groups, leftovers = result
-            s_data = None
     
     if stats and s_data:
         p1 = s_data.get('pass_1', {})
@@ -185,9 +210,7 @@ def apply_semantic_arrangement(
             }
         )
             
-    if return_metadata:
-        return groups, leftovers, metadata
-    return groups, leftovers
+    return groups, leftovers, metadata
 
 
 

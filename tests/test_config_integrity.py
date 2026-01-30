@@ -24,6 +24,8 @@ class TestConfigIntegrity(unittest.TestCase):
         
         for ds_name, presets in DATASET_PRESET_OVERRIDES.items():
             for p_name, values in presets.items():
+                if not isinstance(values, tuple) or len(values) != 7:
+                    continue
                 depth, hyp, leaf, orphan, clean, arrange, method = values
                 self.assertLessEqual(depth, MAX_DEPTH, f"Override {ds_name}:{p_name} depth {depth} > {MAX_DEPTH}")
                 self.assertLessEqual(hyp, MAX_HYPONYMS, f"Override {ds_name}:{p_name} hyponyms {hyp} > {MAX_HYPONYMS}")

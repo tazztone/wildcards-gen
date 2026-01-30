@@ -125,7 +125,8 @@ def generate_tencent_hierarchy(
     debug_arrangement: bool = False,
     skip_nodes: Optional[List[str]] = None,
     orphans_label_template: Optional[str] = None,
-    stats: Optional[Any] = None
+    stats: Optional[Any] = None,
+    preview_limit: Optional[int] = None
 ) -> Dict:
     """Generate Tencent ML-Images hierarchy."""
     file_path = download_tencent_hierarchy()
@@ -149,7 +150,7 @@ def generate_tencent_hierarchy(
         return leaves
 
     from ruamel.yaml.comments import CommentedMap
-    from ..smart import SmartConfig, should_prune_node, handle_small_leaves, apply_semantic_cleaning
+    from ..smart import SmartConfig, should_prune_node, handle_small_leaves, apply_semantic_cleaning, TraversalBudget
     
     preset_overrides = DATASET_CATEGORY_OVERRIDES.get("Tencent ML-Images", {})
     final_overrides = preset_overrides.copy()
@@ -178,8 +179,11 @@ def generate_tencent_hierarchy(
         semantic_arrangement_method=semantic_arrangement_method,
         debug_arrangement=debug_arrangement,
         skip_nodes=skip_nodes_list,
-        orphans_label_template=orphans_template
+        orphans_label_template=orphans_template,
+        preview_limit=preview_limit
     )
+
+    budget = TraversalBudget(preview_limit)
 
     def merge_nodes(existing: Any, new_val: Any) -> Any:
         # Merge two hierarchy nodes (list or dict)
@@ -197,7 +201,12 @@ def generate_tencent_hierarchy(
         return existing
     
     
-    def build_commented(current_idx: int, current_depth: int, config: SmartConfig, stats: Optional[Any] = None) -> Tuple[Any, List[str]]:
+    def build_commented(current_idx: int, current_depth: int, config: SmartConfig, stats: Optional[Any] = None, budget: Optional[TraversalBudget] = None) -> Tuple[Any, List[str]]:
+        if budget and not budget.consume(1):
+            if budget.is_exhausted() and stats:
+                stats.log_event("limit_reached", message=f"Traversal limit {budget.limit} reached during build_commented", data={"limit": budget.limit})
+            return None, []
+
         cat_info = categories[current_idx]
         name = cat_info['name'].split(',')[0].strip()
         wnid = cat_info['id']
@@ -207,6 +216,14 @@ def generate_tencent_hierarchy(
         # Base case: actual leaf
         if not children:
             # Leaf node acts as an item, not an empty category
+            if budget:
+                 # Refund 1 (since we consumed for node) and Consume count
+                 # OR just count node as 1? 
+                 # Better to count emitted items. 
+                 # Let's say node visit costs 1. Emitted items cost 1?
+                 # If we return items, we should consume budget?
+                 # Simplifying: Count nodes visited as proxy for effort.
+                 pass
             return None, [name]
             
         # Decision logic: keep as category or flatten?
@@ -344,15 +361,14 @@ def generate_tencent_hierarchy(
                  child_wnid = categories[child_idx]['id']
                  child_config = config.get_child_config(child_name, child_wnid)
             
-            child_val, child_orphans = build_commented(child_idx, current_depth + 1, child_config, stats=stats)
+            child_val, child_orphans = build_commented(child_idx, current_depth + 1, child_config, stats=stats, budget=budget)
             
             # Collect bubbled-up orphans from children
             if child_orphans:
                 orphan_leaves.extend(child_orphans)
 
-            # Skip only if child was fully bubbled up (has orphans).
-            # Keep leaf categories (None, []) to preserve them as empty keys.
-            should_skip = child_val is None and child_orphans
+            # Skip if child_val is None (meaning empty/flattened/aborted)
+            should_skip = child_val is None
             
             if not should_skip:
                 # Collision check
@@ -432,7 +448,11 @@ def generate_tencent_hierarchy(
 
         if valid_items_added == 0:
             # If all children were pruned/merged, flatten itself
-            leaves = collect_leaves(current_idx)
+            if smart and config.enabled:
+                # In smart mode, we trust our traversal (orphan_leaves) and do not grab everything
+                leaves = []
+            else:
+                leaves = collect_leaves(current_idx)
             # Also include any orphans that bubbled up to us?
             # Yes, if we flatten, we become a list, so we can just include them.
             if orphan_leaves:
@@ -495,7 +515,7 @@ def generate_tencent_hierarchy(
     
     for root_idx in sorted_roots:
         root_name = categories[root_idx]['name'].split(',')[0].strip()
-        root_val, root_orphans = build_commented(root_idx, 1, smart_config, stats=stats)
+        root_val, root_orphans = build_commented(root_idx, 1, smart_config, stats=stats, budget=budget)
         
         # If root produced orphans, what to do? Add them to 'misc'?
         # Roots are usually dicts, so we check root_val type.

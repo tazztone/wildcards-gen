@@ -60,7 +60,6 @@
 
 ## Technical Debt
 
-- [ ] **Dependency Inconsistency:** Gradio missing from `pyproject.toml` but in `requirements.txt`.
 - [ ] **Prompt Coupling:** Prompts are text files in `prompts/`, but some logic is still in `llm.py`.
 - [ ] **Sync Execution:** Long-running dataset generations are synchronous and can block the GUI.
 

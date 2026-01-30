@@ -47,7 +47,7 @@ def test_openimages_smoke_execution_smart_flatten():
         
         # Mock arrangement to return a dummy group
         # Returns (named_groups, leftovers)
-        mock_arrange.return_value = ({"Cluster1": ["Object2"]}, [])
+        mock_arrange.return_value = ({"Cluster1": ["Object2"]}, [], {})
         
         from wildcards_gen.core.datasets.openimages import generate_openimages_hierarchy
         
@@ -100,7 +100,7 @@ def test_openimages_smoke_empty_arrangement():
          patch("wildcards_gen.core.datasets.openimages.apply_semantic_arrangement") as mock_arrange:
          
         # Return empty groups, all items as leftovers
-        mock_arrange.return_value = ({}, ["Leaf"])
+        mock_arrange.return_value = ({}, ["Leaf"], {})
         
         from wildcards_gen.core.datasets.openimages import generate_openimages_hierarchy
         result = generate_openimages_hierarchy(smart=True, semantic_arrangement=True)
@@ -138,7 +138,7 @@ def test_tencent_smoke_execution_smart_flatten():
          patch("wildcards_gen.core.smart.should_prune_node", return_value=True), \
          patch("wildcards_gen.core.smart.apply_semantic_arrangement") as mock_arrange:
          
-        mock_arrange.return_value = ({"GroupX": ["Grandchild"]}, [])
+        mock_arrange.return_value = ({"GroupX": ["Grandchild"]}, [], {})
         
         from wildcards_gen.core.datasets.tencent import generate_tencent_hierarchy
         

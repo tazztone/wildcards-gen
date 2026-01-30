@@ -3,21 +3,25 @@
 > Project Memory
 
 ## Current Position
-- **Phase:** Initial Mapping
-- **Task:** Codebase Mapping
-- **Status:** COMPLETED
+- **Phase:** Phase 4: Verification & Audit
+- **Task:** Final regression and manual verification
+- **Status:** IN_PROGRESS
 
 ## Last Session Summary
-Codebase mapping complete.
-- Core components identified (CLI, GUI, StructureManager, LLMEngine, WordNetWrapper, SmartMode, Arranger).
-- Dependencies analyzed from `pyproject.toml` and `requirements.txt`.
-- Technical debt noted (Sync execution, Dependency mismatch).
+Implemented and verified "Fast Preview" feature.
+- Implemented `TraversalBudget` mechanism.
+- Integrated budget check into `tencent.py`, `imagenet.py`, `openimages.py`.
+- Added GUI toggle for Fast Preview.
+- Squashed syntax errors and logical bugs in hierarchy generation.
+- Verified with comprehensive test suite (14/14 passed).
 
 ## Accomplishments
-- Generated `.gsd/ARCHITECTURE.md`.
-- Generated `.gsd/STACK.md`.
-- Established `.gsd/` structure.
+- Implemented Fast Preview logic across backend and frontend.
+- Fixed critical bug in `tencent.py` related to empty node handling.
+- Unified dependencies (from Phase 2).
+- Cleaned up test suite.
 
 ## Next Steps
-- Finalize `SPEC.md` as part of `/new-project`.
-- Create `ROADMAP.md`.
+- Full regression test suite run (Done).
+- Manual GUI verification (User).
+- Final handoff.

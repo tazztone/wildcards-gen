@@ -17,7 +17,7 @@
 | nltk | >=3.8.0 | WordNet access and semantic definitions |
 | requests | >=2.28.0 | API calls to OpenRouter |
 | tqdm | >=4.64.0 | Progress tracking |
-| gradio | (missing in pyproj) | UI Framework |
+| gradio | >=4.0.0 | UI Framework |
 
 ### Development / ML Optional
 | Package | Version | Purpose |
@@ -25,7 +25,7 @@
 | sentence-transformers | >=2.7.0 | Vector embeddings |
 | transformers | >=4.51.0 | Model management |
 | hdbscan | >=0.8.33 | Semantic clustering |
-| pytest | - | Testing framework |
+| pytest | >=9.0.2 | Testing framework |
 
 ## Infrastructure
 
