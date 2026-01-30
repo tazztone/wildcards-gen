@@ -5,6 +5,9 @@
 ## Vision
 Stabilize the `wildcards-gen` codebase by resolving regression failures, unifying dependency management into a modern standards-based approach, and improving the interactive feedback loop in the GUI.
 
+> [!NOTE]
+> For detailed architectural principles (Skeleton concept, Smart Mode, Arranger logic), see [.gsd/ARCHITECTURE.md](file:///home/tazztone/_coding/wildcards-gen/.gsd/ARCHITECTURE.md).
+
 ## Goals
 1.  **Zero-Failure Test Suite**: Fix all regression failures in the pytest suite (Tencent ValueErrors, Config TypeErrors, and Dataset AssertionErrors).
 2.  **Unified Dependency Management**: Centralize all project requirements (including `gradio` and ML libs) into `pyproject.toml` and remove the redundant `requirements.txt`.

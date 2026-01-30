@@ -6,6 +6,8 @@
 
 `wildcards-gen` is a Python-based toolkit designed to generate structured YAML "skeletons" for AI prompt management. It bridges formal taxonomies (WordNet) with data-driven clustering (Embeddings) and generative logic (LLMs).
 
+**🎯 Target Tool**: [wildcards-generator](https://github.com/tazztone/wildcards-generator) — the AI-powered SPA that consumes these skeletons for massive wildcard population.
+
 ```
 ┌─────────────────────────────────────────┐
 │          CLI (cli.py) / GUI (gui.py)    │
@@ -39,7 +41,17 @@
 - **Arranger (`core/arranger.py`):** HDBSCAN-based semantic clustering for flat leaf lists.
 
 ### Datasets (`core/datasets/`)
-- Implements specialized logic for parsing metadata from ImageNet, COCO, OpenImages, and Tencent.
+Specialized modules for parsing diverse metadata sources:
+- **ImageNet**: ~21k standard classes. Supporting hierarchical WordNet traversal.
+- **Tencent ML**: ~11k modern categories. Optimized for text-only discovery (no heavy downloads).
+- **Open Images V7**: ~20k labels. Supports both deep image-level labels and legacy 600-class `--bbox-only` mode.
+
+### LLM Pipeline (`core/llm.py`)
+Interfaces with OpenRouter via specific logic:
+- **`create`**: Two-phase prompt (Architect -> Mason) to build trees from topics.
+- **`categorize`**: Massive term-to-skeleton mapping via JSON response format.
+- **`enrich`**: Minimalist "fill-in-the-gaps" for missing instructions.
+- **Response Cleaning**: Hardened `_clean_response()` to strip markdown backticks and handle API variances.
 
 ## Data Flow
 
@@ -50,7 +62,33 @@
 3. **Refinement:** (Optional) Semantic Arrangement clusters flat lists into named subgroups.
 4. **Serialization:** `StructureManager` converts internal `CommentedMap` (with instruction comments) to a YAML file.
 
-## Integration Points
+## Mental Model & Implementation Details
+
+### 1. The "Skeleton" Concept
+This tool produces **skeletons**: structured YAML files with categories and instructions, but minimal leaf nodes. These skeletons are imported into the `wildcards-generator` SPA, where the AI populates them with extensive wildcards.
+- **Goal**: precise structure, helpful context instructions.
+- **Non-Goal**: generating millions of wildcards (that's the SPA's job).
+
+### 2. Strict Comment Preservation
+The `# instruction:` comment is the payload. It tells the downhill AI what a category *means*.
+- **Implementation**: Uses `ruamel.yaml` via `StructureManager` (`core/structure.py`).
+- **Rule**: NEVER use standard `yaml` or `PyYAML` libraries, as they strip comments.
+
+### 3. Hybrid Data Sources
+- **WordNet (Trusted)**: Used for `dataset` commands. Maps IDs (WNID, Freebase) to WordNet Synsets.
+- **LLM (Flexible)**: Used for `categorize/create`. Uses `LLMEngine` for prompt injection and response cleaning.
+
+### 4. Smart Mode Pruning Logic
+- **Significance**: Uses WordNet depth/branching to keep meaningful categories while flattening obscure intermediates.
+- **Node Elision**: Nodes in `SKIP_NODES` are logically removed while promoting children.
+- **Orphan Bubbling**: Small lists are bubbled up to `other_{parent}:` keys.
+- **Self-Reference Filtering**: Filters out leaf nodes that are identical to their parent category name (e.g., `nose: - nose` is forbidden) to reduce redundancy.
+
+### 5. Semantic Arrangement (Arranger)
+- **Clustering**: HDBSCAN-based density clusters (min size 3).
+- **Naming**: Calculates medoid, queries hypernym hypernym (e.g., basil -> herb), and appends medoid if generic: `LCA (Medoid)`.
+
+## Service Roles & Integration
 
 | Service | Type | Purpose |
 |---------|------|---------|
@@ -62,6 +100,22 @@
 
 - [ ] **Prompt Coupling:** Prompts are text files in `prompts/`, but some logic is still in `llm.py`.
 - [ ] **Sync Execution:** Long-running dataset generations are synchronous and can block the GUI.
+
+## UI/UX Principles (GUI)
+- **Consolidated Workflow**: Builder tab for generation, Tools tab for post-processing, Settings for config.
+- **Documentation**: Use `info=` for guidance. **Do NOT use `tooltip=`** (not supported in current Gradio version).
+- **Progressive Disclosure**: Use `gr.Accordion` for advanced tuning.
+
+## Maintenance & Testing
+- **WordNet Mapping**: Use `wordnet.py` for all label-to-gloss lookups.
+- **Async Safety**: Be aware that many operations are currently synchronous.
+- **Testing**: Run `uv run pytest tests/` before every PR/completion.
+
+## Technical Execution Trace
+1. **Config**: `cli.py`/`gui.py` merge CLI overrides with `ConfigManager`.
+2. **Parser**: Datasets parse raw sources into ID-Name-Parent graphs.
+3. **Traverser**: Recurses through graph, applying Smart Pruning logic and WordNet enrichment.
+4. **Serializer**: `StructureManager` handles final `ruamel.yaml` output.
 
 ## Conventions
 
