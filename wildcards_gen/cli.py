@@ -17,6 +17,7 @@ from typing import Optional
 
 from .core.config import config
 from .core.structure import StructureManager
+from .core.stats import StatsCollector
 from .core.datasets.imagenet import generate_imagenet_tree, generate_imagenet_from_wnids
 from .core.datasets.coco import generate_coco_hierarchy
 from .core.datasets.coco import generate_coco_hierarchy
@@ -46,6 +47,12 @@ def get_api_key() -> Optional[str]:
         return config.api_key
     return os.environ.get('OPENROUTER_API_KEY')
 from .core.presets import SMART_PRESETS, DATASET_PRESET_OVERRIDES
+
+def resolve_output_path(path: str) -> str:
+    """Ensure path is in output_dir if no directory is specified."""
+    if os.path.dirname(path):
+        return path
+    return os.path.join(config.output_dir, path)
 def apply_smart_preset(args):
     """Apply preset values to args, with explicit flags taking precedence."""
     preset_name = getattr(args, 'preset', None)
@@ -128,10 +135,15 @@ def cmd_dataset_imagenet(args):
             smart=False # Raw tree
         )
         from .core import analyze
-        stats = analyze.compute_dataset_stats(hierarchy)
-        suggestions = analyze.suggest_thresholds(stats)
-        analyze.print_analysis_report(stats, suggestions)
+        stats_data = analyze.compute_dataset_stats(hierarchy)
+        suggestions = analyze.suggest_thresholds(stats_data)
+        analyze.print_analysis_report(stats_data, suggestions)
         return
+
+    # Initialize stats
+    stats = StatsCollector()
+    stats.set_metadata("dataset", "imagenet")
+    stats.set_metadata("output", args.output)
 
     hierarchy = generate_imagenet_tree(
         root_synset_str=args.root,
@@ -155,12 +167,20 @@ def cmd_dataset_imagenet(args):
         semantic_arrangement_threshold=args.semantic_arrange_threshold,
         semantic_arrangement_min_cluster=args.semantic_arrange_min_cluster,
         semantic_arrangement_method=args.semantic_arrange_method,
-        debug_arrangement=args.debug_arrangement
+        debug_arrangement=args.debug_arrangement,
+        stats=stats
     )
     
+    output_path = resolve_output_path(args.output)
     mgr = StructureManager()
-    mgr.save_structure(hierarchy, args.output)
-    print(f"✓ Saved ImageNet hierarchy to {args.output}")
+    mgr.save_structure(hierarchy, output_path)
+    print(f"✓ Saved ImageNet hierarchy to {output_path}")
+
+    # Save stats
+    base_path = os.path.splitext(output_path)[0]
+    stats.save_to_json(f"{base_path}.stats.json")
+    stats.save_summary_log(f"{base_path}.log")
+    print(f"✓ Saved generation logs to {base_path}.log")
 
 
 def cmd_dataset_coco(args):
@@ -202,6 +222,11 @@ def cmd_dataset_openimages(args):
         analyze.print_analysis_report(stats, suggestions)
         return
 
+    # Initialize stats
+    stats = StatsCollector()
+    stats.set_metadata("dataset", "openimages")
+    stats.set_metadata("output", args.output)
+
     hierarchy = generate_openimages_hierarchy(
         max_depth=args.depth,
         with_glosses=not args.no_glosses,
@@ -218,12 +243,20 @@ def cmd_dataset_openimages(args):
         semantic_arrangement_threshold=args.semantic_arrange_threshold,
         semantic_arrangement_min_cluster=args.semantic_arrange_min_cluster,
         semantic_arrangement_method=args.semantic_arrange_method,
-        debug_arrangement=args.debug_arrangement
+        debug_arrangement=args.debug_arrangement,
+        stats=stats
     )
     
+    output_path = resolve_output_path(args.output)
     mgr = StructureManager()
-    mgr.save_structure(hierarchy, args.output)
-    print(f"✓ Saved Open Images hierarchy to {args.output}")
+    mgr.save_structure(hierarchy, output_path)
+    print(f"✓ Saved Open Images hierarchy to {output_path}")
+
+    # Save stats
+    base_path = os.path.splitext(output_path)[0]
+    stats.save_to_json(f"{base_path}.stats.json")
+    stats.save_summary_log(f"{base_path}.log")
+    print(f"✓ Saved generation logs to {base_path}.log")
 
 
 def cmd_dataset_tencent(args):
@@ -240,10 +273,15 @@ def cmd_dataset_tencent(args):
             smart=False # Raw tree
         )
         from .core import analyze
-        stats = analyze.compute_dataset_stats(hierarchy)
-        suggestions = analyze.suggest_thresholds(stats)
-        analyze.print_analysis_report(stats, suggestions)
+        stats_data = analyze.compute_dataset_stats(hierarchy)
+        suggestions = analyze.suggest_thresholds(stats_data)
+        analyze.print_analysis_report(stats_data, suggestions)
         return
+
+    # Initialize stats
+    stats = StatsCollector()
+    stats.set_metadata("dataset", "tencent")
+    stats.set_metadata("output", args.output)
 
     hierarchy = generate_tencent_hierarchy(
         max_depth=args.depth,
@@ -261,12 +299,20 @@ def cmd_dataset_tencent(args):
         semantic_arrangement_threshold=args.semantic_arrange_threshold,
         semantic_arrangement_min_cluster=args.semantic_arrange_min_cluster,
         semantic_arrangement_method=args.semantic_arrange_method,
-        debug_arrangement=args.debug_arrangement
+        debug_arrangement=args.debug_arrangement,
+        stats=stats
     )
     
+    output_path = resolve_output_path(args.output)
     mgr = StructureManager()
-    mgr.save_structure(hierarchy, args.output)
-    print(f"✓ Saved Tencent ML-Images hierarchy to {args.output}")
+    mgr.save_structure(hierarchy, output_path)
+    print(f"✓ Saved Tencent ML-Images hierarchy to {output_path}")
+
+    # Save stats
+    base_path = os.path.splitext(output_path)[0]
+    stats.save_to_json(f"{base_path}.stats.json")
+    stats.save_summary_log(f"{base_path}.log")
+    print(f"✓ Saved generation logs to {base_path}.log")
 
 
 def cmd_categorize(args):
