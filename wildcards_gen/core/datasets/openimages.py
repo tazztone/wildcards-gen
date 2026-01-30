@@ -45,17 +45,7 @@ def load_openimages_data() -> Tuple[Dict[str, Any], Dict[str, str]]:
     return hierarchy, id_to_name
 
 
-def build_wordnet_hierarchy(
-    id_to_name: Dict[str, str],
-    structure_mgr: StructureManager,
-    with_glosses: bool = True,
-    smart_config: Any = None
-) -> CommentedMap:
-    """
-    Build a hierarchy for all labels using WordNet hypernym paths.
-    """
-    result = CommentedMap()
-    
+# Helper for dynamic hierarchy build
 @functools.lru_cache(maxsize=1)
 def _get_cached_synset_tree() -> Tuple[Dict[str, Any], Dict[str, Any]]:
     """
@@ -138,7 +128,8 @@ def build_wordnet_hierarchy(
     id_to_name: Dict[str, str],
     structure_mgr: StructureManager,
     with_glosses: bool = True,
-    smart_config: Any = None
+    smart_config: Any = None,
+    stats: Optional[Any] = None
 ) -> CommentedMap:
     """
     Build a hierarchy for all labels using WordNet hypernym paths.
@@ -152,7 +143,7 @@ def build_wordnet_hierarchy(
         
 
         # Recursive function to convert synset_tree to CommentedMap
-        def build_recursive(wnid, parent_map, depth):
+        def build_recursive(wnid, parent_map, depth, stats=stats):
             """Returns (success, orphans) tuple."""
             node = synset_tree[wnid]
             synset = node['synset']
@@ -195,7 +186,7 @@ def build_wordnet_hierarchy(
                     
                     # Semantic Arrangement (Re-grow)
                     if smart_config.semantic_arrangement:
-                         named_groups, leftovers = apply_semantic_arrangement(unique_labels, smart_config)
+                         named_groups, leftovers = apply_semantic_arrangement(unique_labels, smart_config, stats=stats, context=name)
                          for g_name, g_terms in named_groups.items():
                              structure_mgr.add_leaf_list(parent_map, g_name, g_terms, f"instruction: items related to {g_name}")
                          
@@ -216,7 +207,7 @@ def build_wordnet_hierarchy(
                 
                 has_valid_children = False
                 for child_wnid in sorted_children:
-                    success, orphans = build_recursive(child_wnid, child_map, depth + 1)
+                    success, orphans = build_recursive(child_wnid, child_map, depth + 1, stats=stats)
                     if success:
                         has_valid_children = True
                     if orphans:
@@ -232,7 +223,7 @@ def build_wordnet_hierarchy(
 
                     # Semantic Arrangement for Orphans
                     if smart_config.semantic_arrangement:
-                        named_groups, leftovers = apply_semantic_arrangement(collected_orphans, smart_config)
+                        named_groups, leftovers = apply_semantic_arrangement(collected_orphans, smart_config, stats=stats, context=f"orphans of {name}")
                         for g_name, g_terms in named_groups.items():
                             structure_mgr.add_leaf_list(child_map, g_name, g_terms, f"instruction: items related to {g_name}")
                         collected_orphans = leftovers
@@ -267,7 +258,7 @@ def build_wordnet_hierarchy(
         # Start from roots (nodes with parent None)
         roots = [wnid for wnid, n in synset_tree.items() if n['parent'] is None]
         for root in sorted(roots):
-            build_recursive(root, result, 0)
+            build_recursive(root, result, 0, stats=stats)
             
     else:
         # Simple mode: Group by first letter or just one big list?
@@ -301,7 +292,8 @@ def parse_hierarchy_node(
     depth: int,
     max_depth: int,
     with_glosses: bool = True,
-    smart_config: Any = None
+    smart_config: Any = None,
+    stats: Optional[Any] = None
 ) -> tuple:
     """
     Recursively parse an Open Images hierarchy node.
@@ -364,7 +356,7 @@ def parse_hierarchy_node(
         for subcat in child_nodes:
             success, orphans = parse_hierarchy_node(
                 subcat, id_to_name, structure_mgr, child_map,
-                depth + 1, max_depth, with_glosses, smart_config
+                depth + 1, max_depth, with_glosses, smart_config, stats=stats
             )
             if success:
                 has_valid_children = True
@@ -476,7 +468,8 @@ def generate_openimages_hierarchy(
     semantic_arrangement_threshold: float = 0.1,
     semantic_arrangement_min_cluster: int = 5,
     semantic_arrangement_method: str = "eom",
-    debug_arrangement: bool = False
+    debug_arrangement: bool = False,
+    stats: Optional[Any] = None
 ) -> CommentedMap:
     """
     Generate hierarchy from Open Images dataset.
@@ -523,7 +516,7 @@ def generate_openimages_hierarchy(
         parse_hierarchy_node(
             hierarchy, id_to_name, structure_mgr, result,
             depth=0, max_depth=max_depth, with_glosses=with_glosses,
-            smart_config=smart_config
+            smart_config=smart_config, stats=stats
         )
     else:
         logger.info("Using full image-level mode (20k+ labels)")
@@ -533,7 +526,8 @@ def generate_openimages_hierarchy(
         result = build_wordnet_hierarchy(
             id_to_name, structure_mgr, 
             with_glosses=with_glosses, 
-            smart_config=smart_config
+            smart_config=smart_config,
+            stats=stats
         )
     
     return result

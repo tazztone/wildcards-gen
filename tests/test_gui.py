@@ -16,12 +16,13 @@ def test_generate_dataset_handler_logic():
         mock_mgr.to_string.return_value = "root:\n- child"
         mock_img.return_value = {"root": ["child"]}
         
-        path, content = gui.generate_dataset_handler(
+        content, summary, files = gui.generate_dataset_handler(
             "ImageNet", "Standard", "entity.n.01", 3, "out.yaml",
             True, "none", True, False,
             6, 10, 3, False, False,
             None, None, 0.1, False, 0.1, 5
         )
+        path = files[0] if files else None
         
         assert path is not None
         assert "out.yaml" in path
@@ -32,12 +33,13 @@ def test_generate_dataset_handler_error():
     """Test error handling in generation."""
     # We patch inside gui.py's namespace for consistency
     with patch('wildcards_gen.gui.imagenet.generate_imagenet_tree', side_effect=Exception("Boom")):
-        path, content = gui.generate_dataset_handler(
+        content, summary, files = gui.generate_dataset_handler(
             "ImageNet", "Standard", "root", 3, "out.yaml",
             True, "none", True, False,
             6, 10, 3, False, False,
             None, None, 0.1, False, 0.1, 5
         )
+        path = files[0] if files else None # Should be empty list on error
         assert path is None
         assert "Boom" in content
 
@@ -53,12 +55,13 @@ def test_generate_dataset_handler_openimages():
         mock_oi.return_value = {}
         
         # Test valid call with bbox_only=True
-        path, content = gui.generate_dataset_handler(
+        content, summary, files = gui.generate_dataset_handler(
             "Open Images", "Smart", "", 3, "out.yaml",
             True, "none", False, False,
             4, 10, 3, False, True,
             None, None, 0.1, False, 0.1, 5
         )
+        path = files[0] if files else None
         
         assert path is not None
         mock_oi.assert_called_once()

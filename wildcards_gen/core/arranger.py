@@ -239,10 +239,14 @@ def arrange_list(
     Arrange a flat list into semantic sub-groups using Multi-Pass Clustering.
     """
     if not terms or len(terms) < 3:
-        return {}, terms, ({} if return_stats else None)
+        if return_stats:
+            return {}, terms, {}
+        return {}, terms
         
     if not check_dependencies():
-        return {}, terms, ({"error": "missing_dependencies"} if return_stats else None)
+        if return_stats:
+            return {}, terms, {"error": "missing_dependencies"}
+        return {}, terms
 
     # 1. Embeddings (Computed Once)
     model = load_embedding_model(model_name)
@@ -250,7 +254,9 @@ def arrange_list(
     embeddings = get_cached_embeddings(model, normalized)
     
     if len(embeddings) == 0:
-        return {}, terms, None
+        if return_stats:
+            return {}, terms, {"error": "no_embeddings"}
+        return {}, terms
 
     # --- PASS 1: Main Configured Pass ---
     groups_1, leftovers_1, stats_1 = _arrange_single_pass(
