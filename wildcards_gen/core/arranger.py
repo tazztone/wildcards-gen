@@ -12,13 +12,13 @@ Key features:
 
 import logging
 import re
-from typing import List, Dict, Tuple, Optional
+from typing import List, Dict, Tuple, Optional, Any
 import functools
 import hashlib
 
-from .wordnet import get_primary_synset, get_synset_name, is_abstract_category
-from .linter import check_dependencies, load_embedding_model, compute_list_embeddings, get_hdbscan_clusters
 from .wordnet import get_primary_synset, get_synset_name, is_abstract_category, get_synset_wnid
+from .linter import check_dependencies, load_embedding_model, compute_list_embeddings, get_hdbscan_clusters
+
 
 logger = logging.getLogger(__name__)
 
@@ -120,11 +120,12 @@ def get_medoid_name(cluster_embeddings: np.ndarray, cluster_terms: List[str]) ->
         logger.warning(f"Medoid naming failed: {e}")
         return None
 
+
 def _generate_descriptive_name(
     lca_name: Optional[str], 
     cluster_embeddings: np.ndarray, 
     cluster_terms: List[str]
-) -> Tuple[str, dict]:
+) -> Tuple[str, Dict[str, Any]]:
     """
     Generate a descriptive name using Hybrid Strategy (LCA + Medoid).
     Returns (name, metadata).
@@ -135,26 +136,15 @@ def _generate_descriptive_name(
         "examples": cluster_terms[:3]
     }
     
-    # 1. Try LCA
-    if lca_name:
-        # Check if LCA is specific enough (not in blacklist is already checked by get_lca_name)
-        # If the cluster is small/tight, LCA might be perfect.
-        # But if we have multiple clusters with SAME LCA, we need distinction.
-        # For now, we return LCA, and let the caller handle collision logic by appending medoid.
-        pass
-
-    # 2. Medoid
+    # Pre-calculate medoid hypernym
     medoid_hypernym = get_medoid_name(cluster_embeddings, cluster_terms)
     
-    # Decision Logic
-    # If we have LCA, use it as base.
-    # If we have Medoid, it can be a qualifier.
+    name = "Group"
     
+    # Decision Logic
     if lca_name:
         name = lca_name
         metadata["source"] = "lca"
-        # Try to get WNID for LCA
-        # This is a bit inefficient re-lookup, but safe
         s = get_primary_synset(lca_name)
         if s:
             metadata["wnid"] = get_synset_wnid(s)
@@ -185,6 +175,42 @@ def _generate_descriptive_name(
     return name, metadata
 
 
+
+
+def compute_umap_embeddings(embeddings: np.ndarray, n_components: int = 5) -> np.ndarray:
+    """
+    Reduce embedding dimensionality using UMAP for better density-based clustering.
+    Falls back to original embeddings if UMAP is missing or fails.
+    """
+    try:
+        import umap
+        
+        # UMAP needs enough neighbors. Default is 15.
+        # If we have fewer samples than neighbors, we can't effectively run it 
+        # with default settings.
+        n_samples = embeddings.shape[0]
+        if n_samples < 16:
+            # Too small for meaningful manifold structure
+            return embeddings
+
+        # 5 components is a sweet spot for HDBSCAN (dense but not too high-dim)
+        reducer = umap.UMAP(
+            n_neighbors=15, 
+            n_components=n_components, 
+            min_dist=0.1, 
+            metric='cosine',
+            random_state=42 # Try to keep it somewhat deterministic
+        )
+        return reducer.fit_transform(embeddings)
+
+    except ImportError:
+        logger.debug("umap-learn not installed. Skipping dimensionality reduction.")
+        return embeddings
+    except Exception as e:
+        logger.warning(f"UMAP reduction failed: {e}. Using raw embeddings.")
+        return embeddings
+
+
 def _arrange_single_pass(
     terms: List[str],
     embeddings: np.ndarray,
@@ -193,6 +219,7 @@ def _arrange_single_pass(
     cluster_selection_method: str = 'eom',
     min_samples: Optional[int] = None
 ) -> Tuple[Dict[str, List[str]], List[str], Dict, Dict[str, Dict]]:
+
     """
     Internal Helper: Run a single pass of HDBSCAN clustering.
     Returns: (groups, leftovers, stats, group_metadata)
@@ -215,17 +242,26 @@ def _arrange_single_pass(
     if len(terms) < min_cluster_size + 1:
         return {}, terms, stats, {}
 
+    # Run HDBSCAN
     try:
         clusterer = hdbscan.HDBSCAN(
-            min_cluster_size=min_cluster_size, 
+            min_cluster_size=min_cluster_size,
             min_samples=min_samples,
-            gen_min_span_tree=True,
-            cluster_selection_method=cluster_selection_method
+            cluster_selection_epsilon=0.0,
+            metric='euclidean', # We use euclidean on UMAP or raw embeddings
+            cluster_selection_method=cluster_selection_method,
+            prediction_data=True
         )
-        clusterer.fit(embeddings)
-        labels, probabilities = clusterer.labels_, clusterer.probabilities_
-    except Exception as e:
-        logger.warning(f"HDBSCAN error: {e}")
+        
+        # Reduce dimensionality first using UMAP if available
+        # This creates a denser manifold for HDBSCAN to find clusters in
+        clustering_data = compute_umap_embeddings(embeddings)
+        
+        clusterer.fit(clustering_data)
+        
+        labels = clusterer.labels_
+        probabilities = clusterer.probabilities_
+
     except Exception as e:
         logger.warning(f"HDBSCAN error: {e}")
         return {}, terms, stats, {}
