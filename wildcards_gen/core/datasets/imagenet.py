@@ -154,17 +154,59 @@ def build_tree_recursive(
             # If we flattened a potentially large list, try to re-group meaningful parts
             if smart_config and smart_config.enabled and smart_config.semantic_arrangement:
                 from ..smart import apply_semantic_arrangement
-                named_groups, leftovers, metadata = apply_semantic_arrangement(descendants, smart_config, stats=stats, context=name)
+                arranged_structure = apply_semantic_arrangement(descendants, smart_config, stats=stats, context=name)
                 
-                # Add named groups as sub-categories
-                for group_name, terms in named_groups.items():
-                    # We create a simple leaf list for each group
-                    # Instruction? Maybe "semantically grouped terms from {name}"?
-                    # For now, no specific instruction, just the terms.
-                    structure_mgr.add_leaf_list(parent, group_name, terms, f"instruction: items related to {group_name}")
+                # Merge the arranged structure into the parent
+                # The arranged_structure is a dict (sub-categories) or list (if no structure found).
                 
-                # Replace descendants with leftovers for the main list
-                descendants = leftovers
+                if isinstance(arranged_structure, list):
+                    # It returned a flat list (failed to cluster or just small)
+                    descendants = arranged_structure
+                else:
+                    # It's a dict. We need to add these as valid children of 'parent'.
+                    # This effectively replaces the 'descendants' list with a subtree.
+                    # We can use structure_mgr to merge it, OR just add it carefully.
+                    
+                    # Logic: We are in 'should_flatten=True' block.
+                    # Originally we would add_leaf_list(parent, name, descendants...).
+                    # Now we have a subtree for "name".
+                    # So parent[name] should be this subtree?
+                    # But we usually return 'success' or not.
+                    
+                    # If we have a subtree, we attach it to parent[name].
+                    # BUT, usually 'flatten' means "make it a leaf list".
+                    # Here we are "un-flattening" partially.
+                    
+                    # We need to convert the generic dict from arrange_hierarchy 
+                    # into CommentedMap structure with proper comments via Manager?
+                    # structure_mgr.merge_categorized_data works on existing structure.
+                    
+                    # Let's create a temporary root for merge?
+                    # result of arrange is { "Category": [items], "Other": [items] }
+                    
+                    # We want parent[name] to contain this.
+                    # Let's manually reconstruct to ensure we use StructureManager methods?
+                    # Or reuse merge_categorized_data?
+                    
+                    # Problem: StructureManager.merge_categorized_data expects {Key: Val}.
+                    # Here 'arranged_structure' IS the content of 'name'.
+                    # So we want parent[name] = arranged_structure (converted).
+                    
+                    # Helper to recurse and add using Manager?
+                    # Or just direct assignment if we convert to CommentedMap?
+                    
+                    # Let's try direct insertion via merge_categorized_data onto a temp node, then assign.
+                    temp_node = structure_mgr.create_empty_structure()
+                    structure_mgr.merge_categorized_data(temp_node, arranged_structure)
+                    
+                    parent[name] = temp_node
+                    if instruction:
+                         try:
+                             parent.yaml_add_eol_comment(f"instruction: {instruction}", name)
+                         except: pass
+                         
+                    return (True, [])
+
 
             # Smart Mode: Min leaf size check with orphan bubbling
             if smart_config and smart_config.enabled:
@@ -225,14 +267,30 @@ def build_tree_recursive(
         # Semantic Arrangement for Orphans (Misc)
         if smart_config.semantic_arrangement:
             from ..smart import apply_semantic_arrangement
-            named_groups, leftovers, metadata = apply_semantic_arrangement(collected_orphans, smart_config, stats=stats, context=f"orphans of {name}")
+            arranged_orphans = apply_semantic_arrangement(collected_orphans, smart_config, stats=stats, context=f"orphans of {name}")
             
-            # Add named groups as peer categories to 'misc'
-            for group_name, terms in named_groups.items():
-                structure_mgr.add_leaf_list(child_map, group_name, terms, f"instruction: items related to {group_name}")
-            
-            # Leftovers become the new misc
-            collected_orphans = leftovers
+            if isinstance(arranged_orphans, dict):
+                 # Merge these groups into the child_map (which holds siblings)
+                 # Wait, these are orphans. They usually go to 'misc'.
+                 # If we arranged them, we have specific groups!
+                 # e.g. "Spotted", "Striped".
+                 # We should add them as valid children of 'name' (i.e. into child_map).
+                 structure_mgr.merge_categorized_data(child_map, arranged_orphans)
+                 
+                 # What about leftovers?
+                 # arranged_orphans from arrange_hierarchy puts leftovers in "Other" key if significant,
+                 # or if it returns a list, it's all leftovers.
+                 # If it returned a dict, did it include 'Other'?
+                 # arrange_hierarchy adds 'Other' logic internally.
+                 # So we rely on that.
+                 
+                 # If we merged everything, we are good.
+                 # But we need to ensure we don't double-add if we handle 'misc' below.
+                 collected_orphans = [] # Handled.
+            else:
+                 # It's a list. Just flat orphans.
+                 collected_orphans = arranged_orphans
+
 
         if collected_orphans: # Only add misc if there are still items
             if 'misc' in child_map:
@@ -399,6 +457,19 @@ def generate_imagenet_tree(
         stats=stats,
         budget=budget
     )
+    
+    # Post-process with ConstraintShaper
+    if smart and (min_leaf_size > 0 or merge_orphans):
+        from ..shaper import ConstraintShaper
+        logger.info("Shaping hierarchy (merging orphans, flattening)...")
+        shaper = ConstraintShaper(result)
+        # result is modified in-place? No, shaper returns new structure.
+        # But we want to preserve comments on 'result' root?
+        # 'result' is the map.
+        result = shaper.shape(min_leaf_size=min_leaf_size, flatten_singles=True) # Flatten singles true?
+        # Maybe expose flatten_singles to CLI? It wasn't in original args.
+        # Let's default to True as per research.
+
     
     return result
 
