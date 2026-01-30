@@ -135,9 +135,13 @@ class ConstraintShaper:
             key = list(new_node.keys())[0]
             val = new_node[key]
             
+            # Protect leaf lists from flattening (preserves Category name for list)
+            if isinstance(val, list):
+                return new_node
+            
             # Promote single child content (whether dict or list)
             # This effectively removes the current node's wrapper (key).
-            # e.g. {Sub: [items]} -> [items]
+            # e.g. {Sub: {Deep: ...}} -> {Deep: ...}
             return val
 
                  

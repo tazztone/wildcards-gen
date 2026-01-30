@@ -210,7 +210,20 @@ def build_wordnet_hierarchy(
                             
                             # Create a temp map for 'name'
                             temp_node = structure_mgr.create_empty_structure()
-                            structure_mgr.merge_categorized_data(temp_node, arranged_structure)
+                            
+                            # DEBUG/GUARD: Ensure structure is merged type
+                            if hasattr(arranged_structure, 'items'):
+                                try:
+                                    structure_mgr.merge_categorized_data(temp_node, arranged_structure)
+                                except AttributeError as e:
+                                    logger.error(f"Failed to merge structure for {name}: {e}")
+                                    raise e
+                            else:
+                                # Fallback or Logic Error: Treating as list/leaf?
+                                # This can happen if arrange returns a single string or list instead of dict.
+                                logger.warning(f"arranged_structure for {name} is not dict: {type(arranged_structure)}")
+                                if isinstance(arranged_structure, list):
+                                     structure_mgr.add_leaf_list(temp_node, "misc", arranged_structure)
                             
                             parent_map[name] = temp_node
                             if instruction:
@@ -261,7 +274,11 @@ def build_wordnet_hierarchy(
                         if arranged_orphans:
                             # We have groups for the orphans.
                             # Merge them into child_map (siblings).
-                            structure_mgr.merge_categorized_data(child_map, arranged_orphans)
+                            try:
+                                structure_mgr.merge_categorized_data(child_map, arranged_orphans)
+                            except AttributeError as e:
+                                logger.error(f"Failed to merge orphans for {name}: {e}")
+                                raise e
                             collected_orphans = leftovers # Only keep leftovers as orphans
                         else:
                             # Still a flat list
