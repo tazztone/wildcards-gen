@@ -311,6 +311,21 @@ The `# instruction:` comment is the payload. It tells the downhill AI what a cat
 - **WordNet (Trusted)**: Used for `dataset` commands. We map dataset IDs (WNID, Freebase) to WordNet Synsets to extract definitions.
 - **LLM (Flexible)**: Used for `categorize/create`. We use a custom `LLMEngine` that handles prompt loading and response cleaning (stripping markdown backticks).
 
+#### 4. Smart Mode Pruning Logic
+- **Significance**: Uses WordNet depth/branching to keep meaningful categories while flattening obscure intermediates.
+- **Node Elision**: Nodes in `SKIP_NODES` are logically removed while promoting children.
+- **Orphan Bubbling**: Small lists are bubbled up to `other_{parent}:` keys.
+- **Self-Reference Filtering**: Filters out leaf nodes that are identical to their parent category name (e.g., `nose: - nose` is forbidden) to reduce redundancy.
+
+#### 5. Semantic Arrangement (Arranger)
+- **Clustering**: HDBSCAN-based density clusters (min size 3) with UMAP dimensionality reduction.
+- **Naming**: Calculates medoid, queries hypernym (e.g., basil -> herb), and appends medoid if generic: `LCA (Medoid)`.
+- **Recursion**: Clusters are recursively processed to handle high-cardinality leaves.
+
+#### 6. Constraint Shaping (Shaper)
+- **Orphan Merging**: Small sibling groups (< `min_leaf_size`) are merged into a "misc" grouping.
+- **Flatten Singles**: Unnecessary single-path nesting is promoted up the tree.
+
 ### 🗺️ Codebase Map
 
 *   **`wildcards_gen/cli.py`**: The single entry point. Defined using `argparse`.
@@ -321,6 +336,8 @@ The `# instruction:` comment is the payload. It tells the downhill AI what a cat
     *   `llm.py`: OpenRouter interaction and response cleaning.
     *   `wordnet.py`: NLTK WordNet wrappers.
     *   `smart.py`: Common logic for semantic pruning and leaf bubbling.
+    *   `arranger.py`: Recursive semantic clustering (UMAP + HDBSCAN).
+    *   `shaper.py`: Post-processing constraints engine.
     *   `presets.py`: Single Source of Truth for pruning presets.
     *   `datasets/`: Logic for specific datasets (ImageNet, Tencent, OpenImages).
 
@@ -328,7 +345,7 @@ The `# instruction:` comment is the payload. It tells the downhill AI what a cat
 
 *   **Consolidated Workflow**: Builder (Generation), Tools (Post-processing), Settings (Configuration).
 *   **Progressive Disclosure**: Advanced tuning parameters are hidden behind `gr.Accordion` by default.
-*   **Contextual Help**: Uses `info=` arguments in Gradio components for embedded documentation.
+*   **Contextual Help**: Uses `info=` arguments in Gradio components for embedded documentation. **Do NOT use `tooltip=`** (not supported in current Gradio version).
 
 ### 🔬 Technical Execution Trace
 
