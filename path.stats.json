@@ -1,11 +1,12 @@
 {
   "execution": {
     "duration_seconds": 0.0,
-    "timestamp": "2026-01-30T14:49:51Z"
+    "timestamp": "2026-01-30T15:54:01Z"
   },
   "metadata": {
     "dataset": "ImageNet",
-    "output": "out.yaml"
+    "output": "out.yaml",
+    "fast_preview": false
   },
   "events": []
 }

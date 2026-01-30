@@ -20,7 +20,8 @@ DEFAULT_CONFIG = {
         "default_depth": 3,
         "add_glosses": True,
         "max_retries": 3,
-        "timeout": 60
+        "timeout": 60,
+        "preview_limit": 500
     },
     "datasets": {
         "imagenet": {
