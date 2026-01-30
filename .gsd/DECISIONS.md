@@ -4,7 +4,7 @@
 
 ## 2026-01-30: Stabilization Pivot
 **Context:** Existing codebase had several regression failures in tests and fragmented dependency management.
-**Decision:** Prioritize codebase health over new features (Batch/Merge/Migration).
+**Decision:** Prioritize codebase health over new features.
 **Impact:** Will result in a 100% green test suite and a single source of truth for dependencies.
 
 ## 2026-01-30: Fast Preview Implementation
