@@ -187,6 +187,7 @@ def generate_dataset_handler(
     semantic_arrange, semantic_arrange_threshold, semantic_arrange_min_cluster,
     exclude_subtree=None, exclude_regex=None,
     semantic_arrange_method='eom', debug_arrangement=False,
+    fast_preview=False,
     progress=gr.Progress()
 ):
     progress(0, desc='Initializing...')
@@ -197,6 +198,9 @@ def generate_dataset_handler(
         stats = StatsCollector()
         stats.set_metadata("dataset", dataset_name)
         stats.set_metadata("output", output_name)
+        stats.set_metadata("fast_preview", fast_preview)
+
+        preview_limit = 500 if fast_preview else None
         
         # Common kwargs for smart datasets
         smart_kwargs = {'stats': stats} # Always pass stats if available
@@ -215,6 +219,7 @@ def generate_dataset_handler(
                 'semantic_arrangement_min_cluster': int(semantic_arrange_min_cluster),
                 'semantic_arrangement_method': semantic_arrange_method,
                 'debug_arrangement': debug_arrangement,
+                'preview_limit': preview_limit
             })
 
         if dataset_name == 'ImageNet':
@@ -283,6 +288,13 @@ def generate_dataset_handler(
         summary_md += f"* **Clusters Created**: {n_clusters}\n"
         if arrangements:
             summary_md += f"* **Avg Semantic Noise**: {avg_noise:.1%}\n"
+
+        # Check for limit reached
+        limit_events = [e for e in stats.events if e.event_type == 'limit_reached']
+        if limit_events:
+             limit_val = limit_events[0].data.get('limit', 500)
+             summary_md += f"\n> [!WARNING]\n> **Fast Preview Limit Reached**\n> Processed {limit_val} items. Output is truncated."
+
         summary_md += f"* **Total Duration**: {stats.to_dict()['execution']['duration_seconds']}s\n"
         
         # Return summary and list of files [yaml, log, json]
@@ -611,6 +623,7 @@ def launch_gui(share=False):
                          gr.Markdown('---')
                          ds_summary = gr.Markdown('')
                          with gr.Row():
+                             ds_fast_preview = gr.Checkbox(label='⚡ Fast Preview', value=False, info='Limit to ~500 items for rapid tuning.')
                              ds_btn = gr.Button('🚀 Generate Skeleton', variant='primary', size='lg')
                              ds_file = gr.File(label='Download Files (YAML, Log, JSON)', height=100, file_count='multiple')
 
@@ -766,7 +779,8 @@ def launch_gui(share=False):
             ds_semantic_clean, ds_semantic_model, ds_semantic_threshold,
             ds_semantic_arrangement, ds_arrange_threshold, ds_arrange_min_cluster,
             ds_exclude_subtree, ds_exclude_regex,
-            ds_arrange_method, ds_debug_arrangement
+            ds_arrange_method, ds_debug_arrangement,
+            ds_fast_preview
         ]
         
         ds_btn.click(generate_dataset_handler, inputs=all_gen_inputs, outputs=[ds_prev, ds_summary, ds_file])

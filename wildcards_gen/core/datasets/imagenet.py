@@ -82,7 +82,8 @@ def build_tree_recursive(
     smart_config: Any = None,
     regex_list: List[Any] = None,
     excluded_synsets: Set[Any] = None,
-    stats: Optional[Any] = None
+    stats: Optional[Any] = None,
+    budget: Optional = None
 ) -> tuple:
     """
     Recursively build hierarchy tree from a synset.
@@ -90,6 +91,11 @@ def build_tree_recursive(
     Returns:
         Tuple[bool, List[str]]: (success, orphans_to_bubble_up)
     """
+    if budget and not budget.consume(1):
+        if budget.is_exhausted() and stats:
+            stats.log_event("limit_reached", message=f"Traversal limit {budget.limit} reached during build_tree_recursive", data={"limit": budget.limit})
+        return (False, [])
+
     name = get_synset_name(synset)
     
     # 1. Subtree Exclusion Check
@@ -148,7 +154,7 @@ def build_tree_recursive(
             # If we flattened a potentially large list, try to re-group meaningful parts
             if smart_config and smart_config.enabled and smart_config.semantic_arrangement:
                 from ..smart import apply_semantic_arrangement
-                named_groups, leftovers = apply_semantic_arrangement(descendants, smart_config, stats=stats, context=name)
+                named_groups, leftovers, metadata = apply_semantic_arrangement(descendants, smart_config, stats=stats, context=name)
                 
                 # Add named groups as sub-categories
                 for group_name, terms in named_groups.items():
@@ -200,7 +206,7 @@ def build_tree_recursive(
         success, orphans = build_tree_recursive(
             child, structure_mgr, child_map, valid_wnids,
             depth + 1, max_depth, with_glosses, strict_filter, blacklist_abstract,
-            child_config, regex_list, excluded_synsets, stats=stats
+            child_config, regex_list, excluded_synsets, stats=stats, budget=budget
         )
         if success:
             has_valid_children = True
@@ -219,7 +225,7 @@ def build_tree_recursive(
         # Semantic Arrangement for Orphans (Misc)
         if smart_config.semantic_arrangement:
             from ..smart import apply_semantic_arrangement
-            named_groups, leftovers = apply_semantic_arrangement(collected_orphans, smart_config, stats=stats, context=f"orphans of {name}")
+            named_groups, leftovers, metadata = apply_semantic_arrangement(collected_orphans, smart_config, stats=stats, context=f"orphans of {name}")
             
             # Add named groups as peer categories to 'misc'
             for group_name, terms in named_groups.items():
@@ -277,7 +283,8 @@ def generate_imagenet_tree(
     debug_arrangement: bool = False,
     skip_nodes: Optional[List[str]] = None,
     orphans_label_template: Optional[str] = None,
-    stats: Optional[Any] = None
+    stats: Optional[Any] = None,
+    preview_limit: Optional[int] = None
 ) -> CommentedMap:
     """
     Generate ImageNet hierarchy tree from a root synset.
@@ -311,7 +318,7 @@ def generate_imagenet_tree(
     if smart_overrides:
         final_overrides.update(smart_overrides)
 
-    from ..smart import SmartConfig
+    from ..smart import SmartConfig, TraversalBudget
     smart_config = SmartConfig(
         enabled=smart,
         min_depth=min_significance_depth,
@@ -328,8 +335,11 @@ def generate_imagenet_tree(
         semantic_arrangement_method=semantic_arrangement_method,
         debug_arrangement=debug_arrangement,
         skip_nodes=skip_nodes,
-        orphans_label_template=orphans_label_template
+        orphans_label_template=orphans_label_template,
+        preview_limit=preview_limit
     )
+    
+    budget = TraversalBudget(preview_limit)
     
     # Load filter set
     valid_wnids = None
@@ -386,7 +396,8 @@ def generate_imagenet_tree(
         smart_config=smart_config,
         regex_list=regex_list,
         excluded_synsets=excluded_synsets,
-        stats=stats
+        stats=stats,
+        budget=budget
     )
     
     return result
