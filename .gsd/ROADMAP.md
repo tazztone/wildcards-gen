@@ -21,8 +21,17 @@
 
 
 ### Phase 3: Fast Preview Engine
-**Status**: ⬜ Not Started
+**Status**: 🚧 Partial
 **Objective**: Implement a "Dry Run" pipeline that skips heavy clustering/shaping to just show the raw pruned structure instantly.
+
+### Phase 4: Gap Closure & Verification
+**Status**: ⬜ Not Started
+**Objective**: Address missed optimizations (WordNet caching) and strictly verify performance claims.
+
+**Gaps to Close:**
+- [ ] **WordNet Caching**: Cache expensive graph traversals (`get_all_descendants`).
+- [ ] **Performance Verification**: Benchmark "Deep Tuning" latency.
+
 
 ---
 ## Archived Milestones
