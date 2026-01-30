@@ -12,7 +12,7 @@ import json
 import csv
 import functools
 import logging
-from typing import Dict, Tuple, Any, Optional
+from typing import Dict, List, Tuple, Any, Optional
 
 from ruamel.yaml.comments import CommentedMap, CommentedSeq
 
@@ -469,6 +469,8 @@ def generate_openimages_hierarchy(
     semantic_arrangement_min_cluster: int = 5,
     semantic_arrangement_method: str = "eom",
     debug_arrangement: bool = False,
+    skip_nodes: Optional[List[str]] = None,
+    orphans_label_template: Optional[str] = None,
     stats: Optional[Any] = None
 ) -> CommentedMap:
     """
@@ -500,7 +502,9 @@ def generate_openimages_hierarchy(
         semantic_arrangement_threshold=semantic_arrangement_threshold,
         semantic_arrangement_min_cluster=semantic_arrangement_min_cluster,
         semantic_arrangement_method=semantic_arrangement_method,
-        debug_arrangement=debug_arrangement
+        debug_arrangement=debug_arrangement,
+        skip_nodes=skip_nodes,
+        orphans_label_template=orphans_label_template
     )
     
     logger.info("Generating Open Images hierarchy...")
