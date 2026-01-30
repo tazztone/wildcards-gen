@@ -309,7 +309,8 @@ def _arrange_single_pass(
     min_cluster_size: int,
     threshold: float,
     cluster_selection_method: str = 'eom',
-    min_samples: Optional[int] = None
+    min_samples: Optional[int] = None,
+    **kwargs
 ) -> Tuple[Dict[str, List[str]], List[str], Dict, Dict[str, Dict]]:
 
     """
@@ -321,6 +322,11 @@ def _arrange_single_pass(
     # Defaults
     if min_samples is None:
         min_samples = min_cluster_size
+
+    # Extract UMAP params from kwargs or set defaults
+    umap_n_neighbors = kwargs.get('umap_n_neighbors', 15)
+    umap_min_dist = kwargs.get('umap_min_dist', 0.1)
+    umap_n_components = kwargs.get('umap_n_components', 5)
         
     stats = {
         "n_clusters_found": 0,
@@ -344,7 +350,6 @@ def _arrange_single_pass(
             cluster_selection_method=cluster_selection_method,
             prediction_data=True
         )
-        
         # Reduce dimensionality first using UMAP if available
         # This creates a denser manifold for HDBSCAN to find clusters in
         clustering_data = compute_umap_embeddings(
@@ -372,7 +377,11 @@ def _arrange_single_pass(
             
     # Stats
     noise_count = list(labels).count(-1)
-    stats["noise_ratio"] = noise_count / len(labels)
+    if len(labels) > 0:
+        stats["noise_ratio"] = noise_count / len(labels)
+    else:
+        stats["noise_ratio"] = 0.0
+        
     stats["n_clusters_found"] = len(clusters)
 
     named_groups = {}

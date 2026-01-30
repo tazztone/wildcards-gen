@@ -1,6 +1,6 @@
 # SPEC.md — Project Specification
 
-> **Status**: `DRAFT`
+> **Status**: `FINALIZED`
 
 ## Vision
 Transform `wildcards-gen` from a robust engine into a polished, high-performance product. Focus on user feedback loops (fast previews), visual clarity (compact UI), and runtime efficiency (async/caching) to make the tool a joy to use.

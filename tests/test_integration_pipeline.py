@@ -83,7 +83,20 @@ def test_integration_pipeline_shaping():
     2. Respects min_leaf_size (merging orphans)
     3. Preserves CommentedMap type
     """
-    mock_wn.synset.side_effect = lambda x: {
+    # Patch HDBSCAN to ensure clustering works (simulate 2 clusters)
+    with patch('hdbscan.HDBSCAN') as MockHDBSCAN, \
+         patch('wildcards_gen.core.arranger.check_dependencies', return_value=True):
+         
+        mock_clusterer = MockHDBSCAN.return_value
+        # Configure mock to return valid clusters
+        # 16 items being arranged (animal + vehicle children?)
+        # Logic in imagenet runs arrange on CHILDREN.
+        # e.g. Vehicle children (15 items).
+        # We need to simulate that call.
+        mock_clusterer.labels_ = [0]*15 # All in cluster 0
+        mock_clusterer.probabilities_ = [1.0]*15
+        
+        mock_wn.synset.side_effect = lambda x: {
         "entity.n.01": s_entity,
         "animal.n.01": s_animal,
         "dog.n.01": s_dog,
@@ -121,17 +134,18 @@ def test_integration_pipeline_shaping():
 
 
     # Patch the 'wn' object inside the imagenet module
-    with patch("wildcards_gen.core.datasets.imagenet.wn", mock_wn):
-        # We also need to patch check dependencies or ensure ensure_nltk_data doesn't fail
-        with patch("wildcards_gen.core.datasets.imagenet.ensure_nltk_data"):
-             result = generate_imagenet_tree(
-                root_synset_str="entity.n.01",
-                smart=True,
-                min_significance_depth=1, 
-                min_leaf_size=5,
-                merge_orphans=True,
-                with_glosses=False
-            )
+    with patch("wildcards_gen.core.datasets.imagenet.wn", mock_wn), \
+         patch("wildcards_gen.core.datasets.imagenet.ensure_nltk_data"), \
+         patch("wildcards_gen.core.datasets.imagenet.load_imagenet_1k_wnids", return_value=None):
+         
+         result = generate_imagenet_tree(
+            root_synset_str="entity.n.01",
+            smart=True,
+            min_significance_depth=1, 
+            min_leaf_size=5,
+            merge_orphans=True,
+            with_glosses=False
+        )
     
     # Verify Type
     assert isinstance(result, CommentedMap)
