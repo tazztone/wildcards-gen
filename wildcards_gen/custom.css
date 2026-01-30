@@ -1,48 +1,66 @@
+/* Custom CSS to tighten spacing and improve panel distinctiveness */
+.gradio-container {
+    max-width: 1400px !important;
+}
 
-        /* Custom CSS to tighten spacing and improve panel distinctiveness */
-        .gradio-container {
-            max-width: 1400px !important;
-        }
-        .header-section {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 2rem;
-            padding: 1rem;
-            background: rgba(var(--background-fill-secondary-rgb), 0.3);
-            border-radius: 8px;
-        }
-        .dataset-config-panel {
-            border-right: 1px solid var(--border-color-primary);
-            padding-right: 1.5rem;
-        }
-        .analysis-panel {
-            background: var(--background-fill-secondary);
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            border: 1px solid var(--border-color-primary);
-        }
-        .stale-warning {
-            color: #d97706;
-            font-weight: bold;
-            padding: 0.5rem;
-            background: #fef3c7;
-            border-radius: 4px;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        .dark .stale-warning {
-            background: #451a03;
-            color: #fbbf24;
-        }
-        .section-header {
-            font-size: 1.1em;
-            font-weight: 600;
-            margin-bottom: 0.8rem;
-            color: var(--body-text-color-subdued);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
+.header-section {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: rgba(var(--background-fill-secondary-rgb), 0.3);
+    border-radius: 8px;
+}
+
+.dataset-config-panel {
+    border-right: 1px solid var(--border-color-primary);
+    padding-right: 1.5rem;
+}
+
+.analysis-panel {
+    background: var(--background-fill-secondary);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color-primary);
+}
+
+.stale-warning {
+    color: #d97706;
+    font-weight: bold;
+    padding: 0.5rem;
+    background: #fef3c7;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dark .stale-warning {
+    background: #451a03;
+    color: #fbbf24;
+}
+
+.section-header {
+    font-size: 1.1em;
+    font-weight: 600;
+    margin-bottom: 0.8rem;
+    color: var(--body-text-color-subdued);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Force vertical scrollbar and limit height for YAML previews */
+.preview-code textarea,
+.preview-code .cm-editor,
+.preview-code .cm-scroller,
+.preview-code .cm-editor>.cm-scroller,
+.preview-code pre,
+.preview-code .code-container,
+.preview-code [class*="container"] {
+    max-height: 650px !important;
+    overflow-y: auto !important;
+    scrollbar-width: thin !important;
+}

@@ -604,7 +604,7 @@ def launch_gui(share=False):
                          # Block 2: Preview
                          with gr.Column():
                              gr.Markdown('**Preview output**')
-                             ds_prev = gr.Code(language='yaml', label='YAML Preview', lines=15, max_lines=30)
+                             ds_prev = gr.Code(language='yaml', label='YAML Preview', lines=40, max_lines=40, elem_classes=['preview-code'])
                              ds_out_name = gr.Textbox(label='Output Filename', value='skeleton.yaml', show_label=False)
 
                          # Block 3: Run Controls
@@ -626,7 +626,7 @@ def launch_gui(share=False):
                                 cr_out = gr.Textbox(label='Output Filename', value='topic_skeleton.yaml')
                                 cr_btn = gr.Button('✨ Generate', variant='primary')
                             with gr.Column():
-                                cr_prev = gr.Code(language='yaml', label='Preview', lines=20, max_lines=30)
+                                cr_prev = gr.Code(language='yaml', label='Preview', lines=40, max_lines=40, elem_classes=['preview-code'])
                                 cr_file = gr.File(label='Download')
                         cr_topic.change(update_cr_filename, inputs=[cr_topic], outputs=[cr_out])
                         cr_btn.click(create_handler, inputs=[cr_topic, model_state, api_key_state, cr_out], outputs=[cr_file, cr_prev])
@@ -640,7 +640,7 @@ def launch_gui(share=False):
                                 cat_out = gr.Textbox(label='Output Filename', value='categorized.yaml')
                                 cat_btn = gr.Button('🗂️ Categorize', variant='primary')
                             with gr.Column():
-                                cat_prev = gr.Code(language='yaml', label='Preview', lines=20, max_lines=30)
+                                cat_prev = gr.Code(language='yaml', label='Preview', lines=40, max_lines=40, elem_classes=['preview-code'])
                                 cat_file = gr.File(label='Download')
                         cat_terms.change(update_cat_filename, inputs=[cat_terms], outputs=[cat_out])
                         cat_btn.click(categorize_handler, inputs=[cat_terms, model_state, api_key_state, cat_out], outputs=[cat_file, cat_prev])
@@ -655,7 +655,7 @@ def launch_gui(share=False):
                                 en_out = gr.Textbox(label='Output Filename', value='enriched.yaml')
                                 en_btn = gr.Button('💡 Enrich', variant='primary')
                             with gr.Column():
-                                en_prev = gr.Code(language='yaml', label='Preview', lines=20, max_lines=30)
+                                en_prev = gr.Code(language='yaml', label='Preview', lines=40, max_lines=40, elem_classes=['preview-code'])
                                 en_file = gr.File(label='Download')
                         en_topic.change(update_en_filename, inputs=[en_topic], outputs=[en_out])
                         en_btn.click(enrich_handler, inputs=[en_yaml, en_topic, model_state, api_key_state, en_out], outputs=[en_file, en_prev])
