@@ -2,15 +2,14 @@
 
 ## Current Position
 - **Milestone**: v0.4.0 - Data Science Core
-- **Phase**: Phase 1: Stability & Metrics Foundation
+- **Phase**: Phase 2: Geometry-First Clustering
 - **Status**: Complete
-- **Goal**: Establish stability and quality metrics before starting algorithmic changes.
+- **Goal**: Implement the UMAP dimensionality reduction pipeline feeding into HDBSCAN.
 
 ## Last Accomplishment
-- Implemented `wildcards_gen/analytics` module.
-- Added `wildcards-gen compare` CLI command.
-- Verified with unit and integration tests.
+- Integrated UMAP into `arranger.py`.
+- Verified with unit tests and smoke tests.
+- Updated `pyproject.toml`.
 
 ## Next Steps
-- Begin **Phase 2: Geometry-First Clustering**.
-- Research UMAP integration.
+- Begin **Phase 3: Recursive Hierarchy & Formatting**.
