@@ -8,6 +8,7 @@ from wildcards_gen.core.datasets import imagenet, coco, openimages, tencent
 from wildcards_gen.core.structure import StructureManager
 from wildcards_gen.core.config import config
 from wildcards_gen.core.llm import LLMEngine
+from wildcards_gen.core.stats import StatsCollector
 from .core.presets import SMART_PRESETS, DATASET_PRESET_OVERRIDES
 
 logger = logging.getLogger(__name__)
@@ -192,10 +193,15 @@ def generate_dataset_handler(
     try:
         is_smart = (strategy == 'Smart')
         
+        # Initialize Stats Collector
+        stats = StatsCollector()
+        stats.set_metadata("dataset", dataset_name)
+        stats.set_metadata("output", output_name)
+        
         # Common kwargs for smart datasets
-        smart_kwargs = {}
+        smart_kwargs = {'stats': stats} # Always pass stats if available
         if is_smart:
-            smart_kwargs = {
+            smart_kwargs.update({
                 'smart': True,
                 'min_significance_depth': int(min_depth),
                 'min_hyponyms': int(min_hyponyms),
@@ -209,7 +215,7 @@ def generate_dataset_handler(
                 'semantic_arrangement_min_cluster': int(semantic_arrange_min_cluster),
                 'semantic_arrangement_method': semantic_arrange_method,
                 'debug_arrangement': debug_arrangement,
-            }
+            })
 
         if dataset_name == 'ImageNet':
             if not root:
@@ -261,13 +267,32 @@ def generate_dataset_handler(
                 kwargs.update(smart_kwargs)
                 
             data = tencent.generate_tencent_hierarchy(**kwargs)
-        else:
-            return None, f'Unknown dataset: {dataset_name}'
-            
-        return save_and_preview(data, output_name)
+        output_path, preview = save_and_preview(data, output_name)
+        
+        # Save Stats
+        base_path = os.path.splitext(output_path)[0]
+        stats.save_to_json(f"{base_path}.stats.json")
+        stats.save_summary_log(f"{base_path}.log")
+        
+        # Generate Summary Markdown for the UI
+        arrangements = [e for e in stats.events if e.event_type == "arrangement"]
+        n_clusters = sum(e.data.get('clusters', 0) for e in arrangements)
+        avg_noise = sum(e.data.get('noise', 0) for e in arrangements) / len(arrangements) if arrangements else 0
+        
+        summary_md = f"### ✅ Generation Complete\n"
+        summary_md += f"* **Clusters Created**: {n_clusters}\n"
+        if arrangements:
+            summary_md += f"* **Avg Semantic Noise**: {avg_noise:.1%}\n"
+        summary_md += f"* **Total Duration**: {stats.to_dict()['execution']['duration_seconds']}s\n"
+        
+        # Return summary and list of files [yaml, log, json]
+        log_path = f"{base_path}.log"
+        json_path = f"{base_path}.stats.json"
+        
+        return preview, summary_md, [output_path, log_path, json_path]
     except Exception as e:
         logger.exception('Dataset generation failed')
-        return None, f'Error: {str(e)}'
+        return f'Error: {str(e)}', '', []
 
 def analyze_handler(
     dataset_name, root, depth, filter_set, strict_filter, blacklist_abstract, bbox_only,
@@ -584,9 +609,10 @@ def launch_gui(share=False):
 
                          # Block 3: Run Controls
                          gr.Markdown('---')
+                         ds_summary = gr.Markdown('')
                          with gr.Row():
                              ds_btn = gr.Button('🚀 Generate Skeleton', variant='primary', size='lg')
-                             ds_file = gr.File(label='Download', height=50)
+                             ds_file = gr.File(label='Download Files (YAML, Log, JSON)', height=100, file_count='multiple')
 
             # === TAB 2: AI ASSISTANT (LLM) ===
             with gr.Tab('🧠 AI Assistant'):
@@ -743,7 +769,7 @@ def launch_gui(share=False):
             ds_arrange_method, ds_debug_arrangement
         ]
         
-        ds_btn.click(generate_dataset_handler, inputs=all_gen_inputs, outputs=[ds_file, ds_prev])
+        ds_btn.click(generate_dataset_handler, inputs=all_gen_inputs, outputs=[ds_prev, ds_summary, ds_file])
 
 
 

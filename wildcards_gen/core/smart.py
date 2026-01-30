@@ -92,7 +92,7 @@ class SmartConfig:
 
 # ... (skipping unchanged functions) ...
 
-def apply_semantic_arrangement(items: List[str], config: SmartConfig) -> Tuple[dict, List[str]]:
+def apply_semantic_arrangement(items: List[str], config: SmartConfig, stats: Optional[Any] = None, context: Optional[str] = None) -> Tuple[dict, List[str]]:
     """
     Arrange a list of items into semantic sub-groups.
     Returns (named_groups, leftovers).
@@ -107,22 +107,38 @@ def apply_semantic_arrangement(items: List[str], config: SmartConfig) -> Tuple[d
     
     from .arranger import arrange_list
     
+    request_stats = config.debug_arrangement or stats is not None
     result = arrange_list(
         items, 
         config.semantic_model, 
         config.semantic_arrangement_threshold,
         config.semantic_arrangement_min_cluster,
         config.semantic_arrangement_method,
-        return_stats=config.debug_arrangement
+        return_stats=request_stats
     )
     
-    groups, leftovers, stats = result
+    if request_stats:
+        groups, leftovers, s_data = result
+    else:
+        groups, leftovers = result
+        s_data = None
     
-    if config.debug_arrangement and stats:
-        print(f"\n[DEBUG] Arrangement Stats ({len(items)} items):")
-        print(f"  Noise Ratio: {stats.get('pass_1', {}).get('noise_ratio', 0):.2%}")
-        if stats.get('pass_2'):
-            print(f"  Pass 2 Added: {stats['pass_2']['n_clusters_found']} clusters")
+    if stats and s_data:
+        p1 = s_data.get('pass_1', {})
+        noise_ratio = p1.get('noise_ratio', 0)
+        n_clusters = len(groups)
+        
+        stats.log_event(
+            "arrangement", 
+            message=f"Arranged {len(items)} items",
+            context=context,
+            data={
+                "items": len(items),
+                "clusters": n_clusters,
+                "noise": noise_ratio,
+                "pass_2_clusters": s_data.get('pass_2', {}).get('n_clusters_found', 0) if s_data.get('pass_2') else 0
+            }
+        )
             
     return groups, leftovers
 

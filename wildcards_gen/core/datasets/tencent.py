@@ -122,7 +122,8 @@ def generate_tencent_hierarchy(
     semantic_arrangement_threshold: float = 0.1,
     semantic_arrangement_min_cluster: int = 5,
     semantic_arrangement_method: str = "eom",
-    debug_arrangement: bool = False
+    debug_arrangement: bool = False,
+    stats: Optional[Any] = None
 ) -> Dict:
     """Generate Tencent ML-Images hierarchy."""
     file_path = download_tencent_hierarchy()
@@ -186,7 +187,7 @@ def generate_tencent_hierarchy(
         return existing
     
     
-    def build_commented(current_idx: int, current_depth: int, config: SmartConfig) -> Tuple[Any, List[str]]:
+    def build_commented(current_idx: int, current_depth: int, config: SmartConfig, stats: Optional[Any] = None) -> Tuple[Any, List[str]]:
         cat_info = categories[current_idx]
         name = cat_info['name'].split(',')[0].strip()
         wnid = cat_info['id']
@@ -195,7 +196,8 @@ def generate_tencent_hierarchy(
         
         # Base case: actual leaf
         if not children:
-            return None, []
+            # Leaf node acts as an item, not an empty category
+            return None, [name]
             
         # Decision logic: keep as category or flatten?
         should_flatten = False
@@ -235,7 +237,7 @@ def generate_tencent_hierarchy(
             # Smart Mode: Semantic Arrangement Re-grow
             if smart and config.enabled and config.semantic_arrangement:
                 from ..smart import apply_semantic_arrangement
-                named_groups, leftovers = apply_semantic_arrangement(filtered_leaves, config)
+                named_groups, leftovers = apply_semantic_arrangement(filtered_leaves, config, stats=stats, context=name)
                 
                 # If we have groups, we need to return a structure (dict) instead of just leaves (list)
                 # But this function returns (filtered_leaves_list_or_None, orphans)
@@ -284,7 +286,7 @@ def generate_tencent_hierarchy(
                  child_wnid = categories[child_idx]['id']
                  child_config = config.get_child_config(child_name, child_wnid)
             
-            child_val, child_orphans = build_commented(child_idx, current_depth + 1, child_config)
+            child_val, child_orphans = build_commented(child_idx, current_depth + 1, child_config, stats=stats)
             
             # Collect bubbled-up orphans from children
             if child_orphans:
@@ -333,7 +335,7 @@ def generate_tencent_hierarchy(
             # Semantic Arrangement for Orphans
             if smart and config.enabled and config.semantic_arrangement:
                 from ..smart import apply_semantic_arrangement
-                named_groups, leftovers = apply_semantic_arrangement(orphan_leaves, config)
+                named_groups, leftovers = apply_semantic_arrangement(orphan_leaves, config, stats=stats, context=f"orphans of {name}")
                 
                 # Add groups to CM
                 for g_name, g_terms in named_groups.items():
@@ -343,7 +345,9 @@ def generate_tencent_hierarchy(
                 orphan_leaves = leftovers
 
             cm['misc'] = orphan_leaves
-            valid_items_added += 1
+            # Do NOT increment valid_items_added here.
+            # If we only have orphans (no sub-categories), we want to fall through
+            # to the flatten logic below to return a list instead of {misc: [...]}.
 
         if valid_items_added == 0:
             # If all children were pruned/merged, flatten itself
@@ -367,7 +371,7 @@ def generate_tencent_hierarchy(
             # Semantic Arrangement (Re-grow)
             if smart and config.enabled and config.semantic_arrangement:
                  from ..smart import apply_semantic_arrangement
-                 named_groups, leftovers = apply_semantic_arrangement(filtered_leaves, config)
+                 named_groups, leftovers = apply_semantic_arrangement(filtered_leaves, config, stats=stats, context=name)
                  
                  if named_groups:
                      mini_tree = CommentedMap()
@@ -390,7 +394,7 @@ def generate_tencent_hierarchy(
     
     for root_idx in sorted_roots:
         root_name = categories[root_idx]['name'].split(',')[0].strip()
-        root_val, root_orphans = build_commented(root_idx, 1, smart_config)
+        root_val, root_orphans = build_commented(root_idx, 1, smart_config, stats=stats)
         
         # If root produced orphans, what to do? Add them to 'misc'?
         # Roots are usually dicts, so we check root_val type.

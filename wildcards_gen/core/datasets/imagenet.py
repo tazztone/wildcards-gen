@@ -81,7 +81,8 @@ def build_tree_recursive(
     blacklist_abstract: bool = False,
     smart_config: Any = None,
     regex_list: List[Any] = None,
-    excluded_synsets: Set[Any] = None
+    excluded_synsets: Set[Any] = None,
+    stats: Optional[Any] = None
 ) -> tuple:
     """
     Recursively build hierarchy tree from a synset.
@@ -147,7 +148,7 @@ def build_tree_recursive(
             # If we flattened a potentially large list, try to re-group meaningful parts
             if smart_config and smart_config.enabled and smart_config.semantic_arrangement:
                 from ..smart import apply_semantic_arrangement
-                named_groups, leftovers = apply_semantic_arrangement(descendants, smart_config)
+                named_groups, leftovers = apply_semantic_arrangement(descendants, smart_config, stats=stats, context=name)
                 
                 # Add named groups as sub-categories
                 for group_name, terms in named_groups.items():
@@ -199,7 +200,7 @@ def build_tree_recursive(
         success, orphans = build_tree_recursive(
             child, structure_mgr, child_map, valid_wnids,
             depth + 1, max_depth, with_glosses, strict_filter, blacklist_abstract,
-            child_config, regex_list, excluded_synsets
+            child_config, regex_list, excluded_synsets, stats=stats
         )
         if success:
             has_valid_children = True
@@ -218,7 +219,7 @@ def build_tree_recursive(
         # Semantic Arrangement for Orphans (Misc)
         if smart_config.semantic_arrangement:
             from ..smart import apply_semantic_arrangement
-            named_groups, leftovers = apply_semantic_arrangement(collected_orphans, smart_config)
+            named_groups, leftovers = apply_semantic_arrangement(collected_orphans, smart_config, stats=stats, context=f"orphans of {name}")
             
             # Add named groups as peer categories to 'misc'
             for group_name, terms in named_groups.items():
@@ -273,7 +274,8 @@ def generate_imagenet_tree(
     semantic_arrangement_threshold: float = 0.1,
     semantic_arrangement_min_cluster: int = 5,
     semantic_arrangement_method: str = "eom",
-    debug_arrangement: bool = False
+    debug_arrangement: bool = False,
+    stats: Optional[Any] = None
 ) -> CommentedMap:
     """
     Generate ImageNet hierarchy tree from a root synset.
@@ -379,7 +381,8 @@ def generate_imagenet_tree(
         blacklist_abstract=blacklist_abstract,
         smart_config=smart_config,
         regex_list=regex_list,
-        excluded_synsets=excluded_synsets
+        excluded_synsets=excluded_synsets,
+        stats=stats
     )
     
     return result

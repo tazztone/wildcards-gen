@@ -57,10 +57,24 @@ def test_generate_tencent_hierarchy(mock_ensure, mock_gloss, mock_get_synset, mo
 @patch('wildcards_gen.core.datasets.tencent.get_synset_gloss')
 @patch('wildcards_gen.core.datasets.tencent.ensure_nltk_data')
 @patch('wildcards_gen.core.smart.SmartConfig')
-def test_generate_tencent_hierarchy_with_smart_flags(mock_smart_config, mock_ensure, mock_gloss, mock_get_synset, mock_download, mock_tencent_file):
+@patch('wildcards_gen.core.smart.apply_semantic_arrangement')
+@patch('wildcards_gen.core.smart.apply_semantic_cleaning')
+def test_generate_tencent_hierarchy_with_smart_flags(mock_cleaning, mock_arrangement, mock_smart_config, mock_ensure, mock_gloss, mock_get_synset, mock_download, mock_tencent_file):
     """Verify that new smart/arrangement flags are accepted and passed to SmartConfig."""
     mock_download.return_value = mock_tencent_file
     mock_get_synset.return_value = MagicMock()
+    mock_arrangement.return_value = ({}, [])
+    mock_cleaning.side_effect = lambda x, c: x
+    
+    # Configure mock
+    conf = mock_smart_config.return_value
+    conf.enabled = True
+    conf.min_leaf_size = 5
+    conf.min_hyponyms = 50
+    conf.min_depth = 4
+    conf.semantic_cleanup = True
+    conf.semantic_arrangement = True
+
     
     # Call with new flags
     tencent.generate_tencent_hierarchy(
