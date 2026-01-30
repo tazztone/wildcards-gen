@@ -191,18 +191,37 @@ def build_wordnet_hierarchy(
                         pass
                     
                     # Semantic Arrangement (Re-grow)
+                    
+                    # Semantic Arrangement (Re-grow)
                     if smart_config.semantic_arrangement:
-                         named_groups, leftovers, metadata = apply_semantic_arrangement(unique_labels, smart_config, stats=stats, context=name)
-                         for g_name, g_terms in named_groups.items():
-                             structure_mgr.add_leaf_list(parent_map, g_name, g_terms, f"instruction: items related to {g_name}")
+                         arranged_structure = apply_semantic_arrangement(unique_labels, smart_config, stats=stats, context=name)
                          
-                         if leftovers: # Keep leftovers in the main node name, or Misc? 
-                             # Main node name is better context than "misc"
-                             structure_mgr.add_leaf_list(parent_map, name, leftovers, instruction)
+                         if isinstance(arranged_structure, list):
+                             # Failed to arrange or small -> treat as flat list
+                             structure_mgr.add_leaf_list(parent_map, name, arranged_structure, instruction)
+                         else:
+                             # Created a sub-hierarchy.
+                             # Merge into a temp node first to convert to StructureManager format?
+                             # Or use merge_categorized_data if we had a target.
+                             # We want parent_map[name] = arranged_structure (converted).
+                             
+                             # Use StructureManager to ensure comments if possible, but arranged_structure is raw dict/list from arranger.
+                             # We can convert it to CommentedMap via recursion or just let StructureManager.merge_categorized_data handle it.
+                             
+                             # Create a temp map for 'name'
+                             temp_node = structure_mgr.create_empty_structure()
+                             structure_mgr.merge_categorized_data(temp_node, arranged_structure)
+                             
+                             parent_map[name] = temp_node
+                             if instruction:
+                                 try:
+                                     parent_map.yaml_add_eol_comment(f"instruction: {instruction}", name)
+                                 except Exception: pass
                     else:
                         structure_mgr.add_leaf_list(parent_map, name, unique_labels, instruction)
                         
                     return (True, [])
+
                 return (False, [])
             else:
                 # Create category
@@ -229,10 +248,17 @@ def build_wordnet_hierarchy(
 
                     # Semantic Arrangement for Orphans
                     if smart_config.semantic_arrangement:
-                        named_groups, leftovers, metadata = apply_semantic_arrangement(collected_orphans, smart_config, stats=stats, context=f"orphans of {name}")
-                        for g_name, g_terms in named_groups.items():
-                            structure_mgr.add_leaf_list(child_map, g_name, g_terms, f"instruction: items related to {g_name}")
-                        collected_orphans = leftovers
+                        arranged_orphans = apply_semantic_arrangement(collected_orphans, smart_config, stats=stats, context=f"orphans of {name}")
+                        
+                        if isinstance(arranged_orphans, dict):
+                            # We have groups for the orphans.
+                            # Merge them into child_map (siblings).
+                            structure_mgr.merge_categorized_data(child_map, arranged_orphans)
+                            collected_orphans = [] # Handled
+                        else:
+                            # Still a flat list
+                            collected_orphans = arranged_orphans
+
 
                     if 'misc' in child_map:
                         existing = list(child_map['misc']) if child_map['misc'] else []
@@ -551,4 +577,13 @@ def generate_openimages_hierarchy(
             budget=budget
         )
     
+    
+    # Post-process with ConstraintShaper
+    if smart_config.enabled and (min_leaf_size > 0 or merge_orphans):
+         from ..shaper import ConstraintShaper
+         logger.info("Shaping hierarchy (merging orphans, flattening)...")
+         shaper = ConstraintShaper(result)
+         result = shaper.shape(min_leaf_size=min_leaf_size, flatten_singles=True, preserve_roots=True)
+
     return result
+

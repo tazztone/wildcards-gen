@@ -13,24 +13,38 @@
 ## Phases
 
 ### Phase 1: Stability & Metrics Foundation
-**Status**: ⬜ Not Started
+**Status**: ✅ Complete
 **Objective**: Implement the "Yardstick". Build the analysis tools to measure taxonomy stability and quality (cluster validity indices). We cannot improve what we cannot measure.
 **Tasks**:
-- [ ] Create `wildcards_gen/analytics/metrics.py` for stability calculations (Jaccard, etc.).
-- [ ] Implement `ClusterReport` class to track validity indices (Silhouette, DBCV).
-- [ ] Add CLI command `analyze-stability` to compare two YAML files.
+- [x] Create `wildcards_gen/analytics/metrics.py` for stability calculations (Jaccard, etc.).
+- [x] Implement `ClusterReport` class to track validity indices (Silhouette, DBCV).
+- [x] Add CLI command `analyze-stability` to compare two YAML files.
 
 ### Phase 2: Geometry-First Clustering
-**Status**: ⬜ Not Started
+**Status**: ✅ Complete
 **Objective**: Implement the UMAP dimensionality reduction pipeline feeding into HDBSCAN, allowing for "blobby" cluster detection and better outlier rejection in dense semantic spaces.
 
 ### Phase 3: Recursive Hierarchy & Formatting
-**Status**: ⬜ Not Started
+**Status**: ✅ Complete
 **Objective**: Implement recursive sub-clustering for large leaves and strict deterministic naming (Keyphrase extraction) to eliminate "Group N".
 
 ### Phase 4: Constraints & Shaping
-**Status**: ⬜ Not Started
+**Status**: ✅ Complete
 **Objective**: Build the "Editor" layer—a rule engine that respects user-defined overrides (merges, splits, bans) to post-process the generated probability map.
+
+### Phase 5: Integration
+**Status**: ✅ Complete
+**Objective**: Integrate Data Science components into the main generation pipeline.
+
+### Phase 6: Gap Closure (Integration Fixes)
+**Status**: ⬜ Not Started
+**Objective**: Fix regressions in OpenImages/Tencent datasets and fully propagate ConstraintShaper logic.
+
+**Gaps to Close:**
+- [ ] Fix `openimages.py` API break (nested result handling).
+- [ ] Fix `tencent.py` API break (assumed).
+- [ ] Integrate `ConstraintShaper` into `openimages.py`.
+- [ ] Integrate `ConstraintShaper` into `tencent.py`.
 
 ---
 ## Archived Milestones
