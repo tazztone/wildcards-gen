@@ -21,7 +21,7 @@ def mock_wn_fixture():
         wordnet.get_synset_from_wnid.cache_clear()
         imagenet.load_imagenet_1k_wnids.cache_clear()
         imagenet.load_imagenet_21k_wnids.cache_clear()
-        openimages.load_openimages_data.cache_clear()
+        openimages._OPENIMAGES_CACHE = None
         openimages._get_cached_synset_tree.cache_clear()
 
         # Setup basic synset

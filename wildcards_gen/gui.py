@@ -187,6 +187,7 @@ def generate_dataset_handler(
     semantic_arrange, semantic_arrange_threshold, semantic_arrange_min_cluster,
     exclude_subtree=None, exclude_regex=None,
     semantic_arrange_method='eom', debug_arrangement=False,
+    umap_neighbors=15, umap_dist=0.1, min_samples=5, orphans_template="misc",
     fast_preview=False,
     progress=gr.Progress()
 ):
@@ -223,7 +224,11 @@ def generate_dataset_handler(
                 'semantic_arrangement_min_cluster': int(semantic_arrange_min_cluster),
                 'semantic_arrangement_method': semantic_arrange_method,
                 'debug_arrangement': debug_arrangement,
-                'preview_limit': preview_limit
+                'preview_limit': preview_limit,
+                'umap_n_neighbors': int(umap_neighbors),
+                'umap_min_dist': float(umap_dist),
+                'hdbscan_min_samples': int(min_samples),
+                'orphans_label_template': orphans_template
             })
 
         if dataset_name == 'ImageNet':
@@ -258,7 +263,8 @@ def generate_dataset_handler(
                 'max_depth': int(depth),
                 'with_glosses': with_glosses,
                 'smart': is_smart,
-                'bbox_only': bbox_only
+                'bbox_only': bbox_only,
+                'progress_callback': progress
             }
             if is_smart:
                 kwargs.update(smart_kwargs)
@@ -563,8 +569,8 @@ def launch_gui(share=False):
                         )
 
                 with gr.Row():
-                    # --- Left Column: Configuration ---
-                    with gr.Column(scale=1, variant='panel', elem_classes=['dataset-config-panel']):
+                    # --- Left Column: Configuration (Sidebar) ---
+                    with gr.Sidebar(label="Generator Settings", elem_classes=['dataset-config-panel']) as sidebar:
                         gr.Markdown('### 🛠️ Configuration', elem_classes=['section-header'])
                         
                         # ImageNet Specifics
@@ -609,6 +615,12 @@ def launch_gui(share=False):
                                 
                                 ds_arrange_method = gr.Dropdown(['eom', 'leaf'], value='eom', label="Cluster Method", info="'leaf' finds smaller groups.")
                                 ds_debug_arrangement = gr.Checkbox(label="Debug Logs", value=False)
+                            
+                            with gr.Accordion('Deep Tuning', open=False):
+                                ds_umap_neighbors = gr.Slider(2, 50, value=15, step=1, label="UMAP Neighbors", info="Lower = local structure, Higher = global.")
+                                ds_umap_dist = gr.Slider(0.0, 1.0, value=0.1, step=0.01, label="UMAP Min Dist", info="Clump tightness.")
+                                ds_arr_samples = gr.Slider(1, 20, value=5, step=1, label="Min Samples", info="Outlier sensitivity (High = more strict).")
+                                ds_orphans_template = gr.Textbox(label="Orphan Key", value="misc", placeholder="misc")
                                 
                         # Filters
                         with gr.Accordion('Advanced Filters', open=False, visible=True) as adv_filter_group:
@@ -777,6 +789,7 @@ def launch_gui(share=False):
             ds_semantic_arrangement, ds_arrange_threshold, ds_arrange_min_cluster,
             ds_exclude_subtree, ds_exclude_regex,
             ds_arrange_method, ds_debug_arrangement,
+            ds_umap_neighbors, ds_umap_dist, ds_arr_samples, ds_orphans_template,
             ds_fast_preview
         ]
         
@@ -785,7 +798,8 @@ def launch_gui(share=False):
         live_preview_triggers = [
             ds_depth.change, ds_min_depth.change, ds_min_hyponyms.change, ds_min_leaf.change,
             ds_semantic_threshold.change, ds_arrange_threshold.change, ds_arrange_min_cluster.change,
-            ds_merge_orphans.change, ds_semantic_clean.change, ds_semantic_arrangement.change
+            ds_merge_orphans.change, ds_semantic_clean.change, ds_semantic_arrangement.change,
+            ds_umap_neighbors.change, ds_umap_dist.change, ds_arr_samples.change
         ]
         
         # Wire each trigger to the live_preview_handler with debounce

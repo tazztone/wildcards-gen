@@ -49,7 +49,7 @@ def test_flatten_singles():
     # Level3 has 1 child (list) -> STOP, don't flatten leaf container.
     
     shaper = ConstraintShaper(tree)
-    result = shaper.shape(flatten_singles=True, min_leaf_size=0)
+    result = shaper.shape(flatten_singles=True, min_leaf_size=0, preserve_roots=False)
     
     # Expectation: Level1 -> Level2 (dict) -> promotes Level2?
     # Result should be just {Level3: ...} ??

@@ -264,9 +264,9 @@ def generate_tencent_hierarchy(
             # Smart Mode: Semantic Arrangement Re-grow
             if smart and config.enabled and config.semantic_arrangement:
                 from ..smart import apply_semantic_arrangement
-                arranged_structure = apply_semantic_arrangement(filtered_leaves, config, stats=stats, context=name, return_metadata=True)
+                arranged_structure, leftovers, metadata = apply_semantic_arrangement(filtered_leaves, config, stats=stats, context=name, return_metadata=True)
                 
-                if isinstance(arranged_structure, dict):
+                if arranged_structure:
                     # Created a sub-hierarchy.
                     # Construction logic:
                     # We need to return this dict as the new structure.
@@ -391,9 +391,9 @@ def generate_tencent_hierarchy(
             # Semantic Arrangement for Orphans
             if smart and config.enabled and config.semantic_arrangement:
                 from ..smart import apply_semantic_arrangement
-                arranged_orphans = apply_semantic_arrangement(orphan_leaves, config, stats=stats, context=f"orphans of {name}", return_metadata=True)
+                arranged_orphans, leftovers, metadata = apply_semantic_arrangement(orphan_leaves, config, stats=stats, context=f"orphans of {name}", return_metadata=True)
                 
-                if isinstance(arranged_orphans, dict):
+                if arranged_orphans:
                     # Merge groups into CM (as siblings)
                     # merge_nodes handles dict merging
                     for k, v in arranged_orphans.items():
@@ -435,7 +435,7 @@ def generate_tencent_hierarchy(
                 leaves.extend(orphan_leaves)
             
             normalized_name = name.lower()
-            filtered_leaves = sorted(list(set([l for l in leaves if l.lower() != normalized_name])), key=str.casefold)
+            filtered_leaves = sorted(list(set([l for l in leaves if isinstance(l, str) and l.lower() != normalized_name])), key=str.casefold)
             
             # Semantic cleaning
             if smart and config.enabled and config.semantic_cleanup:

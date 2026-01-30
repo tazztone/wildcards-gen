@@ -66,7 +66,12 @@ class SmartConfig:
                  debug_arrangement: bool = False,
                  skip_nodes: list = None,
                  orphans_label_template: str = "misc",
-                 preview_limit: Optional[int] = None):
+                 preview_limit: Optional[int] = None,
+                 # Advanced Tuning
+                 umap_n_neighbors: int = 15,
+                 umap_min_dist: float = 0.1,
+                 umap_n_components: int = 5,
+                 hdbscan_min_samples: Optional[int] = None):
         """
         Initializes the SmartConfig.
 
@@ -88,6 +93,10 @@ class SmartConfig:
             skip_nodes (list): Nodes to structurally skip (elide) while promoting children.
             orphans_label_template (str): Template for orphan categories (e.g. "other_{}").
             preview_limit (int): Max items/nodes to process (Fast Preview). None = unlimited.
+            umap_n_neighbors (int): UMAP neighbors (default 15).
+            umap_min_dist (float): UMAP min distance (default 0.1).
+            umap_n_components (int): UMAP components (default 5).
+            hdbscan_min_samples (int): HDBSCAN min samples (default uses min_cluster).
         """
         self.enabled = enabled
         self.min_depth = min_depth
@@ -106,6 +115,10 @@ class SmartConfig:
         self.skip_nodes = set(skip_nodes) if skip_nodes else set()
         self.orphans_label_template = orphans_label_template
         self.preview_limit = preview_limit
+        self.umap_n_neighbors = umap_n_neighbors
+        self.umap_min_dist = umap_min_dist
+        self.umap_n_components = umap_n_components
+        self.hdbscan_min_samples = hdbscan_min_samples
 
     def get_child_config(self, node_name: str, node_wnid: Optional[str] = None) -> 'SmartConfig':
         """
@@ -154,7 +167,12 @@ class SmartConfig:
 
             debug_arrangement=override.get('debug_arrangement', self.debug_arrangement),
             skip_nodes=override.get('SKIP_NODES', self.skip_nodes),
-            orphans_label_template=override.get('orphans_label_template', self.orphans_label_template)
+            orphans_label_template=override.get('orphans_label_template', self.orphans_label_template),
+            
+            umap_n_neighbors=override.get('umap_n_neighbors', self.umap_n_neighbors),
+            umap_min_dist=override.get('umap_min_dist', self.umap_min_dist),
+            umap_n_components=override.get('umap_n_components', self.umap_n_components),
+            hdbscan_min_samples=override.get('hdbscan_min_samples', self.hdbscan_min_samples)
         )
 
 
@@ -192,7 +210,12 @@ def apply_semantic_arrangement(
          threshold=config.semantic_arrangement_threshold,
          min_cluster_size=config.semantic_arrangement_min_cluster,
          method=config.semantic_arrangement_method,
-         return_metadata=return_metadata
+         return_metadata=return_metadata,
+         # Advanced Tuning
+         umap_n_neighbors=config.umap_n_neighbors,
+         umap_min_dist=config.umap_min_dist,
+         umap_n_components=config.umap_n_components,
+         min_samples=config.hdbscan_min_samples
     )
     
     metadata = {}

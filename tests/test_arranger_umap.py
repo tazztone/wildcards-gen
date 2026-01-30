@@ -51,6 +51,8 @@ def test_compute_umap_embeddings_import_error():
 
 def test_arrange_single_pass_calls_umap():
     """Verify _arrange_single_pass calls compute_umap_embeddings."""
+    from wildcards_gen.core import arranger
+    arranger._UMAP_CACHE.clear()
     
     # Mock compute_umap_embeddings
     with patch('wildcards_gen.core.arranger.compute_umap_embeddings') as mock_compute:

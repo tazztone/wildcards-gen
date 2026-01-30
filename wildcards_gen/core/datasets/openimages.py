@@ -24,10 +24,17 @@ from ..smart import should_prune_node, apply_semantic_cleaning, apply_semantic_a
 logger = logging.getLogger(__name__)
 
 
-@functools.lru_cache(maxsize=1)
-def load_openimages_data() -> Tuple[Dict[str, Any], Dict[str, str]]:
+
+# Manual cache for OpenImages data
+_OPENIMAGES_CACHE = None
+
+def load_openimages_data(progress_callback=None) -> Tuple[Dict[str, Any], Dict[str, str]]:
     """Load Open Images hierarchy and class descriptions."""
-    hierarchy_path, classes_path = ensure_openimages_data()
+    global _OPENIMAGES_CACHE
+    if _OPENIMAGES_CACHE is not None:
+        return _OPENIMAGES_CACHE
+
+    hierarchy_path, classes_path = ensure_openimages_data(progress_callback=progress_callback)
     
     # Load class descriptions (ID -> Name)
     id_to_name = {}
@@ -42,6 +49,7 @@ def load_openimages_data() -> Tuple[Dict[str, Any], Dict[str, str]]:
     with open(hierarchy_path, 'r', encoding='utf-8') as f:
         hierarchy = json.load(f)
     
+    _OPENIMAGES_CACHE = (hierarchy, id_to_name)
     return hierarchy, id_to_name
 
 
@@ -194,29 +202,29 @@ def build_wordnet_hierarchy(
                     
                     # Semantic Arrangement (Re-grow)
                     if smart_config.semantic_arrangement:
-                         arranged_structure = apply_semantic_arrangement(unique_labels, smart_config, stats=stats, context=name)
+                        arranged_structure, leftovers = apply_semantic_arrangement(unique_labels, smart_config, stats=stats, context=name)
                          
-                         if isinstance(arranged_structure, list):
-                             # Failed to arrange or small -> treat as flat list
-                             structure_mgr.add_leaf_list(parent_map, name, arranged_structure, instruction)
-                         else:
-                             # Created a sub-hierarchy.
-                             # Merge into a temp node first to convert to StructureManager format?
-                             # Or use merge_categorized_data if we had a target.
-                             # We want parent_map[name] = arranged_structure (converted).
-                             
-                             # Use StructureManager to ensure comments if possible, but arranged_structure is raw dict/list from arranger.
-                             # We can convert it to CommentedMap via recursion or just let StructureManager.merge_categorized_data handle it.
-                             
-                             # Create a temp map for 'name'
-                             temp_node = structure_mgr.create_empty_structure()
-                             structure_mgr.merge_categorized_data(temp_node, arranged_structure)
-                             
-                             parent_map[name] = temp_node
-                             if instruction:
-                                 try:
-                                     parent_map.yaml_add_eol_comment(f"instruction: {instruction}", name)
-                                 except Exception: pass
+                        if arranged_structure:
+                            # Created a sub-hierarchy.
+                            # Merge into a temp node first to convert to StructureManager format?
+                            
+                            # Create a temp map for 'name'
+                            temp_node = structure_mgr.create_empty_structure()
+                            structure_mgr.merge_categorized_data(temp_node, arranged_structure)
+                            
+                            parent_map[name] = temp_node
+                            if instruction:
+                                try:
+                                    parent_map.yaml_add_eol_comment(f"instruction: {instruction}", name)
+                                except Exception: pass
+                            
+                            if leftovers:
+                                structure_mgr.add_leaf_list(temp_node, "misc", leftovers, "Other items")
+
+                        else:
+                            # No structure found, just add flat list
+                            structure_mgr.add_leaf_list(parent_map, name, unique_labels, instruction)
+                        
                     else:
                         structure_mgr.add_leaf_list(parent_map, name, unique_labels, instruction)
                         
@@ -248,16 +256,16 @@ def build_wordnet_hierarchy(
 
                     # Semantic Arrangement for Orphans
                     if smart_config.semantic_arrangement:
-                        arranged_orphans = apply_semantic_arrangement(collected_orphans, smart_config, stats=stats, context=f"orphans of {name}")
+                        arranged_orphans, leftovers = apply_semantic_arrangement(collected_orphans, smart_config, stats=stats, context=f"orphans of {name}")
                         
-                        if isinstance(arranged_orphans, dict):
+                        if arranged_orphans:
                             # We have groups for the orphans.
                             # Merge them into child_map (siblings).
                             structure_mgr.merge_categorized_data(child_map, arranged_orphans)
-                            collected_orphans = [] # Handled
+                            collected_orphans = leftovers # Only keep leftovers as orphans
                         else:
                             # Still a flat list
-                            collected_orphans = arranged_orphans
+                            collected_orphans = leftovers
 
 
                     if 'misc' in child_map:
@@ -510,7 +518,8 @@ def generate_openimages_hierarchy(
     skip_nodes: Optional[List[str]] = None,
     orphans_label_template: Optional[str] = None,
     stats: Optional[Any] = None,
-    preview_limit: Optional[int] = None
+    preview_limit: Optional[int] = None,
+    progress_callback=None
 ) -> CommentedMap:
     """
     Generate hierarchy from Open Images dataset.

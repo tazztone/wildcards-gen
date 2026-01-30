@@ -23,7 +23,9 @@ def mock_deps():
              {0: [1]},
              [0]
          )
+         openimages._get_cached_synset_tree.cache_clear()
          yield
+         openimages._get_cached_synset_tree.cache_clear()
 
 def test_openimages_nested_arrangement(mock_deps):
     # Test that openimages handles nested arrangement dicts
@@ -33,8 +35,9 @@ def test_openimages_nested_arrangement(mock_deps):
          patch('wildcards_gen.core.shaper.ConstraintShaper') as MockShaper:
          
         # Mock arrangement to return a nested dict structure
+        # Mock arrangement to return a nested dict structure (and leftovers)
         # e.g. "Animals" -> {"Mammals": ["Dog"], "Others": ["Cat"]}
-        mock_arrange.return_value = {"Mammals": ["Dog"], "Others": ["Cat"]}
+        mock_arrange.return_value = ({"Mammals": ["Dog"], "Others": ["Cat"]}, [])
         
         # Mock Shaper to just pass through or verify it was called
         mock_shaper_instance = MagicMock()
@@ -63,8 +66,8 @@ def test_tencent_nested_arrangement(mock_deps):
          patch('wildcards_gen.core.shaper.ConstraintShaper') as MockShaper:
 
          
-        # Mock arrangement to return a nested dict
-        mock_arrange.return_value = {"SubGroup": ["Item1"], "Other": ["Item2"]}
+        # Mock arrangement to return a nested dict (and leftovers, metadata)
+        mock_arrange.return_value = ({"SubGroup": ["Item1"], "Other": ["Item2"]}, [], {})
         
         # Mock Shaper
         mock_shaper_instance = MagicMock()

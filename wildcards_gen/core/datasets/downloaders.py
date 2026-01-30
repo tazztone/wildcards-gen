@@ -25,16 +25,26 @@ DOWNLOADS_DIR = os.path.join(
 )
 
 
+
 class DownloadProgressBar(tqdm):
     """Progress bar for urllib downloads."""
-    
+    def __init__(self, *args, progress_callback=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.progress_callback = progress_callback
+        
     def update_to(self, b=1, bsize=1, tsize=None):
         if tsize is not None:
             self.total = tsize
-        self.update(b * bsize - self.n)
+        
+        increment = b * bsize - self.n
+        self.update(increment)
+        
+        if self.progress_callback:
+            # Report tuple (current, total)
+            self.progress_callback((self.n, self.total), desc=self.desc)
 
 
-def download_file(url: str, dest_path: str, force: bool = False) -> None:
+def download_file(url: str, dest_path: str, force: bool = False, progress_callback=None) -> None:
     """Download a file from URL to destination path."""
     if os.path.exists(dest_path) and not force:
         logger.debug(f"File already exists: {dest_path}")
@@ -45,7 +55,8 @@ def download_file(url: str, dest_path: str, force: bool = False) -> None:
         os.makedirs(os.path.dirname(dest_path), exist_ok=True)
         with DownloadProgressBar(
             unit='B', unit_scale=True, miniters=1,
-            desc=url.split('/')[-1]
+            desc=url.split('/')[-1],
+            progress_callback=progress_callback
         ) as t:
             urllib.request.urlretrieve(url, filename=dest_path, reporthook=t.update_to)
         logger.info(f"Downloaded to {dest_path}")
