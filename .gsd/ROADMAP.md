@@ -1,14 +1,40 @@
 # ROADMAP.md
 
-> **Current Milestone**: v0.3.0 - UX Polish
-> **Goal**: Improve the GUI layout to optimize space usage and enhance user experience, specifically addressing the Analysis and Generation Completed sections.
+> **Current Milestone**: v0.4.0 - Data Science Core
+> **Goal**: Upgrade the taxonomy generation engine with strict data science methodologies (stability metrics, geometry-first clustering, deterministic naming) to produce high-quality, reproducible, and human-editable YAML artifacts.
 
 ## Must-Haves
-- [ ] Compact "Analysis" section to save vertical space.
-- [ ] Move "Generation Completed" status to a fixed/prominent place.
+- [ ] **Stability Metrics**: Measurable "diff stability" (Jaccard/Edit Distance) between runs.
+- [ ] **Advanced Clustering**: UMAP → HDBSCAN pipeline for better separation in high-cardinality leaves.
+- [ ] **Deterministic Naming**: Keyphrase extraction (TF-IDF/KeyBERT) to replace "Group N".
+- [ ] **Hierarchical Leaves**: Recursive clustering for multi-level sub-categorization.
+- [ ] **Constraints Engine**: Rule-based override system (must-link/cannot-link) for taxonomy shaping.
 
 ## Phases
 
-### Phase 1: Layout Refactoring
+### Phase 1: Stability & Metrics Foundation
 **Status**: ⬜ Not Started
-**Objective**: Implement layout changes to `gui.py` to address the "Analysis" and "Generation Completed" UI issues.
+**Objective**: Implement the "Yardstick". Build the analysis tools to measure taxonomy stability and quality (cluster validity indices). We cannot improve what we cannot measure.
+**Tasks**:
+- [ ] Create `wildcards_gen/analytics/metrics.py` for stability calculations (Jaccard, etc.).
+- [ ] Implement `ClusterReport` class to track validity indices (Silhouette, DBCV).
+- [ ] Add CLI command `analyze-stability` to compare two YAML files.
+
+### Phase 2: Geometry-First Clustering
+**Status**: ⬜ Not Started
+**Objective**: Implement the UMAP dimensionality reduction pipeline feeding into HDBSCAN, allowing for "blobby" cluster detection and better outlier rejection in dense semantic spaces.
+
+### Phase 3: Recursive Hierarchy & Formatting
+**Status**: ⬜ Not Started
+**Objective**: Implement recursive sub-clustering for large leaves and strict deterministic naming (Keyphrase extraction) to eliminate "Group N".
+
+### Phase 4: Constraints & Shaping
+**Status**: ⬜ Not Started
+**Objective**: Build the "Editor" layer—a rule engine that respects user-defined overrides (merges, splits, bans) to post-process the generated probability map.
+
+---
+## Archived Milestones
+
+### v0.3.0 - UX Polish (Paused)
+- [ ] Compact "Analysis" section to save vertical space.
+- [ ] Move "Generation Completed" status to a fixed/prominent place.

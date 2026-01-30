@@ -430,25 +430,87 @@ def cmd_gui(args):
 
 
 def cmd_lint(args):
-    """Handle lint command (Semantic Analysis)."""
-    from .core.linter import lint_file, print_lint_report
+    """
+    lint <file> [--model=qwen3] [--threshold=0.1] [--clean]
+        Check for semantic outliers using embedding models.
+        Strategies:
+         --clean: Remove outliers and save to new file.
+    """
+    from wildcards_gen.core.linter import lint_file, print_lint_report, clean_structure, check_dependencies
+    from pathlib import Path
+
+    file_path = args.file
+    model_name = args.model or "qwen3"
+    threshold = float(args.threshold) if args.threshold else 0.1
+    do_clean = args.clean
+
+    if not check_dependencies():
+         print("❌ Linting requires extra dependencies.")
+         print("   Run: pip install wildcards-gen[lint]")
+         return
+
+    print(f"🔍 Linting {file_path} with {model_name} (threshold={threshold})...")
     
     try:
-        if not os.path.exists(args.skeleton):
-            print(f"Error: File not found: {args.skeleton}")
-            sys.exit(1)
-            
-        print(f"🔍 Linting {args.skeleton} using {args.model} (threshold={args.threshold})...")
-        report = lint_file(args.skeleton, args.model, args.threshold)
-        print_lint_report(report, args.output)
+        report, structure = lint_file(file_path, model_name, threshold)
+        print_lint_report(report)
         
+        if do_clean and report['issues']:
+            print("\n🧹 Cleaning structure...")
+            clean_data = clean_structure(structure, report)
+            
+            # Save to new file
+            p = Path(file_path)
+            new_path = p.parent / f"{p.stem}_clean{p.suffix}"
+            
+            from wildcards_gen.core.structure import StructureManager
+            mgr = StructureManager()
+            mgr.save_structure(clean_data, str(new_path))
+            print(f"✅ Cleaned file saved to: {new_path}")
+            
     except ImportError as e:
-        print(f"Error: {e}")
-        sys.exit(1)
+        print(f"❌ Dependency Error: {e}")
     except Exception as e:
-        logger.exception("Linting failed")
-        print(f"Error: {str(e)}")
-        sys.exit(1)
+        print(f"❌ Error: {e}")
+
+def cmd_compare(args):
+    """
+    compare <file1> <file2>
+        Compare two wildcard files for content and structural stability.
+        Metrics:
+          - Jaccard Index: Content overlap (1.0 = identical terms).
+          - ARI: Clustering similarity (1.0 = identical grouping).
+    """
+    from wildcards_gen.analytics.metrics import check_dependencies
+    
+    if not check_dependencies():
+         print("❌ Analysis requires extra dependencies.")
+         print("   Run: pip install wildcards-gen[lint]")
+         return
+
+    from wildcards_gen.analytics.comparator import TaxonomyComparator
+    
+    file1 = args.file
+    # Access the second positional argument which we'll need to add to the parser
+    file2 = args.other_file 
+
+    print(f"📊 Comparing:\n  A: {file1}\n  B: {file2}")
+    
+    try:
+        comp = TaxonomyComparator()
+        result = comp.compare(file1, file2)
+        metrics = result['metrics']
+        
+        print("\nStability Report")
+        print("================")
+        print(f"Content Stability (Jaccard):   {metrics['jaccard_content']:.4f}")
+        print(f"Structure Stability (ARI):     {metrics['adjusted_rand_index']:.4f}")
+        print(f"Common Terms:                  {metrics['common_terms_count']}")
+        print(f"Total Unique Terms:            {metrics['union_terms_count']}")
+        print("================")
+
+    except Exception as e:
+        print(f"❌ Error during comparison: {e}")
 
 
 def main():
@@ -558,13 +620,20 @@ def main():
 
     # === LINT COMMAND ===
     p_lint = subparsers.add_parser('lint', help='Analyze skeleton for semantic quality')
-    p_lint.add_argument('skeleton', type=str, help='Path to skeleton YAML file')
+    p_lint.add_argument('file', type=str, help='Path to skeleton YAML file')
     p_lint.add_argument('--model', choices=['qwen3', 'mpnet', 'minilm'], default='qwen3',
                         help='Embedding model (qwen3=best quality, minilm=fastest)')
     p_lint.add_argument('--threshold', type=float, default=0.1,
                         help='HDBSCAN outlier score threshold (0-1, higher = stricter)')
+    p_lint.add_argument('--clean', action='store_true', help='Remove outliers and save to new file.')
     p_lint.add_argument('--output', choices=['json', 'markdown'], default='markdown')
     p_lint.set_defaults(func=cmd_lint)
+
+    # === COMPARE COMMAND ===
+    p_comp = subparsers.add_parser('compare', help='Compare two wildcard files for stability.')
+    p_comp.add_argument('file', help='First file path')
+    p_comp.add_argument('other_file', help='Second file path')
+    p_comp.set_defaults(func=cmd_compare)
     
     args = parser.parse_args()
     args.func(args)

@@ -9,26 +9,28 @@ Stabilize the `wildcards-gen` codebase by resolving regression failures, unifyin
 > For detailed architectural principles (Skeleton concept, Smart Mode, Arranger logic), see [.gsd/ARCHITECTURE.md](file:///home/tazztone/_coding/wildcards-gen/.gsd/ARCHITECTURE.md).
 
 ## Goals
-1.  **Zero-Failure Test Suite**: Fix all regression failures in the pytest suite (Tencent ValueErrors, Config TypeErrors, and Dataset AssertionErrors).
-2.  **Unified Dependency Management**: Centralize all project requirements (including `gradio` and ML libs) into `pyproject.toml` and remove the redundant `requirements.txt`.
-3.  **Rapid Settings Feedback**: Implement a "Fast Preview" capability in the core dataset logic and GUI to allow users to tune smart-pruning settings on a 500-item subset before committing to a full generation.
-4.  **Standardized Interfaces**: Ensure `apply_semantic_arrangement` and related core utilities have consistent return signatures across the codebase.
+1.  **Data Science Core Upgrade**: Implement a strict DS pipeline (metrics, geometry-first clustering, deterministic naming) to generate high-quality, stable hierarchies.
+2.  **Zero-Failure Test Suite**: Fix all regression failures in the pytest suite.
+3.  **Unified Dependency Management**: Centralize requirements in `pyproject.toml`.
+4.  **Rapid Settings Feedback**: Implement "Fast Preview" for pruning settings.
 
 ## Non-Goals (Out of Scope)
-- Adding new datasets (Bio-Diversity, etc.).
+- Adding new raw datasets (Bio-Diversity, etc.) beyond the current set.
 - Refactoring the LLM generation prompts.
-- Migrating from Gradio to another UI framework.
+- Migrating away from Gradio.
 
 ## Users
-- **Power Users**: Who need to dial in specific pruning settings without waiting for 20,000-node graph traversals.
-- **Maintainers**: Who need a stable build/test environment to prevent regressions.
+- **Data Scientists**: Who value stability metrics and clear taxonomy structures.
+- **Power Users**: Who need to dial in specific pruning settings.
+- **Maintainers**: Who need a stable build/test environment.
 
 ## Constraints
-- **Python Version**: Must remain `>=3.10` due to `transformers` dependency.
+- **Python Version**: `>=3.10`.
 - **Comment Preservation**: Must never compromise `ruamel.yaml` comment handling.
+- **Reproducibility**: Taxonomy generation must be deterministic given the same inputs and seed.
 
 ## Success Criteria
+- [ ] Stability metrics (Jaccard/Edit Distance) are implemented and reported.
+- [ ] Clustering pipeline uses UMAP -> HDBSCAN for high-cardinality leaves.
+- [ ] Group naming is deterministic (KeyBERT/TF-IDF) avoiding "Group N".
 - [ ] `uv run pytest` passes 100% of tests.
-- [ ] `requirements.txt` is deleted and `pip install -e .` works fully.
-- [ ] GUI includes a "Preview" toggle that limits dataset processing to the first 500 items.
-- [ ] Build/CI scripts updated to reflect new dependency structure.
