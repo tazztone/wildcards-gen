@@ -156,6 +156,12 @@ def _generate_descriptive_name(
         if s:
             metadata["wnid"] = get_synset_wnid(s)
     else:
+        # Fallback: Try TF-IDF
+        keywords = extract_unique_keywords(cluster_terms, [], top_n=1) # Note: Need full context. 
+        # Refactor: _generate_descriptive_name needs access to all_terms for context?
+        # For now, let's just return "Group" and let the caller enhance it or pass context down.
+        # Actually, extracting context inside here is hard without pass-through.
+        # Let's settle for "Group" here and enhance in loop.
         name = "Group"
         metadata["source"] = "fallback"
 
@@ -177,11 +183,66 @@ def _generate_descriptive_name(
 
 
 
+
+def extract_unique_keywords(cluster_terms: List[str], all_terms: List[str], top_n: int = 1) -> List[str]:
+    """
+    Extract top keywords that distinguish this cluster from the global set using TF-IDF.
+    """
+    try:
+        from sklearn.feature_extraction.text import TfidfVectorizer
+        
+        if not cluster_terms or not all_terms:
+            return []
+            
+        # 1. Construct Corpus
+        # Doc 0: The cluster
+        # Doc 1: Everything else (context)
+        cluster_doc = " ".join(cluster_terms)
+        
+        # Performance optimization: Sample context if too large? 
+        # For now, full context is fine for <10k items.
+        context_doc = " ".join([t for t in all_terms if t not in cluster_terms])
+        
+        if not context_doc: # If cluster IS everything
+             return []
+
+        corpus = [cluster_doc, context_doc]
+        
+        # 2. Compute TF-IDF
+        vectorizer = TfidfVectorizer(stop_words='english', token_pattern=r'(?u)\b\w\w+\b')
+        tfidf_matrix = vectorizer.fit_transform(corpus)
+        feature_names = np.array(vectorizer.get_feature_names_out())
+        
+        # 3. Get scores for Cluster Doc (index 0)
+        cluster_scores = tfidf_matrix[0].toarray()[0]
+        
+        # Sort desc
+        top_indices = cluster_scores.argsort()[::-1]
+        
+        keywords = []
+        for idx in top_indices:
+            word = feature_names[idx]
+            # Filter out generic words if needed, though stop_words handles most
+            # Ensure word is actually relevant (score > 0)
+            if cluster_scores[idx] > 0.1:
+                keywords.append(word)
+                if len(keywords) >= top_n:
+                    break
+                    
+        return keywords
+        
+    except Exception as e:
+        logger.warning(f"TF-IDF extraction failed: {e}")
+        return []
+
+
 def compute_umap_embeddings(embeddings: np.ndarray, n_components: int = 5) -> np.ndarray:
     """
     Reduce embedding dimensionality using UMAP for better density-based clustering.
     Falls back to original embeddings if UMAP is missing or fails.
     """
+
+
     try:
         import umap
         
@@ -209,6 +270,9 @@ def compute_umap_embeddings(embeddings: np.ndarray, n_components: int = 5) -> np
     except Exception as e:
         logger.warning(f"UMAP reduction failed: {e}. Using raw embeddings.")
         return embeddings
+
+
+
 
 
 def _arrange_single_pass(
@@ -316,17 +380,40 @@ def _arrange_single_pass(
         
         # If name exists or is "Group", try to enhance it
         if name in named_groups or name == "Group":
-            # Hybrid: Name + (Medoid Term)
-            # Limit medoid term length to keep it readable
-            medoid_term = meta.get("medoid_term", "")
-            if medoid_term and medoid_term != name:
-                # Clean up medoid (remove parens, keep short)
-                clean_medoid = re.sub(r'\([^)]*\)', '', medoid_term).strip()
-                if len(clean_medoid.split()) <= 2:
-                    name = f"{base_name} ({clean_medoid})"
-                    meta["is_hybrid"] = True
+            # Hybrid: Name + (Medoid Term) or TF-IDF
+            
+            suffix = ""
+            
+            # 1. Try TF-IDF if name is generic "Group"
+            if name == "Group":
+                # We need context. Use leftovers + other clusters as context?
+                # Or just all other terms in this pass.
+                other_terms_in_pass = [t for t in terms if t not in cluster_items]
+                keywords = extract_unique_keywords(cluster_items, other_terms_in_pass, top_n=1)
+                if keywords:
+                    suffix = keywords[0].title()
+                    meta["tfidf_keyword"] = suffix
+            
+            # 2. If TF-IDF failed or not used, try Medoid
+            if not suffix:
+                medoid_term = meta.get("medoid_term", "")
+                if medoid_term and medoid_term != name:
+                    clean_medoid = re.sub(r'\([^)]*\)', '', medoid_term).strip()
+                    if len(clean_medoid.split()) <= 2:
+                        suffix = clean_medoid
+
+            # Apply Suffix
+            if suffix:
+                # If we have a suffix, use it.
+                # E.g. "Group (Spotted)" or "Canine (Retriever)"
+                if name == "Group":
+                     name = f"Group ({suffix})"
+                else:
+                     name = f"{base_name} ({suffix})"
+                meta["is_hybrid"] = True
                 
         # Final unique check with counters if Hybrid failed or collided too
+
         original_name = name
         counter = 2
         while name in named_groups:
@@ -436,3 +523,58 @@ def arrange_list(
         result.append(final_metadata)
         
     return tuple(result)
+
+
+def arrange_hierarchy(
+    terms: List[str],
+    max_depth: int = 2,
+    current_depth: int = 0,
+    max_leaf_size: int = 50,
+    **kwargs
+) -> Any:
+    """
+    Recursive arrangement.
+    Returns a structure (dict or list) suitable for direct YAML dump.
+    """
+    # Base case: Leaf is small enough
+    if len(terms) <= max_leaf_size or current_depth >= max_depth:
+        return sorted(terms)
+        
+    # Attempt to cluster
+    # We use return_metadata=True to access stats/meta if needed, but here we simply need groups.
+    groups, leftovers = arrange_list(terms, return_stats=False, return_metadata=False, **kwargs)
+    
+    # If clustering failed to find meaningful structure (all leftovers or 1 group), return flat
+    if not groups or (len(groups) == 1 and not leftovers):
+        return sorted(terms)
+        
+    # Build result
+    result = {}
+    
+    # Recurse on groups
+    for name, group_items in groups.items():
+        # Heuristic: Only recurse if the group is still huge
+        if len(group_items) > max_leaf_size:
+            result[name] = arrange_hierarchy(
+                group_items, 
+                max_depth=max_depth,
+                current_depth=current_depth + 1,
+                max_leaf_size=max_leaf_size,
+                **kwargs
+            )
+        else:
+            result[name] = sorted(group_items)
+            
+    # Handle leftovers
+    if leftovers:
+        # If leftovers are large, we *could* try to recurse them too, 
+        # but usually leftovers are noise. Let's keep them distinct.
+        # We can put them in a special key or just merge them?
+        # Standard approach: "Example" or just a list if mixed?
+        # Actually structure can be mixed: dict keys + list items? 
+        # No, YAML is usually Dict OR List.
+        # So leftovers must go into a group named "Other" or similar.
+        result["Other"] = sorted(leftovers)
+        
+    return result
+
