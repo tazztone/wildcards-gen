@@ -1,23 +1,10 @@
 # STATE.md
 
-> Project Memory
-
 ## Current Position
-- **Phase:** Post-Milestone Cleanup
-- **Status:** COMPLETED
+- **Milestone**: v0.3.0 - UX Polish
+- **Phase**: Not started
+- **Status**: Milestone planned
 
-## Last Task Summary
-Consolidated project documentation by merging `AGENTS.md` into `README.md`.
-- Transferred technical architecture, codebase map, and developer guidelines to `README.md`.
-- Deleted redundant `AGENTS.md`.
-
-## Accomplishments
-- Implemented Fast Preview logic across backend and frontend.
-- Fixed critical bug in `tencent.py` related to empty node handling.
-- Unified dependencies.
-- Cleaned up test suite.
-- **Consolidated architectural documentation into a single source of truth (README.md).**
-
-## Next Steps
-- Final project audit.
-- Manual GUI verification.
+## Recent Accomplishments
+- Created new milestone "v0.3.0 - UX Polish"
+- Established roadmap for GUI improvements
