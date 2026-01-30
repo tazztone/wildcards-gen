@@ -55,5 +55,26 @@ class TestStructureManager(unittest.TestCase):
             self.assertIn("# instruction: machines for transport", content)
             self.assertIn("# instruction: 4 wheels", content)
 
+    def test_round_trip_persistence(self):
+        root = self.sm.create_empty_structure()
+        self.sm.add_category_with_instruction(root, "PLANTS", "green things")
+        self.sm.save_structure(root, self.test_file)
+        
+        # Load back
+        loaded = self.sm.load_structure(self.test_file)
+        self.assertIn("PLANTS", loaded)
+        
+        # Modify
+        self.sm.add_leaf_list(loaded["PLANTS"], "TREES", ["oak", "pine"], "tall plants")
+        
+        # Save again
+        self.sm.save_structure(loaded, self.test_file)
+        
+        # Load again and verify BOTH instructions exist
+        with open(self.test_file, 'r') as f:
+            content = f.read()
+            self.assertIn("# instruction: green things", content)
+            self.assertIn("# instruction: tall plants", content)
+
 if __name__ == "__main__":
     unittest.main()

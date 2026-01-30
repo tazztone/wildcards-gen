@@ -168,6 +168,8 @@ def cmd_dataset_imagenet(args):
         semantic_arrangement_min_cluster=args.semantic_arrange_min_cluster,
         semantic_arrangement_method=args.semantic_arrange_method,
         debug_arrangement=args.debug_arrangement,
+        skip_nodes=args.skip_nodes,
+        orphans_label_template=args.orphans_label_template,
         stats=stats
     )
     
@@ -244,6 +246,8 @@ def cmd_dataset_openimages(args):
         semantic_arrangement_min_cluster=args.semantic_arrange_min_cluster,
         semantic_arrangement_method=args.semantic_arrange_method,
         debug_arrangement=args.debug_arrangement,
+        skip_nodes=args.skip_nodes,
+        orphans_label_template=args.orphans_label_template,
         stats=stats
     )
     
@@ -300,6 +304,8 @@ def cmd_dataset_tencent(args):
         semantic_arrangement_min_cluster=args.semantic_arrange_min_cluster,
         semantic_arrangement_method=args.semantic_arrange_method,
         debug_arrangement=args.debug_arrangement,
+        skip_nodes=args.skip_nodes,
+        orphans_label_template=args.orphans_label_template,
         stats=stats
     )
     
@@ -478,6 +484,8 @@ def main():
         parser.add_argument('--semantic-arrange-min-cluster', type=int, default=5, help='[Smart] Minimum items to form a named cluster')
         parser.add_argument('--semantic-arrange-method', choices=['eom', 'leaf'], default='eom', help='[Smart] Clustering method: eom (stable) or leaf (granular)')
         parser.add_argument('--debug-arrangement', action='store_true', help='[Smart] Show arrangement stats')
+        parser.add_argument('--skip-nodes', nargs='+', help='[Smart] Nodes (WNID or name) to structurally skip (elide) while promoting children')
+        parser.add_argument('--orphans-label-template', type=str, default=None, help='[Smart] Template for orphan categories (e.g. "other_{}")')
 
     # ImageNet
     p_imagenet = dataset_sub.add_parser('imagenet', help='ImageNet (WordNet-based) hierarchy')

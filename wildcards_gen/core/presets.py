@@ -24,7 +24,10 @@ DATASET_PRESET_OVERRIDES = {
     "Tencent ML-Images": {
         "Balanced": (4, 30, 5, True, True, True, 'eom'),
         "Compact": (3, 100, 10, True, True, True, 'eom'),
+        "Compact": (3, 100, 10, True, True, True, 'eom'),
         "Flat": (2, 600, 20, True, True, True, 'eom'),     # Higher leaf size to reduce noise in dense lists
+        "SKIP_NODES": ['placental', 'organism', 'living thing', 'whole', 'object', 'physical entity', 'causal agent'],
+        "orphans_label_template": "other_{}",
     },
     "ImageNet": {
         # ImageNet works well with defaults

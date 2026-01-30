@@ -26,24 +26,21 @@ The `# instruction:` comment is the payload. It tells the downhill AI what a cat
 *   **LLM (Flexible)**: Used for `categorize/create`. We use a custom `LLMEngine` that handles prompt loading and response cleaning (stripping markdown backticks).
 *   **Prompt Pipeline**: `create` uses a two-phase prompt (Architect -> Mason). Architect defines the core roots; Mason fills in the sub-categories.
 
-### 4. Smart Semantic Pruning
-To prevent "directory bloat" and noisy hierarchies, the tool uses an intelligent pruning strategy (enabled via `--smart`):
 *   **Semantic Significance**: Uses WordNet depth and branching factor to keep meaningful categories (e.g., "fruit") while flattening obscure intermediates.
 *   **Linear Chain Removal**: Skips nodes that only have one child, consolidating them into the parent to reduce nesting depth.
-*   **Orphan Bubbling**: Small lists (`min_leaf`) are bubbled up to the parent's `misc:` key (via `--merge-orphans`) instead of being discarded.
+*   **Orphan Bubbling**: Small lists (`min_leaf`) are bubbled up to a context-aware `other_{parent}:` key (via `--merge-orphans`) instead of being discarded.
+*   **Structural Skipping (Node Elision)**: Nodes in `SKIP_NODES` (defined in `presets.py`) are logically removed from the hierarchy while promoting their children, preventing taxonomic noise from deep "wrapper" nodes (e.g., `placental`).
 *   **Self-Reference Filtering**: Ensures leaf nodes never contain their own parent name (e.g., `nose:` instead of `nose: - nose`).
 
-### 5. Semantic Arrangement (Entropy Reduction)
-When a list becomes too large and "flat" (e.g., 200 "foodstuffs"), it loses utility. The arrangement feature (`core/arranger.py`) restores structure using a **Hybrid** approach:
 *   **Clustering**: Runs HDBSCAN on item embeddings to find density-based groups.
 *   **Multi-Pass Refinement**:
     *   *Pass 1*: Finds clear, dense clusters (size >= 3).
     *   *Pass 2*: Scans "leftovers" for smaller micro-clusters (size >= 2) using stricter similarity thresholds.
-*   **Medoid Naming**: To name a cluster without an LLM:
-    1.  Calculates the centroid.
-    2.  Identifies the "medoid" term.
-    3.  Queries WordNet for its hypernym (e.g., "basil" -> "herb").
-    4.  Falls back to LCA or "Group X" if needed.
+*   **Hybrid Naming**: To name a cluster without an LLM:
+    1.  Calculates the centroid and identifies the "medoid" term.
+    2.  Queries WordNet for its hypernym (e.g., "basil" -> "herb").
+    3.  If names collide (e.g., two "bird" clusters) or the name is too generic, it appends the medoid: `LCA (Medoid)` (e.g. `bird (eagle)`).
+    4.  Injects an `# instruction:` comment by fetching the WordNet definition for the chosen WNID.
 
 ## Supported Datasets
 
