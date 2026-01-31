@@ -176,13 +176,17 @@ def cmd_dataset_imagenet(args):
     output_path = resolve_output_path(args.output)
     mgr = StructureManager()
     mgr.save_structure(hierarchy, output_path)
-    print(f"✓ Saved ImageNet hierarchy to {output_path}")
-
     # Save stats
-    base_path = os.path.splitext(output_path)[0]
-    stats.save_to_json(f"{base_path}.stats.json")
-    stats.save_summary_log(f"{base_path}.log")
-    print(f"✓ Saved generation logs to {base_path}.log")
+    if config.get("generation.save_stats"):
+        # Always save stats to the configured output directory
+        filename = os.path.basename(output_path)
+        stem = os.path.splitext(filename)[0]
+        base_path = os.path.join(config.output_dir, stem)
+        os.makedirs(config.output_dir, exist_ok=True)
+        
+        stats.save_to_json(f"{base_path}.stats.json")
+        stats.save_summary_log(f"{base_path}.log")
+        print(f"✓ Saved generation logs to {base_path}.log")
 
 
 def cmd_dataset_coco(args):
@@ -254,13 +258,17 @@ def cmd_dataset_openimages(args):
     output_path = resolve_output_path(args.output)
     mgr = StructureManager()
     mgr.save_structure(hierarchy, output_path)
-    print(f"✓ Saved Open Images hierarchy to {output_path}")
-
     # Save stats
-    base_path = os.path.splitext(output_path)[0]
-    stats.save_to_json(f"{base_path}.stats.json")
-    stats.save_summary_log(f"{base_path}.log")
-    print(f"✓ Saved generation logs to {base_path}.log")
+    if config.get("generation.save_stats"):
+        # Always save stats to the configured output directory
+        filename = os.path.basename(output_path)
+        stem = os.path.splitext(filename)[0]
+        base_path = os.path.join(config.output_dir, stem)
+        os.makedirs(config.output_dir, exist_ok=True)
+        
+        stats.save_to_json(f"{base_path}.stats.json")
+        stats.save_summary_log(f"{base_path}.log")
+        print(f"✓ Saved generation logs to {base_path}.log")
 
 
 def cmd_dataset_tencent(args):
@@ -315,10 +323,16 @@ def cmd_dataset_tencent(args):
     print(f"✓ Saved Tencent ML-Images hierarchy to {output_path}")
 
     # Save stats
-    base_path = os.path.splitext(output_path)[0]
-    stats.save_to_json(f"{base_path}.stats.json")
-    stats.save_summary_log(f"{base_path}.log")
-    print(f"✓ Saved generation logs to {base_path}.log")
+    if config.get("generation.save_stats"):
+        # Always save stats to the configured output directory
+        filename = os.path.basename(output_path)
+        stem = os.path.splitext(filename)[0]
+        base_path = os.path.join(config.output_dir, stem)
+        os.makedirs(config.output_dir, exist_ok=True)
+        
+        stats.save_to_json(f"{base_path}.stats.json")
+        stats.save_summary_log(f"{base_path}.log")
+        print(f"✓ Saved generation logs to {base_path}.log")
 
 
 def cmd_categorize(args):
