@@ -1,68 +1,21 @@
 # ROADMAP.md
 
-> **Current Milestone**: v0.5.0 - Optimization & UI
-> **Goal**: Polish the user experience and optimize performance now that the core engine is robust.
+> **Current Milestone**: v0.6.0 - [PROJECTED]
+> **Goal**: Define next major objective.
 
 ## Must-Haves
-- [ ] **Async Generation**: Move long-running tasks to background threads to keep GUI responsive.
-- [ ] **Compact Layout**: Optimizing `gui.py` use of vertical space (Collapsibles, Sidebar).
-- [ ] **Live Preview**: "Preview" button in Builder tab to show first 50 lines of structure instantly.
-- [ ] **Caching**: Aggressive caching for Synset lookups to speed up re-runs.
+- [ ] TBD
 
 ## Phases
 
-### Phase 1: Async UI Foundation
-**Status**: ⬜ Not Started
-**Objective**: Refactor the centralized `cli.py`/`gui.py` invocation to support non-blocking execution (threaded/asyncio) and progress reporting.
-
-### Phase 2: UI Refresh & Feature Exposure
-**Status**: ⬜ Not Started
-**Objective**: Reorganize the Gradio layout for compactness and expose all deep engine parameters (Smart/Arranger settings) to the user.
-
-
-### Phase 3: Fast Preview Engine
-**Status**: 🚧 Partial
-**Objective**: Implement a "Dry Run" pipeline that skips heavy clustering/shaping to just show the raw pruned structure instantly.
-
-### Phase 4: Gap Closure & Verification
-**Status**: ✅ Complete
-**Objective**: Address missed optimizations (WordNet caching) and strictly verify performance claims.
-
-**Gaps to Close:**
-- [ ] **WordNet Caching**: Cache expensive graph traversals (`get_all_descendants`).
-- [x] **Performance Verification**: Benchmark "Deep Tuning" latency.
-
-### Phase 5: Regression Repair
-**Status**: ✅ Complete
-**Objective**: Fix regressions in Tencent dataset, imports, and test suite identified during full suite run.
-
-**Gaps to Close:**
-- [ ] **Fix Imports**: `Tuple` missing in `progress.py`.
-- [ ] **Fix Tencent**: `AttributeError` in flattening logic.
-- [x] **Fix Test Suite**: `cache_clear()` calls and Mock interactions.
-
-### Phase 6: Integration Polish
-**Status**: ✅ Complete
-**Objective**: Resolve remaining test suite regressions and verify full system stability.
-
-**Gaps to Close:**
-- [ ] **Fix Arranger Tests**: Align tests with UMAP/HDBSCAN changes.
-- [ ] **Fix Shaper Tests**: Resolve flattening assertion failures.
-- [ ] **Fix Dataset Integration Tests**: Update mocks for recursive structure logic.
-
-
-### Phase 7: Gap Closure & Maintenance
-**Status**: ⬜ Not Started
-**Objective**: Address technical debt and institutionalize performance gains from v0.5.0.
-
-**Gaps to Close:**
-- [ ] **Test Robustness**: Centralize WordNet mocks and relax over-specified assertions.
-- [ ] **Performance CI**: Automate benchmarking of Fast Preview paths.
-- [ ] **UI Polish**: Finalize "Analysis" panel behavior and progress messaging.
-
-
 ---
 ## Archived Milestones
+
+### v0.5.0 - Optimization & UI
+- ✅ **Async Generation**: Non-blocking background execution.
+- ✅ **Compact Layout**: Sidebar & Accordions.
+- ✅ **Live Preview**: Dry-run mode.
+- ✅ **Caching**: WordNet & UMAP.
 
 ### v0.4.0 - Data Science Core
 - ✅ **Stability Metrics**: Implemented Jaccard/ARI.
