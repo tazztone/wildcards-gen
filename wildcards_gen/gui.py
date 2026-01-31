@@ -285,9 +285,15 @@ def generate_dataset_handler(
         output_path, preview = save_and_preview(data, output_name)
         
         # Save Stats
-        base_path = os.path.splitext(output_path)[0]
-        stats.save_to_json(f"{base_path}.stats.json")
-        stats.save_summary_log(f"{base_path}.log")
+        if config.get("generation.save_stats"):
+            # Always save stats to the configured output directory
+            filename = os.path.basename(output_path)
+            stem = os.path.splitext(filename)[0]
+            base_path = os.path.join(config.output_dir, stem)
+            os.makedirs(config.output_dir, exist_ok=True)
+            
+            stats.save_to_json(f"{base_path}.stats.json")
+            stats.save_summary_log(f"{base_path}.log")
         
         # Generate Summary Markdown for the UI
         arrangements = [e for e in stats.events if e.event_type == "arrangement"]

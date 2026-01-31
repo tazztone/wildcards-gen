@@ -21,7 +21,8 @@ DEFAULT_CONFIG = {
         "add_glosses": True,
         "max_retries": 3,
         "timeout": 60,
-        "preview_limit": 500
+        "preview_limit": 500,
+        "save_stats": True
     },
     "datasets": {
         "imagenet": {
