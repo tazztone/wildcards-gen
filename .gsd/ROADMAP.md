@@ -42,13 +42,23 @@
 - [x] **Fix Test Suite**: `cache_clear()` calls and Mock interactions.
 
 ### Phase 6: Integration Polish
-**Status**: ⬜ Not Started
+**Status**: ✅ Complete
 **Objective**: Resolve remaining test suite regressions and verify full system stability.
 
 **Gaps to Close:**
 - [ ] **Fix Arranger Tests**: Align tests with UMAP/HDBSCAN changes.
 - [ ] **Fix Shaper Tests**: Resolve flattening assertion failures.
 - [ ] **Fix Dataset Integration Tests**: Update mocks for recursive structure logic.
+
+
+### Phase 7: Gap Closure & Maintenance
+**Status**: ⬜ Not Started
+**Objective**: Address technical debt and institutionalize performance gains from v0.5.0.
+
+**Gaps to Close:**
+- [ ] **Test Robustness**: Centralize WordNet mocks and relax over-specified assertions.
+- [ ] **Performance CI**: Automate benchmarking of Fast Preview paths.
+- [ ] **UI Polish**: Finalize "Analysis" panel behavior and progress messaging.
 
 
 ---

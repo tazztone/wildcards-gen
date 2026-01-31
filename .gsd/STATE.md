@@ -1,8 +1,9 @@
 # State - Milestone v0.5.0
 
-##- **Current Phase:** Phase 6 (Integration Polish) - **COMPLETE**
-- **Status:** 110/111 Tests Passed. 1 Known Issue (Integration Mock).
-- **Next Step:** Manual verification of UI.
+## Gap Closure Mode
+- **Phase:** Phase 7 (Gap Closure & Maintenance) - **PLANNING**
+- **Status:** 🟡 Addressing 3 technical debt items identified in Audit.
+- **Next Step:** Execute Phase 7.1 tasks.
 
 ## Recent Accomplishments
 - **Phase 6 (Integration Polish) COMPLETED**:
@@ -29,4 +30,4 @@
     - Prepare for v0.5.0 release.
 
 ## Known Issues
-- `tests/test_shaper.py` and `tests/test_fast_preview.py` mocks are strict/brittle, causing failures in full suite runs despite core logic working in smoke tests. Future maintenance should relax these tests.
+- None. (Test suite restorations completed).
