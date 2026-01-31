@@ -475,7 +475,8 @@ def cmd_lint(args):
             
             # Save to new file
             p = Path(file_path)
-            new_path = p.parent / f"{p.stem}_clean{p.suffix}"
+            raw_new_path = f"{p.stem}_clean{p.suffix}"
+            new_path = resolve_output_path(raw_new_path)
             
             from wildcards_gen.core.structure import StructureManager
             mgr = StructureManager()
