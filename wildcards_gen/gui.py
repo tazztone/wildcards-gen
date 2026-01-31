@@ -586,6 +586,7 @@ def launch_gui(share=False):
                                 search_btn = gr.Button('Search', size='sm')
                                 search_out = gr.Markdown('')
                                 search_btn.click(search_wordnet, inputs=[search_in], outputs=[search_out])
+                                search_in.submit(search_wordnet, inputs=[search_in], outputs=[search_out])
                         
                         # General Depth
                         ds_depth = gr.Slider(1, 12, value=config.get('generation.default_depth'), step=1, label='Max Generation Depth')
@@ -681,6 +682,7 @@ def launch_gui(share=False):
                                 cr_file = gr.File(label='Download')
                         cr_topic.change(update_cr_filename, inputs=[cr_topic], outputs=[cr_out])
                         cr_btn.click(create_handler, inputs=[cr_topic, model_state, api_key_state, cr_out], outputs=[cr_file, cr_prev])
+                        cr_topic.submit(create_handler, inputs=[cr_topic, model_state, api_key_state, cr_out], outputs=[cr_file, cr_prev])
 
                     # Subtab: Categorize
                     with gr.Tab('🗂️ Categorize List'):
@@ -710,6 +712,7 @@ def launch_gui(share=False):
                                 en_file = gr.File(label='Download')
                         en_topic.change(update_en_filename, inputs=[en_topic], outputs=[en_out])
                         en_btn.click(enrich_handler, inputs=[en_yaml, en_topic, model_state, api_key_state, en_out], outputs=[en_file, en_prev])
+                        en_topic.submit(enrich_handler, inputs=[en_yaml, en_topic, model_state, api_key_state, en_out], outputs=[en_file, en_prev])
 
             # === TAB 3: QUALITY CONTROL ===
             with gr.Tab('🛡️ Quality Control'):
@@ -754,6 +757,8 @@ def launch_gui(share=False):
                         return ak, f"🔑 API: {'✅ Set' if ak else '❌ Not Set'} (Saved)"
                         
                     set_save_keys.click(update_keys, inputs=[set_key, set_hf_token], outputs=[api_key_state, api_status])
+                    set_key.submit(update_keys, inputs=[set_key, set_hf_token], outputs=[api_key_state, api_status])
+                    set_hf_token.submit(update_keys, inputs=[set_key, set_hf_token], outputs=[api_key_state, api_status])
                 
                 with gr.Group():
                     gr.Markdown('**Default LLM**')
