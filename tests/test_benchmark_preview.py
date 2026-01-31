@@ -1,7 +1,9 @@
 import pytest
 import time
+from unittest.mock import patch
 from nltk.corpus import wordnet as wn
 from wildcards_gen.core.wordnet import get_all_descendants, ensure_nltk_data
+from wildcards_gen.core.datasets.imagenet import generate_imagenet_tree
 
 def test_wordnet_caching_speedup():
     """Verify that get_all_descendants is cached and faster on second call."""
@@ -55,3 +57,37 @@ def test_caching_with_filter():
     
     assert res1 == res2
     assert duration < 0.1
+
+def test_fast_preview_perf(mock_wn, sample_hierarchy, mock_arranger_deps):
+    """
+    Benchmark generate_imagenet_tree with mocks.
+    Should be very fast (<0.5s) as no network/disk IO involved.
+    """
+    # Configure mock arranger to simulate clustering on 15 items
+    mock_arranger_deps["clusterer"].labels_ = [0] * 15
+    mock_arranger_deps["clusterer"].probabilities_ = [1.0] * 15
+
+    # We need to mock embeddings related calls in arranger to avoid sentence-transformers
+    import numpy as np
+    dummy_embeddings = np.zeros((15, 10))
+
+    with patch('wildcards_gen.core.datasets.imagenet.ensure_imagenet_1k_data', return_value="dummy.json"), \
+         patch('wildcards_gen.core.datasets.imagenet.load_imagenet_1k_wnids', return_value=None), \
+         patch('wildcards_gen.core.arranger.check_dependencies', return_value=True), \
+         patch("wildcards_gen.core.arranger.load_embedding_model"), \
+         patch("wildcards_gen.core.arranger.get_cached_embeddings", return_value=dummy_embeddings):
+
+        t0 = time.time()
+
+        # Use vehicle.n.01 (15 items)
+        generate_imagenet_tree(
+            root_synset_str="vehicle.n.01",
+            smart=True,
+            preview_limit=50, # Enough to cover all 15
+            with_glosses=False
+        )
+
+        duration = time.time() - t0
+
+    print(f"Fast Preview Duration: {duration:.4f}s")
+    assert duration < 0.5

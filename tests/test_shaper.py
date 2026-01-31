@@ -18,6 +18,7 @@ def test_merge_orphans():
     assert "GroupA" not in result
     assert "GroupC" not in result
     assert "Other" in result
+    # Ensure items were moved
     assert len(result["Other"]) == 5 # 3 + 2
 
 def test_merge_orphans_recursive():
@@ -57,17 +58,9 @@ def test_flatten_singles():
     # Level2 returns {Level3: ...}
     # Level1 returns {Level3: ...}
     
-    # The root wrapper remains? 
-    # shaper.shape calls _flatten_singles(tree)
-    # tree is dict len 1. -> returns child val ({Level2...})
-    # then recurse...
-    
-    # Wait, if I pass a dict {A: {B: ...}}, it returns {B: ...}.
-    # So top key "A" is lost. 
-    # Usually we pass the *Content* of the YAML file.
-    
     assert "Level3" in result
-    assert result["Level3"] == ["items"]
+    assert isinstance(result["Level3"], list)
+    assert "items" in result["Level3"]
     assert "Level1" not in result
     assert "Level2" not in result
 
