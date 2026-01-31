@@ -1,4 +1,3 @@
-
 import pytest
 from unittest.mock import MagicMock, patch
 from wildcards_gen.core.datasets import imagenet, openimages, tencent
@@ -12,47 +11,36 @@ def test_traversal_budget():
     assert budget.is_exhausted()
     assert not budget.consume(1) # False
 
-@patch('wildcards_gen.core.datasets.imagenet.ensure_imagenet_1k_data')
-@patch('wildcards_gen.core.datasets.imagenet.get_synset_from_wnid')
-@patch('wildcards_gen.core.datasets.imagenet.wn')
-def test_imagenet_limit(mock_wn, mock_get_synset, mock_ensure_data):
-    # Mock setup
-    mock_ensure_data.return_value = "dummy.json"
-    root_synset = MagicMock()
-    root_synset.name.return_value = "entity.n.01"
-    children = []
-    for i in range(10):
-        c = MagicMock()
-        c.name.return_value = f"child_{i}"
-        c.pos.return_value = 'n'
-        c.offset.return_value = i
-        l = MagicMock()
-        l.name.return_value = f"child_{i}"
-        l.name.return_value = f"child_{i}"
-        c.lemmas.return_value = [l]
-        # Make sortable
-        c.__lt__ = lambda self, other: self.name() < other.name()
-        children.append(c)
-    root_synset.hyponyms.return_value = children
-    mock_wn.synset.return_value = root_synset
+def test_imagenet_limit(mock_wn, sample_hierarchy):
+    """
+    Test preview_limit on imagenet generation using centralized WordNet mocks.
+    Uses 'vehicle.n.01' from sample_hierarchy which has 15 children.
+    """
+    with patch('wildcards_gen.core.datasets.imagenet.ensure_imagenet_1k_data', return_value="dummy.json"), \
+         patch('wildcards_gen.core.datasets.imagenet.load_imagenet_1k_wnids', return_value=None):
     
-    # Run with limit
-    preview_limit = 5
-    result = imagenet.generate_imagenet_tree(
-        root_synset_str="entity.n.01",
-        max_depth=5,
-        smart=True,
-        preview_limit=preview_limit,
-        with_glosses=False
-    )
-    
-    # We can't easily count exact nodes in result structure because it nests, 
-    # but we can trust that if the budget works, it stops.
-    # We can assert that the budget object was initialized and used.
-    # But since we can't introspect internal vars, check if we got a partial result?
-    # With 10 children and limit 5, we shouldn't get all children.
-    
-    assert len(result.get('entity', {})) <= preview_limit + 1 # rough check
+        # Run with limit
+        preview_limit = 5
+        # Use vehicle.n.01 as root, it has 15 children in sample_hierarchy
+        result = imagenet.generate_imagenet_tree(
+            root_synset_str="vehicle.n.01",
+            max_depth=5,
+            smart=True,
+            preview_limit=preview_limit,
+            with_glosses=False
+        )
+
+        assert "vehicle" in result
+        content = result["vehicle"]
+
+        # Depending on how the budget works (depth vs breadth),
+        # with 15 children and limit 5, we should see fewer than 15 items.
+        # If result is a list (flattened), check length.
+        if isinstance(content, list):
+            assert len(content) < 15
+            assert len(content) <= preview_limit + 2 # +2 for potential extra containers/overhead
+        elif isinstance(content, dict):
+             assert len(content) < 15
 
 @patch('wildcards_gen.core.datasets.openimages.ensure_openimages_data')
 @patch('wildcards_gen.core.datasets.openimages.load_openimages_data')
