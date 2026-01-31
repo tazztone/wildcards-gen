@@ -23,7 +23,7 @@ flowchart LR
     style C fill:#2196F3,stroke:#333,stroke-width:2px
 ```
 
-*   **You Provide**: A topic ("Fantasy RPG"), a dataset ("ImageNet"), or a raw list of terms.
+*   **You Provide**: A dataset ("ImageNet"), a topic ("Fantasy objects"), or a raw list of terms.
 *   **The Structure**:
     *   **Categories** (YAML Keys): These receive `# instruction:` comments to guide the downhill AI.
     *   **Wildcards** (YAML Lists): These are the actual prompt terms.
