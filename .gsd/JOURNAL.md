@@ -90,14 +90,18 @@ Ending session after successful transition from quality hardening to scaling pla
 
 ---
 
-## 2026-02-01 - Phase 0 Regression Fixes
+## 2026-02-01 - Phase 0 Regression Fixes & Semantic Logic Improvement
 
 ### Summary
-Fixed test regressions in `test_datasets.py`, `test_fast_preview.py`, and `test_integration_pipeline.py`. These tests were failing because they asserted lowercase category keys, while the recently implemented `ConstraintShaper` enforces Title Case.
+Resolved test regressions caused by casing normalization and improved the semantic arrangement logic based on analysis of Tencent output.
 
-### Actions
-- Updated assertions in failing tests to match the new Title Case convention.
-- Verified all 118 tests pass.
+### Fixes
+- **Tests**: Updated `test_datasets.py`, `test_fast_preview.py`, and `test_integration_pipeline.py` to expect Title Case categories. All 118 tests passed.
+- **Semantic Labeling**: 
+    - Implemented strict LCA validation in `arranger.py` to reject misleading group names (e.g., "Cereal" for a mixed group containing "Egg").
+    - Updated `arrange_hierarchy` to use `generate_contextual_label` for leftovers, producing "Other (Alcohol)" instead of generic "Other".
+    - Increased default clustering threshold to `0.15` to reduce noise.
 
 ### Status
-- Phase 0 verification is now complete and consistent.
+- Phase 0 verification complete.
+- Semantic logic hardened against "hallucinated" categories.

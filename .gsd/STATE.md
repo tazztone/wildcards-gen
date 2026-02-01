@@ -11,10 +11,10 @@
     - Added contextual labels for merged orphans (e.g., `Other (Fruit)`).
     - Enforced Title Case categories and lowercase items.
 - **Regression Fixes**: Updated integration tests to align with new casing rules. All 118 tests passed.
-- **Scaling Research (Phase 1)**: Researched and planned the architecture for higher throughput.
-    - Designed a persistent SQLite-based embedding cache.
-    - Defined a threaded parallelization strategy for recursive dataset traversal.
-    - Drafted the specification for the new `batch` CLI command.
+- **Semantic Logic Refinement**: 
+    - Enforced LCA validation using Medoid checks (prevents "Cereal" -> "Egg" labeling).
+    - Switched `Arranger` leftovers to use `generate_contextual_label` (e.g., `Other (Alcohol)`).
+    - Bumped default `arrange_list` threshold to 0.15 for tighter clusters.
 
 ## In-Progress Work
 - Phase 1 execution pending.
