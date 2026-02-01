@@ -45,3 +45,23 @@ User identified the "ANALYSIS" panel (Analysis Report, Run History) as obsolete 
 - User Feedback: "your tests aren't good enough".
 - Action: Added **Phase 4: Deep Stability & Integration Testing** to the roadmap.
 - Next: `/plan 4`.
+
+---
+
+## 2026-02-01 - Milestone v0.8.0 Completion & Archival
+
+### Summary
+Milestone v0.8.0 ("Stability & UI Polish") has been successfully completed and archived. This milestone was critical for addressing deep-stack `TypeError` regressions and modernizing the UI/UX.
+
+### Key Decisions
+- **AST-Based Registry Guard**: Implemented `tests/test_gui_registry.py`. Instead of manual checks, this uses Python's `ast` module to scan `gui.py` and ensure every configuration input has an `info=` tooltip. This satisfies the "content preservation" requirement and prevents future "silent" UX regressions.
+- **2-Column UI Layout**: Successfully transitioned the CV Datasets tab to a sidebar-configuration model. This significantly reduced vertical scrolling and reclaimed space from the obsolete Analysis panel.
+- **Deep Integration Testing**: Added `tests/test_deep_integration.py` which simulates full generation cycles with advanced smart tuning enabled, catching signature mismatches that unit tests missed.
+
+### Verification
+- All 115 tests passed.
+- Verified fix for Tencent `umap_n_neighbors` parameter.
+- Verified synchronization of `test_ui_wiring.py` (29 parameters) and `test_ui_logic.py` (6 returns).
+
+### Next Steps
+Moving to **Milestone v0.9.0: Performance & Expansion**. Focus will be on parallelizing the embedding generation in the Arranger and expanding export capabilities to JSONL.
