@@ -62,7 +62,11 @@ class BatchProcessor:
         return JobConfig(name=name, dataset=dataset, params=params, output_path=out_path, analyze=entry.get('analyze', self.global_config.get('analyze', False)))
 
     def _expand_matrix(self, matrix: Dict, output_root: str) -> List[JobConfig]:
-        base_params = matrix.get('base_params', {})
+        # Start with global defaults
+        base_params = self.global_config.get('default_params', {}).copy()
+        # Update with matrix base params
+        base_params.update(matrix.get('base_params', {}))
+        
         axes = matrix.get('axes', {})
         keys = sorted(axes.keys())
         values_list = [axes[k] for k in keys]
