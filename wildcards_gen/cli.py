@@ -557,7 +557,7 @@ def main():
         parser.add_argument('--semantic-threshold', type=float, default=0.1, help='[Smart] Outlier detection threshold')
         # Semantic Arrangement
         parser.add_argument('--semantic-arrange', action='store_true', help='[Smart] Enable semantic arrangement (re-grouping) of flattened lists')
-        parser.add_argument('--semantic-arrange-threshold', type=float, default=0.1, help='[Smart] Cluster acceptance probability (0-1, higher=stricter) for arrangement')
+        parser.add_argument('--semantic-arrange-threshold', type=float, default=0.3, help='[Smart] Cluster acceptance probability (0-1, higher=stricter) for arrangement')
         parser.add_argument('--semantic-arrange-min-cluster', type=int, default=5, help='[Smart] Minimum items to form a named cluster')
         parser.add_argument('--semantic-arrange-method', choices=['eom', 'leaf'], default='eom', help='[Smart] Clustering method: eom (stable) or leaf (granular)')
         parser.add_argument('--debug-arrangement', action='store_true', help='[Smart] Show arrangement stats')

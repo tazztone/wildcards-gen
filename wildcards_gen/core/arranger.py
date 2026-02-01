@@ -236,6 +236,24 @@ def extract_unique_keywords(cluster_terms: List[str], all_terms: List[str], top_
         return []
 
 
+def generate_contextual_label(terms: List[str], context_terms: List[str], fallback: str = "Other") -> str:
+    """
+    Generate a descriptive label for a group of terms using TF-IDF.
+    """
+    if not terms:
+        return fallback
+        
+    try:
+        keywords = extract_unique_keywords(terms, context_terms, top_n=1)
+        if keywords:
+            # Score check is already inside extract_unique_keywords (> 0.1)
+            return f"{fallback} ({keywords[0].title()})"
+    except Exception:
+        pass
+        
+    return fallback
+
+
 # UMAP Cache
 # Key: (hash(embeddings), n_neighbors, min_dist, n_components)
 _UMAP_CACHE = {}

@@ -1,14 +1,14 @@
 # State - Milestone v0.9.0 [IN PROGRESS]
 
 ## Current Position
-- **Phase**: 0 (Quality Hardening)
-- **Status**: 🟢 Planning Complete. Ready for execution.
+- **Phase**: 1 (Throughput & Scaling)
+- **Status**: 🟢 Phase 0 Complete. Ready for Phase 1 planning.
 
 ### Milestone v0.9.0: Performance & Expansion
 **Status**: ⏳ In Progress
 
 ## Last Session Summary
-Phase 0 (Quality Hardening) was researched and planned based on the Tencent YAML analysis report. Three plans were created to address tautology pruning, descriptive "Other" labels, and casing normalization.
+Phase 0 (Quality Hardening) was completed. Implemented tautology pruning, descriptive "Other" labels via TF-IDF, and casing normalization in `ConstraintShaper`. Updated default semantic arrangement thresholds to 0.3. All tests passed.
 
 ## Next Steps
-1. `/execute 0` — Run all Phase 0 plans.
+1. `/plan 1` — Plan throughput and scaling optimizations.
