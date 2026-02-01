@@ -1,20 +1,12 @@
 # State - Milestone v0.8.0 [PLANNING]
 
 ## Current Position
-- **Phase**: None
-- **Status**: ✅ Milestone v0.8.0 Complete
-
-### Phase 1: Stability & Validation
-**Status**: ✅ Complete
-
-### Phase 2: UI Structure
-**Status**: ✅ Complete
-
-### Phase 3: UX Polish
-**Status**: ✅ Complete
+- **Phase**: 4
+- **Task**: Bug report received for deep-stack `TypeError`.
+- **Status**: Planning Phase 4
 
 ## Last Session Summary
-Milestone v0.8.0 executed successfully. Fixed critical signature crashes, implemented a new regression test suite, and refactored the GUI for a cleaner 2-column layout.
+Milestone v0.8.0 was briefly completed, but a new bug was discovered in `arranger.py` related to `return_metadata` parameter collision. Testing was deemed "not good enough" by the user.
 
 ## Next Steps
-1. Awaiting new requirements or next milestone goals.
+1. `/plan 4` — Create plans to fix the deep-stack crash and harden tests.
