@@ -273,7 +273,8 @@ def compute_umap_embeddings(embeddings: np.ndarray, n_components: int = 5, n_nei
             n_components=n_components, 
             min_dist=min_dist, 
             metric='cosine',
-            random_state=42 # Try to keep it somewhat deterministic
+            random_state=42, # Try to keep it somewhat deterministic
+            n_jobs=1
         )
         result = reducer.fit_transform(embeddings)
         
