@@ -188,11 +188,9 @@ def on_dataset_change(dataset_name, strategy):
         'Tencent ML-Images': '_**Tencent ML**: 11k categories. Massive, modern coverage._'
     }.get(dataset_name, '')
     
-    # Returns: visibility_updates (5) + info_update (1) + reset_analysis (2)
+    # Returns: visibility_updates (5) + info_update (1)
     return visibility_updates + [
-        gr.update(value=info_text),
-        gr.update(value=''),                # ds_analysis_stats
-        gr.update(interactive=False)        # ds_apply_suggest
+        gr.update(value=info_text)
     ]
 
 def generate_dataset_handler(
@@ -312,23 +310,15 @@ def generate_dataset_handler(
             stats.save_to_json(f"{base_path}.stats.json")
             stats.save_summary_log(f"{base_path}.log")
         
-        # Generate Summary Markdown for the UI
-        arrangements = [e for e in stats.events if e.event_type == "arrangement"]
-        n_clusters = sum(e.data.get('clusters', 0) for e in arrangements)
-        avg_noise = sum(e.data.get('noise', 0) for e in arrangements) / len(arrangements) if arrangements else 0
-        
+        # No summary markdown anymore, just duration and status
         summary_md = f"### ✅ Generation Complete\n"
-        summary_md += f"* **Clusters Created**: {n_clusters}\n"
-        if arrangements:
-            summary_md += f"* **Avg Semantic Noise**: {avg_noise:.1%}\n"
-
+        summary_md += f"* **Total Duration**: {stats.to_dict()['execution']['duration_seconds']}s\n"
+        
         # Check for limit reached
         limit_events = [e for e in stats.events if e.event_type == 'limit_reached']
         if limit_events:
              limit_val = limit_events[0].data.get('limit', 500)
              summary_md += f"\n> [!WARNING]\n> **Fast Preview Limit Reached**\n> Processed {limit_val} items. Output is truncated."
-
-        summary_md += f"* **Total Duration**: {stats.to_dict()['execution']['duration_seconds']}s\n"
         
         # Return summary and list of files [yaml, log, json]
         log_path = f"{base_path}.log"
@@ -564,11 +554,9 @@ def launch_gui(share=False):
         api_key_state = gr.State(initial_key)
         model_state = gr.State(config.model)
         
-        # Analysis State
-        history_state = gr.State([])
-        sug_d = gr.State(4)
-        sug_h = gr.State(50)
-        sug_l = gr.State(5)
+        # Global State
+        api_key_state = gr.State(initial_key)
+        model_state = gr.State(config.model)
         
         with gr.Tabs():
             # === TAB 1: CV DATASETS (Local) ===
@@ -626,33 +614,33 @@ def launch_gui(share=False):
                             ds_smart_preset = gr.Radio(list(SMART_PRESETS.keys()), label='Preset', value='Balanced')
                             
                             with gr.Accordion('Fine-Tuning', open=False):
-                                ds_min_depth = gr.Slider(0, 10, value=4, step=1, label='Significance Depth', info='Keep all if shallower than X.')
-                                ds_min_hyponyms = gr.Slider(0, 2000, value=50, step=10, label='Flattening Threshold', info='Keep category if descendant count > X.')
-                                ds_min_leaf = gr.Slider(1, 100, value=5, step=1, label='Min Leaf Size', info='Merge list into parent if items < X.')
-                                ds_merge_orphans = gr.Checkbox(label='Merge Orphans', value=True)
+                                ds_min_depth = gr.Slider(0, 10, value=4, step=1, label='Significance Depth', info='Keep all categories shallower than this level regardless of descendant count (preserves top-level structure).')
+                                ds_min_hyponyms = gr.Slider(0, 2000, value=50, step=10, label='Flattening Threshold', info='Merge category into a leaf list if it has fewer than X descendants total.')
+                                ds_min_leaf = gr.Slider(1, 100, value=5, step=1, label='Min Leaf Size', info='If a resulting list has fewer than X items, merge them into the parent node.')
+                                ds_merge_orphans = gr.Checkbox(label='Merge Orphans', value=True, info="Bubble up small lists into the parent's 'misc' key instead of keeping them as separate categories.")
 
                             with gr.Accordion('Semantic Cleaning', open=False):
-                                ds_semantic_clean = gr.Checkbox(label="Enable Cleaning", value=False)
+                                ds_semantic_clean = gr.Checkbox(label="Enable Cleaning", value=False, info="Use embeddings to remove items that don't belong in their category (requires local model).")
                                 ds_semantic_model = gr.Dropdown(['minilm', 'mpnet', 'qwen3'], value='minilm', label="Model")
-                                ds_semantic_threshold = gr.Slider(0.01, 1.0, value=0.1, step=0.01, label="Threshold")
+                                ds_semantic_threshold = gr.Slider(0.01, 1.0, value=0.1, step=0.01, label="Threshold", info="Higher = more aggressive cleaning (removes more potential outliers).")
                                 
                                 gr.Markdown("---")
-                                ds_semantic_arrangement = gr.Checkbox(label="Enable Arrangement", value=False)
+                                ds_semantic_arrangement = gr.Checkbox(label="Enable Arrangement", value=False, info="Automatically group flat lists into semantic sub-categories.")
                                 
                                 with gr.Row():
-                                    ds_arrange_threshold = gr.Slider(label="Quality", minimum=0.0, maximum=1.0, value=0.1, step=0.05, info="Min probability.")
-                                    ds_arrange_min_cluster = gr.Slider(label="Min Cluster", minimum=2, maximum=20, value=5, step=1)
+                                    ds_arrange_threshold = gr.Slider(label="Quality", minimum=0.0, maximum=1.0, value=0.1, step=0.05, info="Min probability required for a cluster.")
+                                    ds_arrange_min_cluster = gr.Slider(label="Min Cluster", minimum=2, maximum=20, value=5, step=1, info="Minimum items required to form a new automated sub-category.")
                                 
-                                ds_arrange_method = gr.Dropdown(['eom', 'leaf'], value='eom', label="Cluster Method", info="'leaf' finds smaller groups.")
+                                ds_arrange_method = gr.Dropdown(['eom', 'leaf'], value='eom', label="Cluster Method", info="'leaf' finds smaller, more specific groups; 'eom' finds stable clusters.")
                                 ds_debug_arrangement = gr.Checkbox(label="Debug Logs", value=False)
                             
                             with gr.Accordion('Deep Tuning', open=False):
                                 with gr.Row():
-                                    ds_umap_neighbors = gr.Slider(2, 50, value=15, step=1, label="UMAP Neighbors")
-                                    ds_umap_dist = gr.Slider(0.0, 1.0, value=0.1, step=0.01, label="UMAP Min Dist")
+                                    ds_umap_neighbors = gr.Slider(2, 50, value=15, step=1, label="UMAP Neighbors", info="Balances local vs global structure. Lower values focus on very tight details.")
+                                    ds_umap_dist = gr.Slider(0.0, 1.0, value=0.1, step=0.01, label="UMAP Min Dist", info="Determines how tight UMAP packs points. Lower = tighter clusters.")
                                 with gr.Row():
-                                    ds_arr_samples = gr.Slider(1, 20, value=5, step=1, label="Min Samples")
-                                    ds_orphans_template = gr.Textbox(label="Orphan Key", value="misc", placeholder="misc")
+                                    ds_arr_samples = gr.Slider(1, 20, value=5, step=1, label="Min Samples", info="HDBSCAN min samples. Higher = more points labeled as noise.")
+                                    ds_orphans_template = gr.Textbox(label="Orphan Key", value="misc", placeholder="misc", info="Label for miscellaneous items (e.g., 'misc' or 'others').")
                                 
                         # Filters
                         with gr.Accordion('Advanced Filters', open=False, visible=True) as adv_filter_group:
@@ -670,42 +658,21 @@ def launch_gui(share=False):
                             # This is a dummy group used for visibility logic in update_ds_ui
                             pass
 
-                    # --- Right Column: Analysis & Output ---
+                    # --- Right Column: Status & Preview ---
                     with gr.Column(scale=3):
-                         # Block 1: Analysis & Status
-                         with gr.Row():
-                             with gr.Column(scale=2):
-                                 with gr.Group(elem_classes=['analysis-panel']):
-                                     with gr.Row():
-                                         with gr.Column(scale=2, min_width=0):
-                                             gr.Markdown('### 📊 Analysis', elem_classes=['section-header'])
-                                         ds_analyze_btn = gr.Button('🔍 Run', size='sm', variant='secondary', scale=1)
-                                         ds_apply_suggest = gr.Button('✅ Apply', size='sm', interactive=False, scale=1)
-                                     
-                                     # Stale Indicator
-                                     stale_warning = gr.Markdown('⚠️ **Settings Changed**: Analysis may be out of date.', visible=False, elem_classes=['stale-warning'])
-                                     
-                                     with gr.Accordion('Analysis Report', open=True) as analysis_accordion:
-                                         ds_analysis_stats = gr.Markdown('*Run analysis to see structure stats and suggestions.*')
-                                     
-                                     with gr.Accordion('Run History', open=False):
-                                         ds_history_view = gr.Markdown('No runs yet.')
-                             
-                             with gr.Column(scale=1):
-                                 with gr.Group(elem_classes=['analysis-panel']):
-                                     gr.Markdown('### 🚀 Status', elem_classes=['section-header'])
-                                     ds_summary = gr.Markdown('_Waiting for generation..._')
+                         with gr.Group(elem_classes=['status-panel']):
+                             gr.Markdown('### 🚀 Status', elem_classes=['section-header'])
+                             ds_summary = gr.Markdown('_Waiting for generation..._')
 
-                         # Block 2: Preview
-                         with gr.Column():
+                         with gr.Group(elem_classes=['preview-panel']):
                              with gr.Row():
                                  with gr.Column(scale=4, min_width=0):
                                      gr.Markdown('**Preview output**')
                                  ds_out_name = gr.Textbox(label='Output Filename', value='skeleton.yaml', show_label=False, scale=2)
                              
-                             ds_prev = gr.Code(language='yaml', label='YAML Preview', lines=35, max_lines=35, elem_classes=['preview-code'])
+                             ds_prev = gr.Code(language='yaml', label='YAML Preview', lines=35, max_lines=40, elem_classes=['preview-code'])
 
-                         # Block 3: Run Controls
+                         # Run Controls
                          with gr.Row():
                              ds_fast_preview = gr.Checkbox(label='⚡ Fast Preview', value=False, info='Limit to ~500 items.')
                              ds_btn = gr.Button('🚀 Generate Skeleton', variant='primary', size='lg')
@@ -814,20 +781,13 @@ def launch_gui(share=False):
         # === Event Wiring ===
         
         # Dataset Visibility
-        ds_name.change(on_dataset_change, inputs=[ds_name, ds_strategy], outputs=[ds_imagenet_group, ds_strategy, smart_tuning_group, adv_filter_group, ds_openimages_group, ds_info, ds_analysis_stats, ds_apply_suggest])
-        ds_strategy.change(on_dataset_change, inputs=[ds_name, ds_strategy], outputs=[ds_imagenet_group, ds_strategy, smart_tuning_group, adv_filter_group, ds_openimages_group, ds_info, ds_analysis_stats, ds_apply_suggest])
+        ds_name.change(on_dataset_change, inputs=[ds_name, ds_strategy], outputs=[ds_imagenet_group, ds_strategy, smart_tuning_group, adv_filter_group, ds_openimages_group, ds_info])
+        ds_strategy.change(on_dataset_change, inputs=[ds_name, ds_strategy], outputs=[ds_imagenet_group, ds_strategy, smart_tuning_group, adv_filter_group, ds_openimages_group, ds_info])
 
         # Filename Updates
         config_inputs = [ds_name, ds_root, ds_depth, ds_strategy, ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_bbox_only]
         for comp in config_inputs:
             comp.change(update_ds_filename, inputs=config_inputs, outputs=[ds_out_name])
-
-        # Stale Analysis Triggers
-        def mark_stale(): 
-            return gr.update(visible=True), gr.update(interactive=False)
-            
-        for comp in [ds_root, ds_depth, ds_strategy, ds_min_depth, ds_min_hyponyms, ds_min_leaf, ds_filter, ds_strict]:
-            comp.change(mark_stale, outputs=[stale_warning, ds_apply_suggest])
         
         # Dataset Generation components
         all_gen_inputs = [
@@ -863,26 +823,11 @@ def launch_gui(share=False):
                 show_progress="hidden"
             )
         
-        # Analysis
-        ds_analyze_btn.click(
-            analyze_handler,
-            inputs=[ds_name, ds_root, ds_depth, ds_filter, ds_strict, ds_blacklist, ds_bbox_only, history_state],
-            outputs=[ds_analysis_stats, sug_d, sug_h, sug_l, history_state, stale_warning]
-        ).then(
-            lambda h: "\n".join(h) if h else "No runs yet.", inputs=[history_state], outputs=[ds_history_view]
-        ).then(
-             # Activate Apply button if success (rough check if report has content)
-             lambda r: gr.update(interactive=True) if 'Analysis Report' in r else gr.update(interactive=False),
-             inputs=[ds_analysis_stats],
-             outputs=[ds_apply_suggest]
-        )
-
-        # Apply Suggestions
-        ds_apply_suggest.click(
-            lambda d, h, l: (d, h, l),
-            inputs=[sug_d, sug_h, sug_l],
-            outputs=[ds_min_depth, ds_min_hyponyms, ds_min_leaf]
-        )
+        # Smart Presets
+        def apply_smart_preset(p, dataset_name):
+            if dataset_name in DATASET_PRESET_OVERRIDES and p in DATASET_PRESET_OVERRIDES[dataset_name]:
+                return DATASET_PRESET_OVERRIDES[dataset_name][p]
+            return SMART_PRESETS.get(p, [gr.update()]*7)
 
         # Smart Presets
         def apply_smart_preset(p, dataset_name):
