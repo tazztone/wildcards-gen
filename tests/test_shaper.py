@@ -14,12 +14,14 @@ def test_merge_orphans():
     shaper = ConstraintShaper(tree)
     result = shaper.shape(min_leaf_size=5, flatten_singles=False)
     
-    assert "GroupB" in result
-    assert "GroupA" not in result
-    assert "GroupC" not in result
-    assert "Other" in result
+    assert "Groupb" in result
+    assert "Groupa" not in result
+    assert "Groupc" not in result
+    # Find the key that was used for merged items (may be "Other" or "Other (Keyword)")
+    other_key = next((k for k in result.keys() if k.startswith("Other")), None)
+    assert other_key is not None
     # Ensure items were moved
-    assert len(result["Other"]) == 5 # 3 + 2
+    assert len(result[other_key]) == 5 # 3 + 2
 
 def test_merge_orphans_recursive():
     """Test merging happens deep in the tree."""
@@ -32,9 +34,11 @@ def test_merge_orphans_recursive():
     shaper = ConstraintShaper(tree)
     result = shaper.shape(min_leaf_size=5, flatten_singles=False)
     
-    assert "Other" in result["Top"]
+    other_key = next((k for k in result["Top"].keys() if k.startswith("Other")), None)
+    assert other_key is not None
     assert "Sub1" not in result["Top"]
-    assert len(result["Top"]["Other"]) == 2
+    # x * 2 becomes one x due to deduplication during casing normalization
+    assert len(result["Top"][other_key]) == 1
 
 def test_flatten_singles():
     """Test removing intermediate single-child dicts."""
@@ -76,3 +80,71 @@ def test_flatten_singles_leaf_protection():
     assert isinstance(result, dict)
     assert "Category" in result
     assert isinstance(result["Category"], list)
+
+def test_prune_tautologies():
+    """Test removing nodes where parent name == child name."""
+    from wildcards_gen.core.shaper import ConstraintShaper
+    
+    # Simple tautology
+    tree = {"Fish": {"Fish": ["salmon", "trout"]}}
+    shaper = ConstraintShaper(tree)
+    result = shaper.shape(min_leaf_size=0, flatten_singles=False)
+    
+    assert result == {"Fish": ["salmon", "trout"]}
+
+    # Case insensitive and deep
+    tree = {
+        "ANIMAL": {
+            "Chordate": {
+                "chordate": ["human", "dog"]
+            }
+        }
+    }
+    shaper = ConstraintShaper(tree)
+    # preserve_roots=True (default) keeps ANIMAL
+    result = shaper.shape(min_leaf_size=0, flatten_singles=False)
+    assert "Animal" in result
+    assert result["Animal"] == {"Chordate": ["dog", "human"]}
+
+def test_contextual_other(mocker):
+    """Test that 'Other' blocks get contextual names if possible."""
+    # We mock generate_contextual_label to avoid sklearn dependency in tests
+    mocker.patch("wildcards_gen.core.arranger.generate_contextual_label", return_value="Other (Fruit)")
+    
+    from wildcards_gen.core.shaper import ConstraintShaper
+    
+    tree = {
+        "Apple": ["granny smith"],
+        "Banana": ["cavendish"],
+        "Meat": ["beef", "chicken", "pork", "lamb", "turkey"] # Regular size
+    }
+    
+    shaper = ConstraintShaper(tree)
+    # min_leaf_size=5 -> Apple and Banana (size 1) should merge
+    result = shaper.shape(min_leaf_size=5, flatten_singles=False)
+    
+    assert "Meat" in result
+    assert result["Other (Fruit)"] == ["cavendish", "granny smith"]
+
+def test_normalize_casing():
+    """Test Title Case categories and lowercase items."""
+    from wildcards_gen.core.shaper import ConstraintShaper
+    
+    tree = {
+        "FOOD": {
+            "fruit": ["Apple", "BANANA"]
+        },
+        "vegetable": ["CARROT"]
+    }
+    
+    shaper = ConstraintShaper(tree)
+    result = shaper.shape(min_leaf_size=0, flatten_singles=False)
+    
+    # Categories should be Title Case
+    assert "Food" in result
+    assert "Fruit" in result["Food"]
+    assert "Vegetable" in result
+    
+    # Leaf items should be lowercase and sorted
+    assert result["Food"]["Fruit"] == ["apple", "banana"]
+    assert result["Vegetable"] == ["carrot"]
