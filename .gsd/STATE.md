@@ -1,15 +1,14 @@
-# State - Milestone v0.9.0 [PLANNING]
+# State - Milestone v0.9.0 [IN PROGRESS]
 
 ## Current Position
-- **Phase**: None
-- **Status**: 🟢 Milestone v0.8.0 Archived. Beginning v0.9.0 Planning.
+- **Phase**: 0 (Quality Hardening)
+- **Status**: 🟢 Planning Complete. Ready for execution.
 
 ### Milestone v0.9.0: Performance & Expansion
-**Status**: ⏳ Planned
+**Status**: ⏳ In Progress
 
 ## Last Session Summary
-Milestone v0.8.0 was successfully closed and archived. All technical debt identified in the final audit was addressed, including UI test synchronization and signature validation. The system is now stable, well-tested, and features a refined user interface.
+Phase 0 (Quality Hardening) was researched and planned based on the Tencent YAML analysis report. Three plans were created to address tautology pruning, descriptive "Other" labels, and casing normalization.
 
 ## Next Steps
-1. Finalize SPEC for v0.9.0.
-2. Begin Phase 1: Throughput & Scaling (Parallelization).
+1. `/execute 0` — Run all Phase 0 plans.
