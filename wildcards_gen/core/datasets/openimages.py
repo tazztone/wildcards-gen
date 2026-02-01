@@ -17,6 +17,7 @@ from typing import Dict, List, Tuple, Any, Optional
 from ruamel.yaml.comments import CommentedMap, CommentedSeq
 
 from ..structure import StructureManager
+from ..config import config
 from ..wordnet import ensure_nltk_data, get_primary_synset, get_synset_gloss, get_synset_name
 from .downloaders import ensure_openimages_data
 from ..smart import should_prune_node, apply_semantic_cleaning, apply_semantic_arrangement
@@ -228,7 +229,7 @@ def build_wordnet_hierarchy(
                             parent_map[name] = temp_node
                             if instruction:
                                 try:
-                                    parent_map.yaml_add_eol_comment(f"instruction: {instruction}", name)
+                                    parent_map.yaml_add_eol_comment(config.instruction_template.format(gloss=instruction), name)
                                 except Exception: pass
                             
                             if leftovers:
@@ -306,7 +307,7 @@ def build_wordnet_hierarchy(
                     parent_map[name] = child_map
                     if instruction:
                         try:
-                            parent_map.yaml_add_eol_comment(f"instruction: {instruction}", name)
+                            parent_map.yaml_add_eol_comment(config.instruction_template.format(gloss=instruction), name)
                         except Exception:
                             pass
                     return (True, [])
@@ -445,7 +446,7 @@ def parse_hierarchy_node(
             parent[name] = child_map
             if instruction:
                 try:
-                    parent.yaml_add_eol_comment(f"instruction: {instruction}", name)
+                    parent.yaml_add_eol_comment(config.instruction_template.format(gloss=instruction), name)
                 except Exception:
                     pass
             return (True, [])

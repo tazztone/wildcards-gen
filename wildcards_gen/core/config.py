@@ -23,6 +23,9 @@ class Config:
     config_dir: str = CONFIG_DIR
     db_path: str = DB_PATH
     
+    # Generation Defaults
+    instruction_template: str = "instruction: {gloss}"
+    
     # GUI Defaults
     gui_share: bool = False
     gui_port: int = 7860
@@ -42,6 +45,8 @@ class Config:
             return self.gui_port
         if key == "generation.save_stats":
             return True
+        if key == "generation.instruction_template":
+            return self.instruction_template
         return default
 
 # Global instance

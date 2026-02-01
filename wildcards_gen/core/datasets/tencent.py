@@ -7,6 +7,7 @@ from typing import Dict, Any, List, Optional, Tuple
 from ruamel.yaml import CommentedMap
 import yaml
 from .downloaders import download_tencent_hierarchy
+from ..config import config
 from ..wordnet import get_synset_gloss, ensure_nltk_data, get_synset_from_wnid
 from ..presets import DATASET_CATEGORY_OVERRIDES, DATASET_PRESET_OVERRIDES
 
@@ -380,7 +381,7 @@ def generate_tencent_hierarchy(
                      instr = get_synset_gloss(synset) if synset else f"Items related to {child_name}"
                      try:
                          # Force add/update?
-                         cm.yaml_add_eol_comment(f"# instruction: {instr}", child_name)
+                         cm.yaml_add_eol_comment(config.instruction_template.format(gloss=instr), child_name)
                      except Exception:
                          pass
         
@@ -424,7 +425,7 @@ def generate_tencent_hierarchy(
             cm[orphan_label] = orphan_leaves
             # Add instruction to misc
             try:
-                cm.yaml_add_eol_comment(f"# instruction: Miscellaneous {name} items", orphan_label)
+                cm.yaml_add_eol_comment(config.instruction_template.format(gloss=f"Miscellaneous {name} items"), orphan_label)
             except: pass
             
             # Do NOT increment valid_items_added here.
@@ -475,7 +476,7 @@ def generate_tencent_hierarchy(
                                       instr = get_synset_gloss(synset)
                               if instr:
                                   try:
-                                      mini_tree.yaml_add_eol_comment(f"# instruction: {instr}", g_name)
+                                      mini_tree.yaml_add_eol_comment(config.instruction_template.format(gloss=instr), g_name)
                                   except: pass
                      
                      if leftovers:
@@ -484,7 +485,7 @@ def generate_tencent_hierarchy(
                              orphan_label = orphan_label.format(name)
                          mini_tree[orphan_label] = sorted(leftovers, key=str.casefold)
                          try:
-                              mini_tree.yaml_add_eol_comment(f"# instruction: Miscellaneous {name} items", orphan_label)
+                              mini_tree.yaml_add_eol_comment(config.instruction_template.format(gloss=f"Miscellaneous {name} items"), orphan_label)
                          except: pass
                      
                      return mini_tree, []
@@ -523,7 +524,7 @@ def generate_tencent_hierarchy(
             synset = get_synset_from_wnid(wnid)
             instr = get_synset_gloss(synset) if synset else f"Items related to {root_name}"
             try:
-                final_map.yaml_add_eol_comment(f"# instruction: {instr}", root_name)
+                final_map.yaml_add_eol_comment(config.instruction_template.format(gloss=instr), root_name)
             except Exception:
                 pass
             
