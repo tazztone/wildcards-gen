@@ -1,6 +1,6 @@
 # ROADMAP.md
 
-> **Current Milestone**: v0.6.0 - [PROJECTED]
+> **Current Milestone**: v0.7.0 - [PROJECTED]
 > **Goal**: Define next major objective.
 
 ## Must-Haves
@@ -10,6 +10,11 @@
 
 ---
 ## Archived Milestones
+
+### v0.6.0 - Layout & Stability
+- ✅ **Wider Sidebar**: 2x scale relative to previous.
+- ✅ **Compact UI**: Tightened CSS and better grouping.
+- ✅ **Hardened Tests**: Unified mocking strategy.
 
 ### v0.5.0 - Optimization & UI
 - ✅ **Async Generation**: Non-blocking background execution.
@@ -24,6 +29,6 @@
 - ✅ **Constraints Engine**: ConstraintsShaper.
 - ✅ **Integration**: Full pipeline integration.
 
-### v0.3.0 - UX Polish (Paused)
-- [ ] Compact "Analysis" section.
-- [ ] Move "Generation Completed" status.
+### v0.3.0 - UX Polish
+- ✅ **Compact "Analysis" section**: Completed in v0.6.0.
+- ✅ **Move "Generation Completed" status**: Completed in v0.6.0.

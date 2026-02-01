@@ -3,21 +3,14 @@ import pytest
 from unittest.mock import MagicMock, patch
 import numpy as np
 
-# Mock dependencies
-import sys
-sys.modules["hdbscan"] = MagicMock()
-sys.modules["umap"] = MagicMock()
-sys.modules["sklearn.feature_extraction.text"] = MagicMock()
-
 from wildcards_gen.core.arranger import arrange_hierarchy, extract_unique_keywords
 
-def test_extract_unique_keywords_logic():
+def test_extract_unique_keywords_logic(mock_arranger_deps):
     """Test TF-IDF keyword extraction logic (mocked)."""
-    mock_tfidf = sys.modules["sklearn.feature_extraction.text"].TfidfVectorizer.return_value
+    mock_tfidf = mock_arranger_deps["tfidf_mod"].TfidfVectorizer.return_value
     
     # Mock fit_transform return value (matrix)
     mock_matrix = MagicMock()
-    mock_array = MagicMock()
     # Mocking sparse matrix toarray()[0]
     mock_matrix.__getitem__.return_value.toarray.return_value = [np.array([0.9, 0.1])] 
     mock_tfidf.fit_transform.return_value = mock_matrix
@@ -31,17 +24,16 @@ def test_extract_unique_keywords_logic():
     keywords = extract_unique_keywords(cluster, context, top_n=1)
     
     # Logic verification (dependent on mock sorting)
-    # The mock setup above is a bit brittle, so we mostly check it runs and calls sklearn
-    sys.modules["sklearn.feature_extraction.text"].TfidfVectorizer.assert_called()
+    mock_arranger_deps["tfidf_mod"].TfidfVectorizer.assert_called()
     assert isinstance(keywords, list)
 
-def test_arrange_hierarchy_base_case():
+def test_arrange_hierarchy_base_case(mock_arranger_deps):
     """Test recursion base case (small list)."""
     terms = ["a", "b", "c"]
     result = arrange_hierarchy(terms, max_leaf_size=10)
     assert result == ["a", "b", "c"]
 
-def test_arrange_hierarchy_recursion_depth():
+def test_arrange_hierarchy_recursion_depth(mock_arranger_deps):
     """Test that recursion respects max depth."""
     terms = [f"item{i}" for i in range(20)]
     
