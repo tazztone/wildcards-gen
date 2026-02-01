@@ -631,7 +631,7 @@ def launch_gui(share=False):
                                 
                         # Filters
                         with gr.Accordion('Advanced Filters', open=False, visible=True) as adv_filter_group:
-                            ds_filter = gr.Dropdown(['none', '1k', '21k'], label='Sub-Filter', value='none')
+                            ds_filter = gr.Dropdown(['none', '1k', '21k'], label='Sub-Filter', value='none', info="Sub-sample size (1k = ImageNet-1k, 21k = Full ImageNet).")
                             ds_strict = gr.Checkbox(label='Strict Lexical Match', value=True)
                             ds_blacklist = gr.Checkbox(label='Hide Abstract Concepts', value=False)
                             ds_exclude_subtree = gr.Textbox(label='Exclude Subtrees', placeholder='comma-separated wnids')
@@ -680,7 +680,7 @@ def launch_gui(share=False):
                         gr.Markdown('### Generate Taxonomy from Scratch')
                         with gr.Row():
                             with gr.Column():
-                                cr_topic = gr.Textbox(label='Topic', placeholder='e.g. Types of Cyberpunk Augmentations')
+                                cr_topic = gr.Textbox(label='Topic', placeholder='e.g. Types of Cyberpunk Augmentations', info="The main subject to generate a taxonomy for.")
                                 cr_out = gr.Textbox(label='Output Filename', value='topic_skeleton.yaml')
                                 cr_btn = gr.Button('✨ Generate', variant='primary')
                             with gr.Column():
@@ -695,7 +695,7 @@ def launch_gui(share=False):
                         gr.Markdown('### Organize Flat List')
                         with gr.Row():
                             with gr.Column():
-                                cat_terms = gr.TextArea(label='Raw Terms', placeholder='List of terms (one per line)...')
+                                cat_terms = gr.TextArea(label='Raw Terms', placeholder='List of terms (one per line)...', info="Paste a flat list of items to be organized into categories.")
                                 cat_out = gr.Textbox(label='Output Filename', value='categorized.yaml')
                                 cat_btn = gr.Button('🗂️ Categorize', variant='primary')
                             with gr.Column():
@@ -709,8 +709,8 @@ def launch_gui(share=False):
                         gr.Markdown('### Add Instructions')
                         with gr.Row():
                             with gr.Column():
-                                en_yaml = gr.TextArea(label='Existing YAML', placeholder='Paste .yaml structure...')
-                                en_topic = gr.Textbox(label='Context / Goal', value='AI image generation wildcards')
+                                en_yaml = gr.TextArea(label='Existing YAML', placeholder='Paste .yaml structure...', info="The skeleton YAML structure you want to enrich with instructions.")
+                                en_topic = gr.Textbox(label='Context / Goal', value='AI image generation wildcards', info="Context to guide the AI on what kind of instructions to generate.")
                                 en_out = gr.Textbox(label='Output Filename', value='enriched.yaml')
                                 en_btn = gr.Button('💡 Enrich', variant='primary')
                             with gr.Column():
@@ -726,8 +726,8 @@ def launch_gui(share=False):
                 with gr.Row():
                     with gr.Column(scale=1):
                         lint_file = gr.File(label='Upload Skeleton YAML')
-                        lint_model = gr.Dropdown(['qwen3', 'mpnet', 'minilm'], label='Model', value='qwen3')
-                        lint_threshold = gr.Slider(0.01, 1.0, value=0.1, step=0.01, label='Sensitivity')
+                        lint_model = gr.Dropdown(['qwen3', 'mpnet', 'minilm'], label='Model', value='qwen3', info="qwen3 (Best/Slow), mpnet (Good/Avg), minilm (Fast/Lower Quality)")
+                        lint_threshold = gr.Slider(0.01, 1.0, value=0.1, step=0.01, label='Sensitivity', info="Higher values = stricter checking (flags more items).")
                         lint_btn = gr.Button('🕵️ Run Linter', variant='primary')
                     
                     with gr.Column(scale=2):
