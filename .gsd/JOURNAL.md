@@ -40,7 +40,8 @@ User identified the "ANALYSIS" panel (Analysis Report, Run History) as obsolete 
 - Planning Lock is in effect: `SPEC.md` and `ROADMAP.md` must be finalized before implementation.
 
 ### Status
-- `/add-todo` items processed.
-- `SPEC.md` and `ROADMAP.md` FINALIZED.
-- Execution plans for 3 phases created and committed.
-- Planning Lock: **UNLOCKED** 🔓
+- Milestone v0.8.0 executed.
+- **CRITICAL BUG FOUND**: `TypeError: arrange_list() got multiple values for keyword argument 'return_metadata'`.
+- User Feedback: "your tests aren't good enough".
+- Action: Added **Phase 4: Deep Stability & Integration Testing** to the roadmap.
+- Next: `/plan 4`.

@@ -21,6 +21,18 @@
 ### Phase 3: UX Polish
 **Status**: ✅ Complete
 
+### Phase 4: Deep Stability & Integration Testing
+**Status**: ⬜ Not Started
+**Objective**: Resolve deep-stack `TypeError` regressions in the semantic arrangement logic and implement multi-layer integration tests to ensure zero-runtime errors.
+**Depends on**: Phase 3
+
+**Tasks**:
+- [ ] Fix `arrange_list` / `arrange_hierarchy` parameter collision.
+- [ ] Implement `tests/test_deep_integration.py` that simulates full generation with advanced tuning.
+
+**Verification**:
+- `pytest tests/test_deep_integration.py` passing with all Smart Tuning features enabled.
+
 ---
 ## Archived Milestones
 
