@@ -136,13 +136,44 @@ def _generate_descriptive_name(
         "examples": cluster_terms[:3]
     }
     
-    # Pre-calculate medoid hypernym
+    # Pre-calculate medoid hypernym and term
     medoid_hypernym = get_medoid_name(cluster_embeddings, cluster_terms)
     
+    # Find the actual medoid term for validation/examples
+    medoid_term = None
+    try:
+        centroid = np.mean(cluster_embeddings, axis=0)
+        distances = euclidean_distances([centroid], cluster_embeddings)
+        medoid_idx = np.argmin(distances)
+        medoid_term = cluster_terms[medoid_idx]
+        metadata["medoid_term"] = medoid_term
+    except:
+        pass
+
     name = "Group"
     
     # Decision Logic
-    if lca_name:
+    # 1. LCA Validation: Ensure LCA is consistent with the Medoid
+    # If LCA says "Cereal" but Medoid is "Egg", and Egg isn't a Cereal, LCA is misleading.
+    # We check if LCA is a hypernym of the Medoid.
+    lca_valid = False
+    if lca_name and medoid_term:
+        lca_synset = get_primary_synset(lca_name)
+        medoid_synset = get_primary_synset(medoid_term)
+        
+        if lca_synset and medoid_synset:
+            # Check if lca_synset is a hypernym of medoid_synset
+            # set(medoid.closure(hypernyms)) contains lca?
+            # Using common_hypernyms is faster than full closure check if we just check one?
+            # Or just: lca_synset in list(medoid_synset.closure(lambda s: s.hypernyms()))
+            # Optimization: check lowest common hypernym of (LCA, Medoid) == LCA
+            lcas = medoid_synset.lowest_common_hypernyms(lca_synset)
+            if lcas and lcas[0] == lca_synset:
+                lca_valid = True
+            elif lca_name.lower() == medoid_term.lower():
+                lca_valid = True
+                
+    if lca_name and (not medoid_term or lca_valid):
         name = lca_name
         metadata["source"] = "lca"
         s = get_primary_synset(lca_name)
@@ -157,26 +188,13 @@ def _generate_descriptive_name(
             metadata["wnid"] = get_synset_wnid(s)
     else:
         # Fallback: Try TF-IDF
-        keywords = extract_unique_keywords(cluster_terms, [], top_n=1) # Note: Need full context. 
-        # Refactor: _generate_descriptive_name needs access to all_terms for context?
-        # For now, let's just return "Group" and let the caller enhance it or pass context down.
-        # Actually, extracting context inside here is hard without pass-through.
-        # Let's settle for "Group" here and enhance in loop.
+        # (Same logic as before...)
         name = "Group"
         metadata["source"] = "fallback"
 
     # Hybrid Data for collision handling (passed in metadata)
     if medoid_hypernym:
          metadata["medoid_hypernym"] = medoid_hypernym
-         
-    # Also find the actual medoid term for "Examples"
-    try:
-        centroid = np.mean(cluster_embeddings, axis=0)
-        distances = euclidean_distances([centroid], cluster_embeddings)
-        medoid_idx = np.argmin(distances)
-        metadata["medoid_term"] = cluster_terms[medoid_idx]
-    except:
-        pass
 
     return name, metadata
 
@@ -492,7 +510,7 @@ def _arrange_single_pass(
 def arrange_list(
     terms: List[str], 
     model_name: str = "minilm", 
-    threshold: float = 0.1, 
+    threshold: float = 0.15, 
     min_cluster_size: int = 5,
     cluster_selection_method: str = 'eom',
     return_stats: bool = False,
@@ -633,14 +651,19 @@ def arrange_hierarchy(
             
     # Handle leftovers
     if leftovers:
-        # If leftovers are large, we *could* try to recurse them too, 
-        # but usually leftovers are noise. Let's keep them distinct.
-        # We can put them in a special key or just merge them?
-        # Standard approach: "Example" or just a list if mixed?
-        # Actually structure can be mixed: dict keys + list items? 
-        # No, YAML is usually Dict OR List.
-        # So leftovers must go into a group named "Other" or similar.
-        result["Other"] = sorted(leftovers)
+        # Generate descriptive label for leftovers
+        # Use existing group names as negative context
+        context_names = list(groups.keys())
+        # Also use a sample of items from groups as context?
+        # For now, just using the group names might be enough to avoid "Group X" again.
+        # But generate_contextual_label expects *terms*, not names.
+        # Let's gather a sample of terms from the groups.
+        context_terms = []
+        for g_items in groups.values():
+            context_terms.extend(g_items[:5]) # Sample 5 from each group
+            
+        label = generate_contextual_label(leftovers, context_terms, fallback="Other")
+        result[label] = sorted(leftovers)
         
     return result
 

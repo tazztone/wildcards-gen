@@ -149,11 +149,26 @@ class TestArranger(unittest.TestCase):
     @patch('wildcards_gen.core.arranger.compute_umap_embeddings')
     @patch('wildcards_gen.core.arranger.get_lca_name')
     @patch('wildcards_gen.core.arranger.get_medoid_name')
-    def test_hybrid_naming_collision(self, mock_get_medoid, mock_get_lca, mock_umap, mock_get_embeddings, mock_load_model, mock_check_deps):
+    @patch('wildcards_gen.core.arranger.get_primary_synset')
+    def test_hybrid_naming_collision(self, mock_get_synset, mock_get_medoid, mock_get_lca, mock_umap, mock_get_embeddings, mock_load_model, mock_check_deps):
         mock_load_model.return_value = MagicMock()
         mock_get_embeddings.return_value = np.zeros((4, 10))
         mock_umap.return_value = np.zeros((4, 5))
         
+        # Mock synsets for validation
+        mock_lca_synset = MagicMock()
+        mock_lca_synset.pos.return_value = 'n'
+        mock_lca_synset.offset.return_value = 12345
+        
+        mock_medoid_synset = MagicMock()
+        mock_medoid_synset.pos.return_value = 'n'
+        mock_medoid_synset.offset.return_value = 67890
+        
+        # Simulate that LCA is a hypernym of medoid
+        mock_medoid_synset.lowest_common_hypernyms.return_value = [mock_lca_synset]
+        
+        mock_get_synset.side_effect = lambda x: mock_lca_synset if x == "bird" else mock_medoid_synset
+
         with patch('hdbscan.HDBSCAN') as MockHDBSCAN:
             mock_clusterer = MockHDBSCAN.return_value
             # Two clusters
@@ -162,6 +177,7 @@ class TestArranger(unittest.TestCase):
             
             # Both return SAME LCA "bird"
             mock_get_lca.return_value = "bird"
+            mock_get_medoid.return_value = None # Fix: prevent MagicMock return
             
             # Define side effect for get_medoid for the two clusters (approx)
             # Actually arranger calls get_medoid inside _generate_descriptive_name or only if LCA fails? 
