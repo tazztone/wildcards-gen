@@ -3,7 +3,10 @@
 ## Current Position
 - **Phase:** None
 - **Status:** ✅ Milestone v0.6.0 Complete and Archived.
-- **Next Step:** /new-milestone — Plan the next stage.
+- **Recent Fixes:**
+  - Fixed `TypeError` in `gui.py` (Invalid `scale` arg in Accordion/Markdown).
+  - Hardened `test_gui.py` to use real Gradio layout construction, preventing future regression.
+  - Eliminated test warnings (UMAP n_jobs, NLTK WNID lookup).
 
 ## Recent Accomplishments
 - **Milestone v0.6.0 COMPLETED**:
