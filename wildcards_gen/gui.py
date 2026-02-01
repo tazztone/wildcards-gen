@@ -599,19 +599,19 @@ def launch_gui(share=False):
                                 )
                                 with gr.Column(scale=1):
                                     with gr.Accordion('🔍 WordNet Lookup', open=False):
-                                        search_in = gr.Textbox(label='Search Term', placeholder='camera...', show_label=False)
+                                        search_in = gr.Textbox(label='Search Term', placeholder='camera...', show_label=False, info='Search ImageNet for valid WordNet synsets.')
                                         search_btn = gr.Button('Search', size='sm')
                                         search_out = gr.Markdown('')
                                         search_btn.click(search_wordnet, inputs=[search_in], outputs=[search_out])
                                         search_in.submit(search_wordnet, inputs=[search_in], outputs=[search_out])
                         
                         # General Depth
-                        ds_depth = gr.Slider(1, 12, value=config.get('generation.default_depth'), step=1, label='Max Generation Depth')
+                        ds_depth = gr.Slider(1, 12, value=config.get('generation.default_depth'), step=1, label='Max Generation Depth', info='Limit recursion depth to prevent massive output files.')
 
                         # Smart Tuning
                         with gr.Group(visible=True) as smart_tuning_group:
                             gr.Markdown('**Smart Tuning**')
-                            ds_smart_preset = gr.Radio(list(SMART_PRESETS.keys()), label='Preset', value='Balanced')
+                            ds_smart_preset = gr.Radio(list(SMART_PRESETS.keys()), label='Preset', value='Balanced', info='Quick configurations for semantic pruning aggressiveness.')
                             
                             with gr.Accordion('Fine-Tuning', open=False):
                                 ds_min_depth = gr.Slider(0, 10, value=4, step=1, label='Significance Depth', info='Keep all categories shallower than this level regardless of descendant count (preserves top-level structure).')
@@ -621,7 +621,7 @@ def launch_gui(share=False):
 
                             with gr.Accordion('Semantic Cleaning', open=False):
                                 ds_semantic_clean = gr.Checkbox(label="Enable Cleaning", value=False, info="Use embeddings to remove items that don't belong in their category (requires local model).")
-                                ds_semantic_model = gr.Dropdown(['minilm', 'mpnet', 'qwen3'], value='minilm', label="Model")
+                                ds_semantic_model = gr.Dropdown(['minilm', 'mpnet', 'qwen3'], value='minilm', label="Model", info='Embedding model for semantic analysis (Local: minilm/mpnet, Cloud: qwen3).')
                                 ds_semantic_threshold = gr.Slider(0.01, 1.0, value=0.1, step=0.01, label="Threshold", info="Higher = more aggressive cleaning (removes more potential outliers).")
                                 
                                 gr.Markdown("---")
@@ -632,7 +632,7 @@ def launch_gui(share=False):
                                     ds_arrange_min_cluster = gr.Slider(label="Min Cluster", minimum=2, maximum=20, value=5, step=1, info="Minimum items required to form a new automated sub-category.")
                                 
                                 ds_arrange_method = gr.Dropdown(['eom', 'leaf'], value='eom', label="Cluster Method", info="'leaf' finds smaller, more specific groups; 'eom' finds stable clusters.")
-                                ds_debug_arrangement = gr.Checkbox(label="Debug Logs", value=False)
+                                ds_debug_arrangement = gr.Checkbox(label="Debug Logs", value=False, info='Print detailed clustering stats to the terminal.')
                             
                             with gr.Accordion('Deep Tuning', open=False):
                                 with gr.Row():
@@ -645,14 +645,14 @@ def launch_gui(share=False):
                         # Filters
                         with gr.Accordion('Advanced Filters', open=False, visible=True) as adv_filter_group:
                             with gr.Row():
-                                ds_filter = gr.Dropdown(['none', '1k', '21k'], label='Sub-Filter', value='none')
-                                ds_strict = gr.Checkbox(label='Strict Lexical Match', value=True)
+                                ds_filter = gr.Dropdown(['none', '1k', '21k'], label='Sub-Filter', value='none', info='Restrict results to specific ImageNet subsets.')
+                                ds_strict = gr.Checkbox(label='Strict Lexical Match', value=True, info='Only include items that exactly match the WordNet synset names.')
                             with gr.Row():
-                                ds_blacklist = gr.Checkbox(label='Hide Abstract Concepts', value=False)
-                                ds_bbox_only = gr.Checkbox(label='Legacy BBox Mode', value=False, visible=False) # Bound to ds_openimages_group logic but kept here
+                                ds_blacklist = gr.Checkbox(label='Hide Abstract Concepts', value=False, info='Filter out purely structural nodes (e.g., "abstraction", "entity").')
+                                ds_bbox_only = gr.Checkbox(label='Legacy BBox Mode', value=False, visible=False, info='Only include classes with bounding box annotations.') # Bound to ds_openimages_group logic but kept here
                             
-                            ds_exclude_subtree = gr.Textbox(label='Exclude Subtrees', placeholder='comma-separated wnids')
-                            ds_exclude_regex = gr.Textbox(label='Exclude Regex', placeholder='regex patterns')
+                            ds_exclude_subtree = gr.Textbox(label='Exclude Subtrees', placeholder='comma-separated wnids', info='Omit entire branches by WNID (e.g., n02084071 for dogs).')
+                            ds_exclude_regex = gr.Textbox(label='Exclude Regex', placeholder='regex patterns', info='Exclude items matching specific name patterns.')
 
                         with gr.Group(visible=False) as ds_openimages_group:
                             # This is a dummy group used for visibility logic in update_ds_ui
@@ -668,7 +668,7 @@ def launch_gui(share=False):
                              with gr.Row():
                                  with gr.Column(scale=4, min_width=0):
                                      gr.Markdown('**Preview output**')
-                                 ds_out_name = gr.Textbox(label='Output Filename', value='skeleton.yaml', show_label=False, scale=2)
+                                 ds_out_name = gr.Textbox(label='Output Filename', value='skeleton.yaml', show_label=False, scale=2, info='Target YAML filename.')
                              
                              ds_prev = gr.Code(language='yaml', label='YAML Preview', lines=35, max_lines=40, elem_classes=['preview-code'])
 
@@ -686,8 +686,8 @@ def launch_gui(share=False):
                         gr.Markdown('### Generate Taxonomy from Scratch')
                         with gr.Row():
                             with gr.Column():
-                                cr_topic = gr.Textbox(label='Topic', placeholder='e.g. Types of Cyberpunk Augmentations')
-                                cr_out = gr.Textbox(label='Output Filename', value='topic_skeleton.yaml')
+                                cr_topic = gr.Textbox(label='Topic', placeholder='e.g. Types of Cyberpunk Augmentations', info='The domain or subject matter for the new taxonomy.')
+                                cr_out = gr.Textbox(label='Output Filename', value='topic_skeleton.yaml', info='Target filename.')
                                 cr_btn = gr.Button('✨ Generate', variant='primary')
                             with gr.Column():
                                 cr_prev = gr.Code(language='yaml', label='Preview', lines=40, max_lines=40, elem_classes=['preview-code'])
