@@ -18,6 +18,7 @@ from typing import Dict, List, Optional, Set, Any
 from ruamel.yaml.comments import CommentedMap, CommentedSeq
 
 from ..structure import StructureManager
+from ..config import config
 from ..wordnet import (
     ensure_nltk_data, get_synset_from_wnid, get_primary_synset,
     get_synset_name, get_synset_gloss, get_synset_wnid,
@@ -202,7 +203,7 @@ def build_tree_recursive(
                     parent[name] = temp_node
                     if instruction:
                          try:
-                             parent.yaml_add_eol_comment(f"instruction: {instruction}", name)
+                             parent.yaml_add_eol_comment(config.instruction_template.format(gloss=instruction), name)
                          except: pass
                          
                     return (True, [])
@@ -305,7 +306,7 @@ def build_tree_recursive(
         parent[name] = child_map
         if instruction:
             try:
-                parent.yaml_add_eol_comment(f"instruction: {instruction}", name)
+                parent.yaml_add_eol_comment(config.instruction_template.format(gloss=instruction), name)
             except Exception:
                 pass
         return (True, [])
@@ -559,7 +560,7 @@ def generate_imagenet_from_wnids(
                 if synset:
                     try:
                         result.yaml_add_eol_comment(
-                            f"instruction: {get_synset_gloss(synset)}", key
+                            config.instruction_template.format(gloss=get_synset_gloss(synset)), key
                         )
                     except Exception:
                         pass

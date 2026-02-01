@@ -1,0 +1,80 @@
+{"text": "backpack", "label": "accessory", "hierarchy": ["accessory"]}
+{"text": "handbag", "label": "accessory", "hierarchy": ["accessory"]}
+{"text": "suitcase", "label": "accessory", "hierarchy": ["accessory"]}
+{"text": "tie", "label": "accessory", "hierarchy": ["accessory"]}
+{"text": "umbrella", "label": "accessory", "hierarchy": ["accessory"]}
+{"text": "bear", "label": "animal", "hierarchy": ["animal"]}
+{"text": "bird", "label": "animal", "hierarchy": ["animal"]}
+{"text": "cat", "label": "animal", "hierarchy": ["animal"]}
+{"text": "cow", "label": "animal", "hierarchy": ["animal"]}
+{"text": "dog", "label": "animal", "hierarchy": ["animal"]}
+{"text": "elephant", "label": "animal", "hierarchy": ["animal"]}
+{"text": "giraffe", "label": "animal", "hierarchy": ["animal"]}
+{"text": "horse", "label": "animal", "hierarchy": ["animal"]}
+{"text": "sheep", "label": "animal", "hierarchy": ["animal"]}
+{"text": "zebra", "label": "animal", "hierarchy": ["animal"]}
+{"text": "microwave", "label": "appliance", "hierarchy": ["appliance"]}
+{"text": "oven", "label": "appliance", "hierarchy": ["appliance"]}
+{"text": "refrigerator", "label": "appliance", "hierarchy": ["appliance"]}
+{"text": "sink", "label": "appliance", "hierarchy": ["appliance"]}
+{"text": "toaster", "label": "appliance", "hierarchy": ["appliance"]}
+{"text": "cell phone", "label": "electronic", "hierarchy": ["electronic"]}
+{"text": "keyboard", "label": "electronic", "hierarchy": ["electronic"]}
+{"text": "laptop", "label": "electronic", "hierarchy": ["electronic"]}
+{"text": "mouse", "label": "electronic", "hierarchy": ["electronic"]}
+{"text": "remote", "label": "electronic", "hierarchy": ["electronic"]}
+{"text": "tv", "label": "electronic", "hierarchy": ["electronic"]}
+{"text": "apple", "label": "food", "hierarchy": ["food"]}
+{"text": "banana", "label": "food", "hierarchy": ["food"]}
+{"text": "broccoli", "label": "food", "hierarchy": ["food"]}
+{"text": "cake", "label": "food", "hierarchy": ["food"]}
+{"text": "carrot", "label": "food", "hierarchy": ["food"]}
+{"text": "donut", "label": "food", "hierarchy": ["food"]}
+{"text": "hot dog", "label": "food", "hierarchy": ["food"]}
+{"text": "orange", "label": "food", "hierarchy": ["food"]}
+{"text": "pizza", "label": "food", "hierarchy": ["food"]}
+{"text": "sandwich", "label": "food", "hierarchy": ["food"]}
+{"text": "bed", "label": "furniture", "hierarchy": ["furniture"]}
+{"text": "chair", "label": "furniture", "hierarchy": ["furniture"]}
+{"text": "couch", "label": "furniture", "hierarchy": ["furniture"]}
+{"text": "dining table", "label": "furniture", "hierarchy": ["furniture"]}
+{"text": "potted plant", "label": "furniture", "hierarchy": ["furniture"]}
+{"text": "toilet", "label": "furniture", "hierarchy": ["furniture"]}
+{"text": "book", "label": "indoor", "hierarchy": ["indoor"]}
+{"text": "clock", "label": "indoor", "hierarchy": ["indoor"]}
+{"text": "hair drier", "label": "indoor", "hierarchy": ["indoor"]}
+{"text": "scissors", "label": "indoor", "hierarchy": ["indoor"]}
+{"text": "teddy bear", "label": "indoor", "hierarchy": ["indoor"]}
+{"text": "toothbrush", "label": "indoor", "hierarchy": ["indoor"]}
+{"text": "vase", "label": "indoor", "hierarchy": ["indoor"]}
+{"text": "bottle", "label": "kitchen", "hierarchy": ["kitchen"]}
+{"text": "bowl", "label": "kitchen", "hierarchy": ["kitchen"]}
+{"text": "cup", "label": "kitchen", "hierarchy": ["kitchen"]}
+{"text": "fork", "label": "kitchen", "hierarchy": ["kitchen"]}
+{"text": "knife", "label": "kitchen", "hierarchy": ["kitchen"]}
+{"text": "spoon", "label": "kitchen", "hierarchy": ["kitchen"]}
+{"text": "wine glass", "label": "kitchen", "hierarchy": ["kitchen"]}
+{"text": "bench", "label": "outdoor", "hierarchy": ["outdoor"]}
+{"text": "fire hydrant", "label": "outdoor", "hierarchy": ["outdoor"]}
+{"text": "parking meter", "label": "outdoor", "hierarchy": ["outdoor"]}
+{"text": "stop sign", "label": "outdoor", "hierarchy": ["outdoor"]}
+{"text": "traffic light", "label": "outdoor", "hierarchy": ["outdoor"]}
+{"text": "person", "label": "person", "hierarchy": ["person"]}
+{"text": "baseball bat", "label": "sports", "hierarchy": ["sports"]}
+{"text": "baseball glove", "label": "sports", "hierarchy": ["sports"]}
+{"text": "frisbee", "label": "sports", "hierarchy": ["sports"]}
+{"text": "kite", "label": "sports", "hierarchy": ["sports"]}
+{"text": "skateboard", "label": "sports", "hierarchy": ["sports"]}
+{"text": "skis", "label": "sports", "hierarchy": ["sports"]}
+{"text": "snowboard", "label": "sports", "hierarchy": ["sports"]}
+{"text": "sports ball", "label": "sports", "hierarchy": ["sports"]}
+{"text": "surfboard", "label": "sports", "hierarchy": ["sports"]}
+{"text": "tennis racket", "label": "sports", "hierarchy": ["sports"]}
+{"text": "airplane", "label": "vehicle", "hierarchy": ["vehicle"]}
+{"text": "bicycle", "label": "vehicle", "hierarchy": ["vehicle"]}
+{"text": "boat", "label": "vehicle", "hierarchy": ["vehicle"]}
+{"text": "bus", "label": "vehicle", "hierarchy": ["vehicle"]}
+{"text": "car", "label": "vehicle", "hierarchy": ["vehicle"]}
+{"text": "motorcycle", "label": "vehicle", "hierarchy": ["vehicle"]}
+{"text": "train", "label": "vehicle", "hierarchy": ["vehicle"]}
+{"text": "truck", "label": "vehicle", "hierarchy": ["vehicle"]}

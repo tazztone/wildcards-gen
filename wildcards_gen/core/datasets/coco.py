@@ -13,6 +13,7 @@ from typing import Dict, List, Any
 from ruamel.yaml.comments import CommentedMap, CommentedSeq
 
 from ..structure import StructureManager
+from ..config import config
 from ..wordnet import ensure_nltk_data, get_primary_synset, get_synset_gloss
 from .downloaders import ensure_coco_data
 
@@ -80,7 +81,7 @@ def generate_coco_hierarchy(
         
         if instruction:
             try:
-                result.yaml_add_eol_comment(f"instruction: {instruction}", supercat)
+                result.yaml_add_eol_comment(config.instruction_template.format(gloss=instruction), supercat)
             except Exception:
                 pass
     

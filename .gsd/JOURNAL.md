@@ -148,3 +148,22 @@ Addressed technical debt and finalized the Phase 1 implementation.
 ### Status
 - **Phase 1: DONE**.
 - **Phase 2: READY**.
+
+---
+
+## 2026-02-01 - Phase 2 Execution: Interoperability
+
+### Summary
+Implemented JSONL export and customizable instruction templates to improve interoperability with ML workflows and different prompt engineering requirements.
+
+### Accomplished
+- **JSONL Support**: Added `_save_as_jsonl` to `StructureManager` and `--format jsonl` to CLI.
+- **Templates**: Centralized instruction formatting in `Config` and refactored all dataset generators (`imagenet`, `coco`, `tencent`, `openimages`) to use `config.instruction_template`.
+- **Verification**: 
+    - Added `tests/test_structure_extended.py`.
+    - Verified JSONL export via CLI.
+    - Verified custom template rendering via YAML export smoke test.
+
+### Status
+- Phase 2 Complete.
+- Milestone v0.9.0 Ready for release.
