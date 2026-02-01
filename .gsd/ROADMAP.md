@@ -11,6 +11,10 @@
 
 ## Phases
 
+### Phase 0: Quality Hardening (The "Gold Standard")
+**Status**: ⏳ Planned
+**Objective**: Address qualitative regressions identified in the Tencent run (naming, casing, redundancy).
+
 ### Phase 1: Throughput & Scaling
 **Status**: ⏳ Planned
 **Objective**: Optimize the Arranger for multi-core processing and implement batch CLI commands.
