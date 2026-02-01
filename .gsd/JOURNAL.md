@@ -23,3 +23,24 @@ Successfully implemented the "Fast Preview" feature to allow rapid iteration on 
 
 ### Next Steps
 Proceeding to Phase 4 (Verification & Audit) for final sign-off.
+
+---
+
+## 2026-02-01 - Milestone v0.8.0 Initiation
+
+### Summary
+User identified the "ANALYSIS" panel (Analysis Report, Run History) as obsolete and requested its removal to reclaim UI space. 
+
+### Key Decisions
+- Captured the request as a high-priority entry for Milestone v0.8.0.
+- Identified critical bug: `TypeError` in `tencent.py` due to missing `umap_n_neighbors` parameter.
+- **Critical Requirement**: Hardened regression testing. The user emphasized that such interface mismatches must be caught by tests early to ensure zero runtime errors during execution.
+- Added requirements for better documentation/tooltips in the UI.
+- **UI Decision**: Rearrange the "📸 CV Datasets" tab into a cleaner 2-column layout while removing the obsolete Analysis panel.
+- Planning Lock is in effect: `SPEC.md` and `ROADMAP.md` must be finalized before implementation.
+
+### Status
+- `/add-todo` items processed.
+- `SPEC.md` and `ROADMAP.md` FINALIZED.
+- Execution plans for 3 phases created and committed.
+- Planning Lock: **UNLOCKED** 🔓
