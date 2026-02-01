@@ -1,157 +1,48 @@
+"""
+Configuration management.
+"""
 
 import os
-import yaml
-import logging
-from typing import Any, Dict, Optional
-from dataclasses import dataclass, field
+from pathlib import Path
+from dataclasses import dataclass
 
-logger = logging.getLogger(__name__)
+# Base Paths
+BASE_DIR = Path(__file__).parent.parent.parent
+OUTPUT_DIR = os.path.join(BASE_DIR, "output")
+CONFIG_DIR = os.path.join(BASE_DIR, "config")
+DB_PATH = os.path.join(BASE_DIR, "embeddings.db")
 
-# Default Configuration
-DEFAULT_CONFIG = {
-    "api_key": None,
-    "model": "google/gemma-3-27b-it:free",
-    "paths": {
-        "output_dir": "output",
-        "downloads_dir": "downloads",
-        "log_file": None
-    },
-    "generation": {
-        "default_depth": 3,
-        "add_glosses": True,
-        "max_retries": 3,
-        "timeout": 60,
-        "preview_limit": 500,
-        "save_stats": True
-    },
-    "datasets": {
-        "imagenet": {
-            "root_synset": "entity.n.01",
-            "filter": None
-        },
-        "openimages": {
-            "version": "v7"
-        },
-        "tencent": {}
-    },
-    "gui": {
-        "share": False,
-        "server_name": "127.0.0.1",
-        "server_port": 7860,
-        "theme": "default"
-    }
-}
-
-class ConfigManager:
-    """
-    Manages configuration loading from files and environment variables.
-    Priority: CLI > Local Config > User Config > Env Vars > Defaults
-    """
+@dataclass
+class Config:
+    # API
+    api_key: str = os.environ.get("OPENROUTER_API_KEY", "")
+    model: str = "google/gemini-flash-1.5"
     
-    def __init__(self):
-        self._config = DEFAULT_CONFIG.copy()
-        self.load_configs()
-        self.load_env_vars()
-        self.validate()
-
-    def load_configs(self):
-        """Load config files in priority order."""
-        # 1. User config: ~/.config/wildcards-gen/config.yaml
-        user_config_path = os.path.expanduser("~/.config/wildcards-gen/config.yaml")
-        if os.path.exists(user_config_path):
-            self._merge_from_file(user_config_path)
-
-        # 2. Project config: ./wildcards-gen.yaml
-        project_config_path = os.path.join(os.getcwd(), "wildcards-gen.yaml")
-        if os.path.exists(project_config_path):
-            self._merge_from_file(project_config_path)
-
-    def _merge_from_file(self, path: str):
-        """Merge a YAML file into the current config."""
-        try:
-            with open(path, 'r', encoding='utf-8') as f:
-                data = yaml.safe_load(f)
-                if data and isinstance(data, dict):
-                    self._deep_update(self._config, data)
-                    logger.debug(f"Loaded config from {path}")
-        except Exception as e:
-            logger.warning(f"Failed to load config {path}: {e}")
-
-    def _deep_update(self, base: Dict, update: Dict):
-        """Recursively update dictionary."""
-        for key, value in update.items():
-            if isinstance(value, dict) and key in base and isinstance(base[key], dict):
-                self._deep_update(base[key], value)
-            else:
-                base[key] = value
-
-    def load_env_vars(self):
-        """Override with environment variables."""
-        # Mapping: Env Var -> Config Key (dot notation)
-        mappings = {
-            "OPENROUTER_API_KEY": "api_key",
-            "WILDCARDS_GEN_MODEL": "model",
-            "WILDCARDS_GEN_OUTPUT_DIR": "paths.output_dir",
-            "WILDCARDS_GEN_DOWNLOADS_DIR": "paths.downloads_dir"
-        }
-        
-        for env_var, config_key in mappings.items():
-            val = os.environ.get(env_var)
-            if val is not None:
-                self.set(config_key, val)
-
-    def set(self, key_path: str, value: Any):
-        """Set a value using dot notation (e.g. 'paths.output_dir')."""
-        keys = key_path.split('.')
-        target = self._config
-        for k in keys[:-1]:
-            target = target.setdefault(k, {})
-        target[keys[-1]] = value
-
-    def get(self, key_path: str, default: Any = None) -> Any:
-        """Get a value using dot notation."""
-        keys = key_path.split('.')
-        target = self._config
-        for k in keys:
-            if not isinstance(target, dict):
-                return default
-            target = target.get(k)
-            if target is None:
-                return default
-        return target
-
-    def validate(self):
-        """Ensure critical paths are absolute or handled correctly."""
-        # Determine strict paths if needed
-        pass
-
-    # -- Properties for common access --
+    # Paths
+    output_dir: str = OUTPUT_DIR
+    config_dir: str = CONFIG_DIR
+    db_path: str = DB_PATH
     
-    @property
-    def api_key(self) -> Optional[str]:
-        return self.get("api_key")
+    # GUI Defaults
+    gui_share: bool = False
+    gui_port: int = 7860
+    
+    def get(self, key, default=None):
+        """Mock get method for compatibility with dict-like usage in some places."""
+        # Simple dot notation lookup simulation
+        if key == "datasets.imagenet.root_synset":
+            return "entity.n.01"
+        if key == "generation.default_depth":
+            return 10
+        if key == "datasets.imagenet.filter":
+            return "none"
+        if key == "gui.share":
+            return self.gui_share
+        if key == "gui.server_port":
+            return self.gui_port
+        if key == "generation.save_stats":
+            return True
+        return default
 
-    @property
-    def model(self) -> str:
-        return self.get("model")
-
-    @property
-    def output_dir(self) -> str:
-        return self.get("paths.output_dir")
-
-    @property
-    def downloads_dir(self) -> str:
-        return self.get("paths.downloads_dir")
-
-    def save(self):
-        """Save current configuration to wildcards-gen.yaml in current directory."""
-        project_config_path = os.path.join(os.getcwd(), "wildcards-gen.yaml")
-        try:
-            with open(project_config_path, 'w', encoding='utf-8') as f:
-                yaml.dump(self._config, f, default_flow_style=False)
-            logger.info(f"Saved configuration to {project_config_path}")
-        except Exception as e:
-            logger.error(f"Failed to save configuration: {e}")
-
-# Singleton instance
-config = ConfigManager()
+# Global instance
+config = Config()

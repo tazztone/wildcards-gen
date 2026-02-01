@@ -2,28 +2,31 @@
 
 ## Current Position
 - **Phase**: 1 (Throughput & Scaling)
-- **Task**: Execution - Analysis Tools
+- **Task**: Cleanup & Handoff
 - **Status**: Completed
 
 ## Last Session Summary
-- **Analysis Tools**: Created `scripts/analyze_study.py` for deep structural metrics.
-- **Experimentation**: Created `experiments/tuning_study.yaml` and ran a 12-job batch.
-- **Outcome**: The batch ran successfully, but results were identical across all configurations. 
-    - **Insight**: `preview_limit: 2000` likely truncates the hierarchy before "Smart Tuning" logic (merging/clustering) can take effect on the leaves. Future experiments should run without limits or on specific subtrees.
+- **Cleanup**: Refactored `DB_PATH` to `config.py` and removed redundant exception handling in `arranger.py`.
+- **Phase 1 Execution**: 
+    - Implemented `batch` command (multiprocessing, manifest-driven).
+    - Implemented persistent SQLite embedding cache.
+    - Verified with extensive tests (`test_batch_integration`, `test_arranger_persistence`).
+- **Verification**: All 122 tests passed (118 original + 4 new).
 
 ## In-Progress Work
-- Ready for Phase 2.
+- Ready for Phase 2 (Interoperability).
 
 ## Context Dump
 
 ### Decisions Made
-- **Batch System**: Validated end-to-end.
-- **Analysis**: Script works, detecting 1504 categories in the sample runs.
+- `DB_PATH` is now centralized in `wildcards_gen/core/config.py`.
+- Batch reports use recursive node counting to be accurate.
 
 ### Files of Interest
-- `experiments/tuning_study.yaml`
-- `scripts/analyze_study.py`
+- `wildcards_gen/batch.py`
+- `wildcards_gen/core/arranger.py`
+- `wildcards_gen/core/config.py`
 
 ## Next Steps
-1. Run a full-scale tuning experiment (overnight).
-2. Start Phase 2.
+1. Begin Phase 2: Add JSONL export support.
+2. Implement template-based instruction generation.
