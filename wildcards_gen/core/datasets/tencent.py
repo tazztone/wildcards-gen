@@ -189,6 +189,9 @@ def generate_tencent_hierarchy(
         hdbscan_min_samples=hdbscan_min_samples
     )
 
+    if stats:
+        stats.set_metadata("smart_config", smart_config.to_dict())
+
     budget = TraversalBudget(preview_limit)
 
     def merge_nodes(existing: Any, new_val: Any) -> Any:

@@ -579,6 +579,9 @@ def generate_openimages_hierarchy(
         hdbscan_min_samples=hdbscan_min_samples
     )
 
+    if stats:
+        stats.set_metadata("smart_config", smart_config.to_dict())
+
     budget = TraversalBudget(preview_limit)
     
     logger.info("Generating Open Images hierarchy...")
