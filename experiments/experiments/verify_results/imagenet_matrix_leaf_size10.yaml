@@ -1,0 +1,140 @@
+Dog:
+  Toy Dog:
+    - blenheim spaniel
+    - english toy spaniel
+    - japanese spaniel
+    - king charles spaniel
+    - maltese dog
+    - papillon
+    - pekinese
+    - shih-tzu
+    - toy terrier
+  Working Dog:
+    Shepherd Dog:
+      - border collie
+      - bouvier des flandres
+      - briard
+      - collie
+      - german shepherd
+      - groenendael
+      - komondor
+      - malinois
+      - old english sheepdog
+      - rottweiler
+      - shetland sheepdog
+    Other:
+      - appenzeller
+      - bernese mountain dog
+      - bull mastiff
+      - entlebucher
+      - eskimo dog
+      - french bulldog
+      - great dane
+      - greater swiss mountain dog
+      - hearing dog
+      - malamute
+      - police dog
+      - saint bernard
+      - seeing eye dog
+      - seizure-alert dog
+      - siberian husky
+      - tibetan mastiff
+  Hunting Dog:
+    Sporting Dog:
+      Spaniel:
+        - american water spaniel
+        - brittany spaniel
+        - clumber
+        - cocker spaniel
+        - english springer
+        - field spaniel
+        - irish water spaniel
+        - sussex spaniel
+        - welsh springer spaniel
+      Other:
+        - bird dog
+        - chesapeake bay retriever
+        - curly-coated retriever
+        - flat-coated retriever
+        - golden retriever
+        - labrador retriever
+    Terrier:
+      - airedale
+      - american staffordshire terrier
+      - australian terrier
+      - bedlington terrier
+      - border terrier
+      - boston bull
+      - clydesdale terrier
+      - dandie dinmont
+      - giant schnauzer
+      - irish terrier
+      - kerry blue terrier
+      - lakeland terrier
+      - manchester terrier
+      - miniature schnauzer
+      - norfolk terrier
+      - norwich terrier
+      - scotch terrier
+      - sealyham terrier
+      - silky terrier
+      - smooth-haired fox terrier
+      - soft-coated wheaten terrier
+      - staffordshire bullterrier
+      - standard schnauzer
+      - tibetan terrier
+      - toy manchester
+      - welsh terrier
+      - west highland white terrier
+      - wire-haired fox terrier
+      - yorkshire terrier
+    Hound:
+      - afghan hound
+      - american foxhound
+      - basset
+      - beagle
+      - black-and-tan coonhound
+      - bloodhound
+      - bluetick
+      - boarhound
+      - borzoi
+      - coondog
+      - english foxhound
+      - ibizan hound
+      - irish wolfhound
+      - italian greyhound
+      - norwegian elkhound
+      - otterhound
+      - plott hound
+      - redbone
+      - saluki
+      - scottish deerhound
+      - staghound
+      - walker hound
+      - weimaraner
+      - whippet
+    Other:
+      - rhodesian ridgeback
+      - sausage dog
+  Other:
+    - basenji
+    - cardigan
+    - chow
+    - feist
+    - great pyrenees
+    - keeshond
+    - lapdog
+    - large poodle
+    - leonberg
+    - mexican hairless
+    - miniature poodle
+    - newfoundland
+    - pariah dog
+    - pembroke
+    - pomeranian
+    - pooch
+    - pug
+    - puppy
+    - samoyed
+    - standard poodle
+    - toy poodle

@@ -1,0 +1,14 @@
+config:
+  output_dir: "experiments/verify_results"
+  dataset: "imagenet"
+  default_params:
+    preview_limit: 50
+    with_glosses: false
+
+matrix:
+  base_params:
+    root: "dog.n.01"
+    smart: true
+    depth: 3
+  axes:
+    min_leaf_size: [3, 10]

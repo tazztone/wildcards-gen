@@ -2,39 +2,28 @@
 
 ## Current Position
 - **Phase**: 1 (Throughput & Scaling)
-- **Task**: Planning Complete
-- **Status**: Ready for Execution
+- **Task**: Execution - Analysis Tools
+- **Status**: Completed
 
 ## Last Session Summary
-- **Quality Hardening (Phase 0)**: Successfully addressed technical debt from the Tencent analysis report.
-    - Implemented tautology pruning (`Fish -> Fish` reduction).
-    - Added contextual labels for merged orphans (e.g., `Other (Fruit)`).
-    - Enforced Title Case categories and lowercase items.
-- **Regression Fixes**: 
-    - Updated integration tests to align with new casing rules.
-    - Fixed unit test `test_hybrid_naming_collision` by properly mocking synset attributes for the new LCA validation logic.
-    - **All 118 tests passed.**
-- **Semantic Logic Refinement**: 
-    - Enforced LCA validation using Medoid checks (prevents "Cereal" -> "Egg" labeling).
-    - Switched `Arranger` leftovers to use `generate_contextual_label` (e.g., `Other (Alcohol)`).
-    - Bumped default `arrange_list` threshold to 0.15 for tighter clusters.
+- **Analysis Tools**: Created `scripts/analyze_study.py` for deep structural metrics.
+- **Experimentation**: Created `experiments/tuning_study.yaml` and ran a 12-job batch.
+- **Outcome**: The batch ran successfully, but results were identical across all configurations. 
+    - **Insight**: `preview_limit: 2000` likely truncates the hierarchy before "Smart Tuning" logic (merging/clustering) can take effect on the leaves. Future experiments should run without limits or on specific subtrees.
 
 ## In-Progress Work
-- Phase 1 execution pending.
+- Ready for Phase 2.
 
 ## Context Dump
 
 ### Decisions Made
-- **Persistence Layer**: Chose SQLite for embedding storage to handle concurrent access and cross-session reuse.
-- **Parallel Strategy**: Selected Threading for recursion (memory efficiency with models) and Multiprocessing for batch tasks (CPU isolation).
-- **Quality Threshold**: Bumped default semantic arrangement threshold to 0.3 to prevent semantic drift in large datasets.
+- **Batch System**: Validated end-to-end.
+- **Analysis**: Script works, detecting 1504 categories in the sample runs.
 
 ### Files of Interest
-- `wildcards_gen/core/shaper.py`: Contains the new quality hardening passes.
-- `wildcards_gen/core/arranger.py`: Entry point for the upcoming persistent cache implementation.
-- `wildcards_gen/cli.py`: Target for the batch command and threshold updates.
+- `experiments/tuning_study.yaml`
+- `scripts/analyze_study.py`
 
 ## Next Steps
-1. `/execute 1` — Implement the Persistent Embedding Cache and Threaded Traversal.
-2. Verify speed gains on large datasets (Tencent/ImageNet).
-3. Implement the `batch` command manifest processing.
+1. Run a full-scale tuning experiment (overnight).
+2. Start Phase 2.

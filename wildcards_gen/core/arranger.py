@@ -15,6 +15,9 @@ import re
 from typing import List, Dict, Tuple, Optional, Any
 import functools
 import hashlib
+import sqlite3
+import pickle
+import os
 
 from .wordnet import get_primary_synset, get_synset_name, is_abstract_category, get_synset_wnid
 from .linter import check_dependencies, load_embedding_model, compute_list_embeddings, get_hdbscan_clusters
@@ -22,21 +25,67 @@ from .linter import check_dependencies, load_embedding_model, compute_list_embed
 
 logger = logging.getLogger(__name__)
 
-# In-memory cache for embeddings (hash(term_list) -> embeddings)
-_EMBEDDING_CACHE = {}
+# Persistent Cache Config
+DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "embeddings.db")
+_MEM_CACHE = {} # LRU/Process-local cache
+
+def _init_db():
+    """Initialize SQLite database for embedding cache."""
+    try:
+        with sqlite3.connect(DB_PATH) as conn:
+            conn.execute("""
+                CREATE TABLE IF NOT EXISTS embeddings (
+                    hash TEXT PRIMARY KEY,
+                    vector BLOB
+                )
+            """)
+    except Exception as e:
+        logger.warning(f"Failed to init embedding DB at {DB_PATH}: {e}")
 
 def get_cached_embeddings(model, terms: List[str]):
-    """Get embeddings with simple in-memory caching."""
+    """Get embeddings with persistent SQLite caching + memory fallback."""
     # Create valid hashable key
     key_str = "|".join(sorted(terms))
     key_hash = hashlib.md5(key_str.encode('utf-8')).hexdigest()
     
-    if key_hash in _EMBEDDING_CACHE:
-        return _EMBEDDING_CACHE[key_hash]
+    # 1. Memory Hit
+    if key_hash in _MEM_CACHE:
+        return _MEM_CACHE[key_hash]
         
+    # 2. DB Hit
+    embeddings = None
+    try:
+        with sqlite3.connect(DB_PATH, timeout=10) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT vector FROM embeddings WHERE hash = ?", (key_hash,))
+            row = cursor.fetchone()
+            if row:
+                embeddings = pickle.loads(row[0])
+    except Exception as e:
+        logger.debug(f"DB Read failed: {e}")
+        
+    if embeddings is not None:
+        _MEM_CACHE[key_hash] = embeddings
+        return embeddings
+
+    # 3. Compute
     embeddings = compute_list_embeddings(model, terms)
-    _EMBEDDING_CACHE[key_hash] = embeddings
+    
+    # 4. Store
+    _MEM_CACHE[key_hash] = embeddings
+    try:
+        with sqlite3.connect(DB_PATH, timeout=10) as conn:
+            conn.execute(
+                "INSERT OR IGNORE INTO embeddings (hash, vector) VALUES (?, ?)",
+                (key_hash, pickle.dumps(embeddings))
+            )
+    except Exception as e:
+        logger.warning(f"DB Write failed: {e}")
+        
     return embeddings
+
+# Initialize DB on import (safe for concurrency as it's just CREATE TABLE IF NOT EXISTS)
+_init_db()
 
 def normalize_term(term: str) -> str:
     """Normalize term for stable processing."""
