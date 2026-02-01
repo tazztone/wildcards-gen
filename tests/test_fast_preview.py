@@ -30,8 +30,8 @@ def test_imagenet_limit(mock_wn, sample_hierarchy):
             with_glosses=False
         )
 
-        assert "vehicle" in result
-        content = result["vehicle"]
+        assert "Vehicle" in result
+        content = result["Vehicle"]
 
         # Depending on how the budget works (depth vs breadth),
         # with 15 children and limit 5, we should see fewer than 15 items.

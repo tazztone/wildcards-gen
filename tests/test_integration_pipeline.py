@@ -52,17 +52,17 @@ def test_integration_pipeline_shaping(mock_wn, sample_hierarchy, mock_arranger_d
     yaml.dump(result, sys.stdout)
 
     # Verify Content
-    assert "entity" in result
-    entity = result["entity"]
-    assert "animal" in entity
-    assert "vehicle" in entity
+    assert "Entity" in result
+    entity = result["Entity"]
+    assert "Animal" in entity
+    assert "Vehicle" in entity
     
     # Animal check (should have orphans merged into misc/Other)
-    assert isinstance(entity["animal"], list)
-    assert len(entity["animal"]) >= 5
-    assert "poodle" in entity["animal"]
+    assert isinstance(entity["Animal"], list)
+    assert len(entity["Animal"]) >= 5
+    assert "poodle" in entity["Animal"]
     
     # Vehicle check (15 items, clustered)
-    assert isinstance(entity["vehicle"], list)
-    assert len(entity["vehicle"]) == 15
-    assert "vehicle 0" in entity["vehicle"]
+    assert isinstance(entity["Vehicle"], list)
+    assert len(entity["Vehicle"]) == 15
+    assert "vehicle 0" in entity["Vehicle"]
