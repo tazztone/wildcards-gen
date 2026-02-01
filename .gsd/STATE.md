@@ -1,14 +1,15 @@
-# State - Milestone v0.8.0 [PLANNING]
+# State - Milestone v0.9.0 [PLANNING]
 
 ## Current Position
 - **Phase**: None
-- **Status**: ✅ Milestone v0.8.0 Complete (Hardened & Polished)
+- **Status**: 🟢 Milestone v0.8.0 Archived. Beginning v0.9.0 Planning.
 
-### Phase 5: Quality Assurance & Registry
-**Status**: ✅ Complete
+### Milestone v0.9.0: Performance & Expansion
+**Status**: ⏳ Planned
 
 ## Last Session Summary
-Milestone v0.8.0 is fully complete. We resolved a critical deep-stack `TypeError`, streamlined the UI to a 2-column layout, and modernized the entire test suite. The project now features an AST-based "Registry Guard" that ensures 100% tooltip coverage for all configuration settings.
+Milestone v0.8.0 was successfully closed and archived. All technical debt identified in the final audit was addressed, including UI test synchronization and signature validation. The system is now stable, well-tested, and features a refined user interface.
 
 ## Next Steps
-1. Archive milestone and prepare for v0.9.0.
+1. Finalize SPEC for v0.9.0.
+2. Begin Phase 1: Throughput & Scaling (Parallelization).

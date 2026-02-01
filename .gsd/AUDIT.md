@@ -28,6 +28,6 @@
 3. **Content Validation**: Add a smoke test to ensure all sliders in the Smart Tuning group have non-empty `info` strings.
 
 ## Technical Debt to Address
-- [ ] Fix broken UI tests in `tests/test_ui_logic.py`.
-- [ ] Update `tests/test_ui_wiring.py` with modern parameter list.
-- [ ] Add `test_gui_tooltips.py` for content preservation.
+- [x] Fix broken UI tests in `tests/test_ui_logic.py`.
+- [x] Update `tests/test_ui_wiring.py` with modern parameter list.
+- [x] Add `test_gui_tooltips.py` for content preservation. (Verified as `test_gui_registry.py`)
