@@ -87,3 +87,17 @@ Ending session after successful transition from quality hardening to scaling pla
 ### Handoff Notes
 - The next step is `/execute 1`, starting with the `PersistentEmbeddingCache` in `arranger.py`.
 - The `batch` command will require careful handling of `tqdm` in multi-processing environments.
+
+---
+
+## 2026-02-01 - Phase 0 Regression Fixes
+
+### Summary
+Fixed test regressions in `test_datasets.py`, `test_fast_preview.py`, and `test_integration_pipeline.py`. These tests were failing because they asserted lowercase category keys, while the recently implemented `ConstraintShaper` enforces Title Case.
+
+### Actions
+- Updated assertions in failing tests to match the new Title Case convention.
+- Verified all 118 tests pass.
+
+### Status
+- Phase 0 verification is now complete and consistent.
