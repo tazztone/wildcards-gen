@@ -175,6 +175,29 @@ class SmartConfig:
             hdbscan_min_samples=override.get('hdbscan_min_samples', self.hdbscan_min_samples)
         )
 
+    def to_dict(self) -> dict:
+        """Return a dictionary representation of the config."""
+        return {
+            "enabled": self.enabled,
+            "min_depth": self.min_depth,
+            "min_hyponyms": self.min_hyponyms,
+            "min_leaf_size": self.min_leaf_size,
+            "merge_orphans": self.merge_orphans,
+            "semantic_cleanup": self.semantic_cleanup,
+            "semantic_model": self.semantic_model,
+            "semantic_threshold": self.semantic_threshold,
+            "semantic_arrangement": self.semantic_arrangement,
+            "semantic_arrangement_threshold": self.semantic_arrangement_threshold,
+            "semantic_arrangement_min_cluster": self.semantic_arrangement_min_cluster,
+            "semantic_arrangement_method": self.semantic_arrangement_method,
+            "umap_n_neighbors": self.umap_n_neighbors,
+            "umap_min_dist": self.umap_min_dist,
+            "umap_n_components": self.umap_n_components,
+            "hdbscan_min_samples": self.hdbscan_min_samples,
+            "orphans_label_template": self.orphans_label_template,
+            "skip_nodes": list(self.skip_nodes)
+        }
+
 
 # ... (skipping unchanged functions) ...
 
