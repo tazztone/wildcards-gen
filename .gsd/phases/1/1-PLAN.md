@@ -4,53 +4,54 @@ plan: 1
 wave: 1
 ---
 
-# Plan 1.1: Fix Dataset Signatures & Add Tests
+# Plan 1.1: Persistent Embedding Cache (SQLite)
 
 ## Objective
-Synchronize the dataset generation function signatures with the GUI's advanced tuning parameters and implement a regression test suite to prevent future mismatches.
+Replace the transient in-memory `_EMBEDDING_CACHE` in `arranger.py` with a persistent SQLite database. This ensures that embeddings are shared across runs and processes, significantly reducing redundant computations during batch processing.
 
 ## Context
-- `.gsd/SPEC.md`
-- `.gsd/phases/1/RESEARCH.md`
-- `wildcards_gen/gui.py` (call site)
-- `wildcards_gen/core/datasets/imagenet.py`
-- `wildcards_gen/core/datasets/tencent.py`
-- `wildcards_gen/core/datasets/openimages.py`
+- .gsd/SPEC.md
+- .gsd/phases/1/RESEARCH.md
+- wildcards_gen/core/arranger.py
 
 ## Tasks
 
 <task type="auto">
-  <name>Synchronize Function Signatures</name>
-  <files>
-    - /home/tazztone/_coding/wildcards-gen/wildcards_gen/core/datasets/imagenet.py
-    - /home/tazztone/_coding/wildcards-gen/wildcards_gen/core/datasets/tencent.py
-    - /home/tazztone/_coding/wildcards-gen/wildcards_gen/core/datasets/openimages.py
-  </files>
+  <name>Implement PersistentEmbeddingCache class</name>
+  <files>wildcards_gen/core/arranger.py</files>
   <action>
-    Update `generate_imagenet_tree`, `generate_tencent_hierarchy`, and `generate_openimages_hierarchy` to:
-    1. Accept `umap_n_neighbors (int)`, `umap_min_dist (float)`, and `hdbscan_min_samples (Optional[int])` as typed arguments.
-    2. Pass these arguments into the `SmartConfig` initialization within each function.
+    Create a new class `PersistentEmbeddingCache` that manages an SQLite database.
+    
+    Logic:
+    1. DB Location: Use `~/.cache/wildcards-gen/embeddings.db` or similar user-specific directory.
+    2. Schema: `CREATE TABLE IF NOT EXISTS embeddings (term_hash TEXT PRIMARY KEY, model_name TEXT, embedding BLOB)`.
+    3. Use WAL mode for concurrent access safety.
+    4. Methods: `get(term, model_name)`, `set(term, model_name, embedding)`.
+    5. Serialization: Store numpy arrays as binary BLOBs using `arr.tobytes()` and `np.frombuffer()`.
+    
+    Integration:
+    - Replace the global `_EMBEDDING_CACHE` dictionary with an instance of this class.
+    - Update `get_cached_embeddings` to use the persistence layer.
   </action>
-  <verify>Check signatures using `inspect` module or visual check.</verify>
-  <done>All three functions accept the new keyword arguments without error.</done>
+  <verify>python -c "from wildcards_gen.core.arranger import PersistentEmbeddingCache; print('Persistent cache ready')"</verify>
+  <done>Caching logic uses SQLite and survives process restarts.</done>
 </task>
 
 <task type="auto">
-  <name>Implement Signature Validation Test</name>
-  <files>
-    - /home/tazztone/_coding/wildcards-gen/tests/test_interface_sync.py
-  </files>
+  <name>Add cache cleanup utility</name>
+  <files>wildcards_gen/cli.py</files>
   <action>
-    Create a new test file that:
-    1. Mocks the core dataset processing logic (to avoid actual downloads).
-    2. Dynamically calls each dataset generator with the `kwargs` dictionary used in `gui.py:generate_dataset_handler`.
-    3. Asserts that no `TypeError` or `Unexpected Argument` error is raised.
+    Add a new sub-command or flag to the `lint` command (or a new `cache` command) to clear the persistent cache.
+    
+    `wildcards-gen cache --clear`
+    
+    This provides a safety valve if the database grows too large or contains corrupted data.
   </action>
-  <verify>`pytest tests/test_interface_sync.py`</verify>
-  <done>Tests pass for all three dataset types.</done>
+  <verify>wildcards-gen cache --clear --help</verify>
+  <done>CLI allows clearing the persistent embedding cache.</done>
 </task>
 
 ## Success Criteria
-- [ ] Dataset functions accept advanced tuning parameters.
-- [ ] `pytest tests/test_interface_sync.py` passes.
-- [ ] No more `TypeError` in GUI when running with high UMAP neighbors.
+- [ ] Embeddings are persisted to disk in an SQLite database.
+- [ ] Subsequent runs of the same dataset are significantly faster due to cache hits.
+- [ ] CLI provides a way to manage/clear the cache.
