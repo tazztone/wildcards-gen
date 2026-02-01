@@ -1,38 +1,40 @@
 # ROADMAP.md
 
-> **Current Milestone**: v0.8.0 - [PROJECTED]
-> **Goal**: Define next major objective.
+> **Current Milestone**: v0.8.0 - Stability & UI Polish
+> **Goal**: Resolve regressions, harden tests, and streamline the CV generation interface.
 
 ## Must-Haves
-- [ ] TBD
+- [ ] Fix `TypeError` in Dataset generation modules.
+- [ ] Implement signature validation tests.
+- [ ] Remove obsolete Analysis/History panels.
+- [ ] Implement 2-column layout for CV Datasets tab.
+- [ ] Improve Smart Tuning tooltips.
 
 ## Phases
+
+### Phase 1: Stability & Validation
+- **Objective**: Fix the immediate crash and prevent future interface regressions.
+- **Tasks**:
+    - Update ImageNet, Tencent, and Open Images generators to accept all Smart Tuning parameters.
+    - Create `tests/test_signatures.py` to programmatically verify that dataset handlers and core functions are in sync.
+- **Verification**: Tests passing; no more `TypeError` when tweaking UMAP/HDBSCAN settings in GUI.
+
+### Phase 2: UI Structure
+- **Objective**: Reorganize the interface for better ergonomics and space usage.
+- **Tasks**:
+    - Remove "Analysis Report" and "Run History" Accordions from `gui.py`.
+    - Refactor "CV Datasets" tab internal layout to a 2-column format.
+- **Verification**: Browser screenshot confirming cleaner layout and reclaimed space.
+
+### Phase 3: UX Polish
+- **Objective**: Improve the educational value of the settings.
+- **Tasks**:
+    - Add descriptive `info` strings to all Smart Tuning UI components in `gui.py`.
+- **Verification**: All settings show helpful tooltips or inline text.
 
 ---
 ## Archived Milestones
 
 ### v0.7.0 - GUI Refactor
-- ✅ **Logical Structure**: Organized `gui.py` into clear sections (Constants, Utils, Handlers, UI).
-- ✅ **Verification**: Passed all GUI tests without regression.
-
-### v0.6.0 - Layout & Stability
-- ✅ **Wider Sidebar**: 2x scale relative to previous.
-- ✅ **Compact UI**: Tightened CSS and better grouping.
-- ✅ **Hardened Tests**: Unified mocking strategy.
-
-### v0.5.0 - Optimization & UI
-- ✅ **Async Generation**: Non-blocking background execution.
-- ✅ **Compact Layout**: Sidebar & Accordions.
-- ✅ **Live Preview**: Dry-run mode.
-- ✅ **Caching**: WordNet & UMAP.
-
-### v0.4.0 - Data Science Core
-- ✅ **Stability Metrics**: Implemented Jaccard/ARI.
-- ✅ **Advanced Clustering**: UMAP+HDBSCAN.
-- ✅ **Deterministic Naming**: Medoid/LCA naming.
-- ✅ **Constraints Engine**: ConstraintsShaper.
-- ✅ **Integration**: Full pipeline integration.
-
-### v0.3.0 - UX Polish
-- ✅ **Compact "Analysis" section**: Completed in v0.6.0.
-- ✅ **Move "Generation Completed" status**: Completed in v0.6.0.
+- ✅ **Logical Structure**: Organized `gui.py` into clear sections.
+- ✅ **Verification**: Passed all GUI tests.
