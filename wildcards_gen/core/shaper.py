@@ -19,6 +19,10 @@ class ConstraintShaper:
         preserve_roots: if True, do not flatten the top-level dictionary even if it has 1 key.
         """
         processed = self._merge_orphans(self.tree, min_leaf_size)
+        
+        # 2. Prune Tautologies (A -> A -> B)
+        processed = self._prune_tautologies(processed)
+        
         if flatten_singles:
             if preserve_roots and isinstance(processed, dict) and len(processed) == 1:
                 # Only recursively flatten the *values*, keep the root key.
@@ -28,7 +32,68 @@ class ConstraintShaper:
                 processed[key] = self._flatten_singles(val)
             else:
                 processed = self._flatten_singles(processed)
+        # 4. Normalize Casing (Categories: Title Case, Items: lowercase)
+        processed = self._normalize_casing(processed)
+        
         return processed
+
+
+    def _normalize_casing(self, node: Any) -> Any:
+        """
+        Force Title Case for category names and lowercase for leaf items.
+        """
+        if isinstance(node, list):
+            # Sort and deduplicate items while lowercasing
+            return sorted(list(set(str(item).lower() for item in node)))
+            
+        if not isinstance(node, dict):
+            return node
+
+        new_node = type(node)() if isinstance(node, dict) else {}
+        for k, v in node.items():
+            title_k = k.title()
+            norm_v = self._normalize_casing(v)
+            
+            if title_k in new_node:
+                # Merge collisions
+                existing = new_node[title_k]
+                if isinstance(existing, list) and isinstance(norm_v, list):
+                    new_node[title_k] = sorted(list(set(existing + norm_v)))
+                elif isinstance(existing, dict) and isinstance(norm_v, dict):
+                    existing.update(norm_v)
+                # If mixed types, the last one wins (rare in this app)
+                else:
+                    new_node[title_k] = norm_v
+            else:
+                new_node[title_k] = norm_v
+                
+        return new_node
+
+
+    def _prune_tautologies(self, node: Any) -> Any:
+        """
+        Recursively remove nodes where parent name equals child name.
+        e.g. {Fish: {Fish: [...]}} -> {Fish: [...] }
+        """
+        if not isinstance(node, dict):
+            return node
+
+        new_node = type(node)() if isinstance(node, dict) else {}
+        for k, v in node.items():
+            # First recurse down
+            v = self._prune_tautologies(v)
+            
+            # Check for tautology with single child
+            if isinstance(v, dict) and len(v) == 1:
+                child_key = list(v.keys())[0]
+                if k.lower().strip() == child_key.lower().strip():
+                    # Promote child's value to current key
+                    new_node[k] = v[child_key]
+                    continue
+            
+            new_node[k] = v
+            
+        return new_node
 
 
     def _merge_orphans(self, node: Any, min_size: int) -> Any:
@@ -48,54 +113,47 @@ class ConstraintShaper:
 
             
         # 2. Process current level
-        # Identify small groups (that are lists, i.e., leaves)
         small_keys = []
-        regular_keys = []
+        orphan_items = []
+        context_items = []
         
         for k, v in processed_node.items():
-            # count items
-            count = 0
+            if k == "Other":
+                continue
+            
             if isinstance(v, list):
-                count = len(v)
+                if len(v) < min_size:
+                    small_keys.append(k)
+                    orphan_items.extend(v)
+                else:
+                    context_items.extend(v)
             elif isinstance(v, dict):
-                # Rough count of children? Or just don't merge dicts?
-                # Usually we only merge leaf lists. Merging sub-trees is risky.
-                count = 99999 
-                
-            if count < min_size and k != "Other":
-                small_keys.append(k)
-            else:
-                regular_keys.append(k)
-                
+                # We don't merge dicts, but they provide context
+                # (Ideally we'd recursive gather, but sibling list items are usually enough)
+                pass
+
         if not small_keys:
             return processed_node
             
-        # Move small items to 'Other'
-        if "Other" not in processed_node:
-             processed_node["Other"] = []
-             
-        # Check type of "Other" - it might be a dict if created recursively?
-        # Enforce "Other" is a list for merging items.
-        if isinstance(processed_node["Other"], dict):
-            # If 'Other' is a dict, we can't easily merge list items into it.
-            # Skip merging for safety or rename?
-            # Let's assume 'Other' is a bucket for items.
-            pass 
-        else:
+        # Determine Label
+        other_label = "Other"
+        try:
+            from .arranger import generate_contextual_label
+            other_label = generate_contextual_label(orphan_items, context_items)
+        except (ImportError, Exception):
+            pass
+
+        # Move to new label
+        if other_label not in processed_node:
+             processed_node[other_label] = []
+        
+        if isinstance(processed_node[other_label], list):
              for k in small_keys:
                  items = processed_node.pop(k)
                  if isinstance(items, list):
-                     processed_node["Other"].extend(items)
-                     
-        # Sort Other
-        if isinstance(processed_node["Other"], list):
-             processed_node["Other"] = sorted(processed_node["Other"])
-             
-        # Cleanup: If "Other" is the ONLY key, maybe promote it? 
-        # Or if "Other" is empty (shouldn't happen if we added stuff).
-        if not processed_node["Other"] and "Other" in processed_node:
-            del processed_node["Other"]
-
+                     processed_node[other_label].extend(items)
+             processed_node[other_label] = sorted(processed_node[other_label])
+        
         return processed_node
 
     def _flatten_singles(self, node: Any) -> Any:
