@@ -95,29 +95,25 @@ def test_create_handler_logic():
 
 def test_launch_gui_construction():
     """
-    Test that the GUI layout can be constructed without errors.
+    Test that the GUI layout can be constructed without errors using real Gradio.
+    This ensures that component arguments (like scale, visible) are valid.
     """
-    with patch('wildcards_gen.gui.gr') as mock_gr, \
-         patch('wildcards_gen.gui.config') as mock_config:
+    # We patch config to avoid filesystem reads
+    # We patch Blocks.launch to prevent the server from actually starting
+    with patch('wildcards_gen.gui.config') as mock_config, \
+         patch('gradio.Blocks.launch') as mock_launch:
         
         # Setup config mocks
         mock_config.api_key = "test_key"
         mock_config.model = "test_model"
         mock_config.get.return_value = "info"
         
-        # Configure the mock chain for unpacking
-        # When ds_smart_preset.change() is called, it returns 4 items
-        mock_gr.Radio.return_value.change.return_value = (MagicMock(), MagicMock(), MagicMock(), MagicMock())
-        
         # Call the launch function
+        # This will execute all the component constructors (gr.Row, gr.Accordion, etc.)
         gui.launch_gui(share=False)
         
-        # Verify that Blocks was used (entered)
-        mock_gr.Blocks.return_value.__enter__.assert_called()
-        
         # Verify launch was called on the demo instance
-        demo_instance = mock_gr.Blocks.return_value.__enter__.return_value
-        demo_instance.launch.assert_called_once()
+        mock_launch.assert_called_once()
 
 def test_update_ds_filename():
     """Test filename generation logic."""

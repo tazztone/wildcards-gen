@@ -589,12 +589,13 @@ def launch_gui(share=False):
                                     info='WordNet ID (e.g. entity.n.01).',
                                     scale=2
                                 )
-                                with gr.Accordion('🔍 WordNet Lookup', open=False, scale=1):
-                                    search_in = gr.Textbox(label='Search Term', placeholder='camera...', show_label=False)
-                                    search_btn = gr.Button('Search', size='sm')
-                                    search_out = gr.Markdown('')
-                                    search_btn.click(search_wordnet, inputs=[search_in], outputs=[search_out])
-                                    search_in.submit(search_wordnet, inputs=[search_in], outputs=[search_out])
+                                with gr.Column(scale=1):
+                                    with gr.Accordion('🔍 WordNet Lookup', open=False):
+                                        search_in = gr.Textbox(label='Search Term', placeholder='camera...', show_label=False)
+                                        search_btn = gr.Button('Search', size='sm')
+                                        search_out = gr.Markdown('')
+                                        search_btn.click(search_wordnet, inputs=[search_in], outputs=[search_out])
+                                        search_in.submit(search_wordnet, inputs=[search_in], outputs=[search_out])
                         
                         # General Depth
                         ds_depth = gr.Slider(1, 12, value=config.get('generation.default_depth'), step=1, label='Max Generation Depth')
@@ -656,7 +657,8 @@ def launch_gui(share=False):
                              with gr.Column(scale=2):
                                  with gr.Group(elem_classes=['analysis-panel']):
                                      with gr.Row():
-                                         gr.Markdown('### 📊 Analysis', elem_classes=['section-header'], scale=2)
+                                         with gr.Column(scale=2, min_width=0):
+                                             gr.Markdown('### 📊 Analysis', elem_classes=['section-header'])
                                          ds_analyze_btn = gr.Button('🔍 Run', size='sm', variant='secondary', scale=1)
                                          ds_apply_suggest = gr.Button('✅ Apply', size='sm', interactive=False, scale=1)
                                      
@@ -677,7 +679,8 @@ def launch_gui(share=False):
                          # Block 2: Preview
                          with gr.Column():
                              with gr.Row():
-                                 gr.Markdown('**Preview output**', scale=4)
+                                 with gr.Column(scale=4, min_width=0):
+                                     gr.Markdown('**Preview output**')
                                  ds_out_name = gr.Textbox(label='Output Filename', value='skeleton.yaml', show_label=False, scale=2)
                              
                              ds_prev = gr.Code(language='yaml', label='YAML Preview', lines=35, max_lines=35, elem_classes=['preview-code'])
