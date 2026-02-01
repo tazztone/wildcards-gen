@@ -17,16 +17,15 @@ import functools
 import hashlib
 import sqlite3
 import pickle
-import os
 
 from .wordnet import get_primary_synset, get_synset_name, is_abstract_category, get_synset_wnid
 from .linter import check_dependencies, load_embedding_model, compute_list_embeddings, get_hdbscan_clusters
-
+from .config import config
 
 logger = logging.getLogger(__name__)
 
 # Persistent Cache Config
-DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "embeddings.db")
+DB_PATH = config.db_path
 _MEM_CACHE = {} # LRU/Process-local cache
 
 def _init_db():
