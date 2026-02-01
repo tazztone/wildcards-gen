@@ -218,18 +218,9 @@ def apply_semantic_arrangement(
          min_samples=config.hdbscan_min_samples
     )
     
+    leftovers = []
     metadata = {}
-    if return_metadata and isinstance(result, tuple):
-         # arrange_hierarchy might return (result, meta) if we updated it?
-         # correctly arrange_hierarchy in arranger.py (lines 482+) does NOT take return_metadata arg for itself, 
-         # it takes **kwargs and passes them to arrange_list.
-         # BUT arrange_hierarchy returns a purely structural object (dict or list).
-         # It does not return native metadata yet.
-         # We might lose metadata from the top level call.
-         # For now, let's assume we just want the structure.
-         pass
-         
-    return result
+    return (result, leftovers, metadata) if return_metadata else (result, leftovers)
 
 
 

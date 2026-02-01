@@ -586,7 +586,10 @@ def arrange_hierarchy(
         return sorted(terms)
         
     # Attempt to cluster
-    # We use return_metadata=True to access stats/meta if needed, but here we simply need groups.
+    # Sanitize kwargs to avoid duplicate values for control flags (popped if present)
+    kwargs.pop('return_stats', None)
+    kwargs.pop('return_metadata', None)
+    
     groups, leftovers = arrange_list(terms, return_stats=False, return_metadata=False, **kwargs)
     
     # If clustering failed to find meaningful structure (all leftovers or 1 group), return flat

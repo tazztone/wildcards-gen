@@ -272,7 +272,7 @@ def generate_tencent_hierarchy(
                 from ..smart import apply_semantic_arrangement
                 arranged_structure, leftovers, metadata = apply_semantic_arrangement(filtered_leaves, config, stats=stats, context=name, return_metadata=True)
                 
-                if arranged_structure:
+                if isinstance(arranged_structure, dict):
                     # Created a sub-hierarchy.
                     # Construction logic:
                     # We need to return this dict as the new structure.
@@ -399,7 +399,7 @@ def generate_tencent_hierarchy(
                 from ..smart import apply_semantic_arrangement
                 arranged_orphans, leftovers, metadata = apply_semantic_arrangement(orphan_leaves, config, stats=stats, context=f"orphans of {name}", return_metadata=True)
                 
-                if arranged_orphans:
+                if isinstance(arranged_orphans, dict):
                     # Merge groups into CM (as siblings)
                     # merge_nodes handles dict merging
                     for k, v in arranged_orphans.items():
@@ -456,7 +456,7 @@ def generate_tencent_hierarchy(
                  from ..smart import apply_semantic_arrangement
                  named_groups, leftovers, metadata = apply_semantic_arrangement(filtered_leaves, config, stats=stats, context=name, return_metadata=True)
                  
-                 if named_groups:
+                 if isinstance(named_groups, dict):
                      mini_tree = CommentedMap()
                      for g_name, g_terms in named_groups.items():
                          mini_tree[g_name] = sorted(g_terms, key=str.casefold)

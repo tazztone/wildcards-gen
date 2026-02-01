@@ -154,7 +154,7 @@ def build_tree_recursive(
             # If we flattened a potentially large list, try to re-group meaningful parts
             if smart_config and smart_config.enabled and smart_config.semantic_arrangement:
                 from ..smart import apply_semantic_arrangement
-                arranged_structure = apply_semantic_arrangement(descendants, smart_config, stats=stats, context=name)
+                arranged_structure, _ = apply_semantic_arrangement(descendants, smart_config, stats=stats, context=name)
                 
                 # Merge the arranged structure into the parent
                 # The arranged_structure is a dict (sub-categories) or list (if no structure found).
@@ -267,7 +267,7 @@ def build_tree_recursive(
         # Semantic Arrangement for Orphans (Misc)
         if smart_config.semantic_arrangement:
             from ..smart import apply_semantic_arrangement
-            arranged_orphans = apply_semantic_arrangement(collected_orphans, smart_config, stats=stats, context=f"orphans of {name}")
+            arranged_orphans, _ = apply_semantic_arrangement(collected_orphans, smart_config, stats=stats, context=f"orphans of {name}")
             
             if isinstance(arranged_orphans, dict):
                  # Merge these groups into the child_map (which holds siblings)
