@@ -536,7 +536,10 @@ def generate_openimages_hierarchy(
     orphans_label_template: Optional[str] = None,
     stats: Optional[Any] = None,
     preview_limit: Optional[int] = None,
-    progress_callback=None
+    progress_callback=None,
+    umap_n_neighbors: int = 15,
+    umap_min_dist: float = 0.1,
+    hdbscan_min_samples: Optional[int] = None
 ) -> CommentedMap:
     """
     Generate hierarchy from Open Images dataset.
@@ -570,7 +573,10 @@ def generate_openimages_hierarchy(
         debug_arrangement=debug_arrangement,
         skip_nodes=skip_nodes,
         orphans_label_template=orphans_label_template,
-        preview_limit=preview_limit
+        preview_limit=preview_limit,
+        umap_n_neighbors=umap_n_neighbors,
+        umap_min_dist=umap_min_dist,
+        hdbscan_min_samples=hdbscan_min_samples
     )
 
     budget = TraversalBudget(preview_limit)
