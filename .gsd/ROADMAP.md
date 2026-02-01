@@ -33,6 +33,20 @@
 **Verification**:
 - `pytest tests/test_deep_integration.py` passing with all Smart Tuning features enabled.
 
+### Phase 5: Quality Assurance & Registry
+**Status**: ⬜ Not Started
+**Objective**: Fix regressions in legacy UI tests, synchronize parameter wiring, and implement registry-based validation for tooltips and presets.
+**Depends on**: Phase 4
+
+**Tasks**:
+- [ ] Fix `test_ui_logic.py` return count.
+- [ ] Synchronize `test_ui_wiring.py` with modern 30-parameter signature.
+- [ ] Implement `tests/test_gui_registry.py` for Tooltips and Smart Presets.
+
+**Verification**:
+- All 35+ test suites passing with zero failures.
+- `test_gui_registry.py` confirms 100% tooltip coverage.
+
 ---
 ## Archived Milestones
 
