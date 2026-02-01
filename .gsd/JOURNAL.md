@@ -96,12 +96,14 @@ Ending session after successful transition from quality hardening to scaling pla
 Resolved test regressions caused by casing normalization and improved the semantic arrangement logic based on analysis of Tencent output.
 
 ### Fixes
-- **Tests**: Updated `test_datasets.py`, `test_fast_preview.py`, and `test_integration_pipeline.py` to expect Title Case categories. All 118 tests passed.
+- **Tests**: Updated `test_datasets.py`, `test_fast_preview.py`, and `test_integration_pipeline.py` to expect Title Case categories.
+- **Unit Tests**: Fixed `tests/test_arranger.py` which was failing due to updated LCA validation logic requiring more robust synset mocks.
 - **Semantic Labeling**: 
     - Implemented strict LCA validation in `arranger.py` to reject misleading group names (e.g., "Cereal" for a mixed group containing "Egg").
     - Updated `arrange_hierarchy` to use `generate_contextual_label` for leftovers, producing "Other (Alcohol)" instead of generic "Other".
     - Increased default clustering threshold to `0.15` to reduce noise.
 
 ### Status
+- All 118 tests passed.
 - Phase 0 verification complete.
 - Semantic logic hardened against "hallucinated" categories.

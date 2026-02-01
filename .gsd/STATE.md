@@ -10,7 +10,10 @@
     - Implemented tautology pruning (`Fish -> Fish` reduction).
     - Added contextual labels for merged orphans (e.g., `Other (Fruit)`).
     - Enforced Title Case categories and lowercase items.
-- **Regression Fixes**: Updated integration tests to align with new casing rules. All 118 tests passed.
+- **Regression Fixes**: 
+    - Updated integration tests to align with new casing rules.
+    - Fixed unit test `test_hybrid_naming_collision` by properly mocking synset attributes for the new LCA validation logic.
+    - **All 118 tests passed.**
 - **Semantic Logic Refinement**: 
     - Enforced LCA validation using Medoid checks (prevents "Cereal" -> "Egg" labeling).
     - Switched `Arranger` leftovers to use `generate_contextual_label` (e.g., `Other (Alcohol)`).
