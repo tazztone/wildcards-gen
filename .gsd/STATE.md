@@ -1,11 +1,11 @@
 # State - Milestone v0.8.0 [PLANNING]
 
 ## Current Position
-- **Phase:** None
-- **Status:** ✅ Milestone v0.7.0 Complete and Archived.
-- **Recent Accomplishments:**
-  - Completed v0.7.0 (GUI Refactor).
-  - Organized `gui.py` and passed tests.
+- **Phase**: 1
+- **Task**: Planning complete
+- **Status**: Ready for execution
 
 ## Next Steps
-- Determine goals for v0.8.0.
+1. `/execute 1` — Resolve signature crash and add tests.
+2. `/execute 2` — Streamline UI and rearrange layout.
+3. `/execute 3` — Final UX polish.
