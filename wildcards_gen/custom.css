@@ -1,28 +1,42 @@
 /* Custom CSS to tighten spacing and improve panel distinctiveness */
 .gradio-container {
-    max-width: 1400px !important;
+    max-width: 1600px !important;
 }
 
 .header-section {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 2rem;
-    padding: 1rem;
+    margin-bottom: 1rem;
+    padding: 0.5rem 1rem;
     background: rgba(var(--background-fill-secondary-rgb), 0.3);
     border-radius: 8px;
 }
 
+/* Tighten form elements */
+.gradio-container .form {
+    gap: 0.5rem !important;
+}
+
+.gradio-container .form > div {
+    margin-bottom: 0 !important;
+}
+
+/* Reduce accordion padding */
+.gradio-container .accordion {
+    padding: 2px 0 !important;
+}
+
 .dataset-config-panel {
     border-right: 1px solid var(--border-color-primary);
-    padding-right: 1.5rem;
+    padding-right: 1rem;
 }
 
 .analysis-panel {
     background: var(--background-fill-secondary);
-    padding: 1rem;
+    padding: 0.75rem;
     border-radius: 8px;
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
     border: 1px solid var(--border-color-primary);
 }
 
