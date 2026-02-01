@@ -76,8 +76,10 @@ def test_openimages_limit(mock_load, mock_ensure):
 
 @patch('wildcards_gen.core.datasets.tencent.download_tencent_hierarchy')
 @patch('wildcards_gen.core.datasets.tencent.parse_hierarchy_file')
-def test_tencent_limit(mock_parse, mock_dl):
+@patch('wildcards_gen.core.datasets.tencent.get_synset_from_wnid')
+def test_tencent_limit(mock_get_synset, mock_parse, mock_dl):
     mock_dl.return_value = "dummy.csv"
+    mock_get_synset.return_value = None # No synset found for dummy IDs
     
     # Create a hierarchy: Root -> 10 children
     categories = {0: {'id': 'n0', 'name': 'Root', 'parent': -1}}

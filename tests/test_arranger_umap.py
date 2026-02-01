@@ -21,7 +21,8 @@ def test_compute_umap_embeddings_success(mock_arranger_deps):
         n_components=5,
         min_dist=0.1,
         metric='cosine',
-        random_state=42
+        random_state=42,
+        n_jobs=1
     )
     # Check result
     assert result.shape == (20, 5)
