@@ -1,6 +1,6 @@
 # ROADMAP.md
 
-> **Current Milestone**: v0.7.0 - [PROJECTED]
+> **Current Milestone**: v0.8.0 - [PROJECTED]
 > **Goal**: Define next major objective.
 
 ## Must-Haves
@@ -10,6 +10,10 @@
 
 ---
 ## Archived Milestones
+
+### v0.7.0 - GUI Refactor
+- ✅ **Logical Structure**: Organized `gui.py` into clear sections (Constants, Utils, Handlers, UI).
+- ✅ **Verification**: Passed all GUI tests without regression.
 
 ### v0.6.0 - Layout & Stability
 - ✅ **Wider Sidebar**: 2x scale relative to previous.
