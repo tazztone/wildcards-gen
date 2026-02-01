@@ -2,25 +2,12 @@
 import pytest
 import numpy as np
 from unittest.mock import MagicMock, patch
-import sys
-
-from unittest.mock import MagicMock, patch
-import sys
-
-# Remove global sys.modules hacking
-# The tests should handle mocking contextually
 
 from wildcards_gen.core.arranger import compute_umap_embeddings, _arrange_single_pass
 
-@pytest.fixture(autouse=True)
-def mock_ml_modules():
-    """Mock hdbscan and umap for all tests in this module."""
-    with patch.dict(sys.modules, {"hdbscan": MagicMock(), "umap": MagicMock()}):
-        yield
-
-def test_compute_umap_embeddings_success():
+def test_compute_umap_embeddings_success(mock_arranger_deps):
     """Test that UMAP is called with correct parameters."""
-    mock_umap_cls = sys.modules["umap"].UMAP
+    mock_umap_cls = mock_arranger_deps["umap"].UMAP
     mock_reducer = mock_umap_cls.return_value
     mock_reducer.fit_transform.return_value = np.zeros((20, 5))
     
@@ -39,7 +26,7 @@ def test_compute_umap_embeddings_success():
     # Check result
     assert result.shape == (20, 5)
 
-def test_compute_umap_embeddings_fallback_small_data():
+def test_compute_umap_embeddings_fallback_small_data(mock_arranger_deps):
     """Test fallback when sample size < n_neighbors."""
     embeddings = np.random.rand(10, 384) # 10 samples < 15 neighbors
     
@@ -51,17 +38,16 @@ def test_compute_umap_embeddings_fallback_small_data():
 
 def test_compute_umap_embeddings_import_error():
     """Test fallback when umap raises ImportError."""
+    import sys
     with patch.dict(sys.modules, {'umap': None}):
         embeddings = np.random.rand(20, 384)
         result = compute_umap_embeddings(embeddings)
         
         assert np.array_equal(result, embeddings)
 
-def test_arrange_single_pass_calls_umap():
+def test_arrange_single_pass_calls_umap(mock_arranger_deps):
     """Verify _arrange_single_pass calls compute_umap_embeddings."""
     # Clear cache to ensure UMAP is called
-    from wildcards_gen.core import arranger
-    arranger._UMAP_CACHE.clear()
     from wildcards_gen.core import arranger
     arranger._UMAP_CACHE.clear()
     
@@ -70,7 +56,7 @@ def test_arrange_single_pass_calls_umap():
         mock_compute.return_value = np.zeros((20, 5))
         
         # Mock HDBSCAN
-        mock_hdbscan = sys.modules["hdbscan"].HDBSCAN.return_value
+        mock_hdbscan = mock_arranger_deps["clusterer"]
         mock_hdbscan.labels_ = np.zeros(20)
         mock_hdbscan.probabilities_ = np.zeros(20)
         

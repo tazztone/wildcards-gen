@@ -576,23 +576,25 @@ def launch_gui(share=False):
 
                 with gr.Row():
                     # --- Left Column: Configuration (Sidebar) ---
-                    with gr.Sidebar(label="Generator Settings", elem_classes=['dataset-config-panel']) as sidebar:
+                    with gr.Column(scale=2, elem_classes=['dataset-config-panel']) as sidebar:
                         gr.Markdown('### 🛠️ Configuration', elem_classes=['section-header'])
                         
                         # ImageNet Specifics
                         with gr.Group(visible=True) as ds_imagenet_group:
-                            ds_root = gr.Textbox(
-                                label='Root Synset', 
-                                value=config.get('datasets.imagenet.root_synset'),
-                                placeholder='entity.n.01',
-                                info='WordNet ID (e.g. entity.n.01).'
-                            )
-                            with gr.Accordion('🔍 WordNet Lookup', open=False):
-                                search_in = gr.Textbox(label='Search Term', placeholder='e.g. camera, dog', show_label=False)
-                                search_btn = gr.Button('Search', size='sm')
-                                search_out = gr.Markdown('')
-                                search_btn.click(search_wordnet, inputs=[search_in], outputs=[search_out])
-                                search_in.submit(search_wordnet, inputs=[search_in], outputs=[search_out])
+                            with gr.Row():
+                                ds_root = gr.Textbox(
+                                    label='Root Synset', 
+                                    value=config.get('datasets.imagenet.root_synset'),
+                                    placeholder='entity.n.01',
+                                    info='WordNet ID (e.g. entity.n.01).',
+                                    scale=2
+                                )
+                                with gr.Accordion('🔍 WordNet Lookup', open=False, scale=1):
+                                    search_in = gr.Textbox(label='Search Term', placeholder='camera...', show_label=False)
+                                    search_btn = gr.Button('Search', size='sm')
+                                    search_out = gr.Markdown('')
+                                    search_btn.click(search_wordnet, inputs=[search_in], outputs=[search_out])
+                                    search_in.submit(search_wordnet, inputs=[search_in], outputs=[search_out])
                         
                         # General Depth
                         ds_depth = gr.Slider(1, 12, value=config.get('generation.default_depth'), step=1, label='Max Generation Depth')
@@ -624,53 +626,67 @@ def launch_gui(share=False):
                                 ds_debug_arrangement = gr.Checkbox(label="Debug Logs", value=False)
                             
                             with gr.Accordion('Deep Tuning', open=False):
-                                ds_umap_neighbors = gr.Slider(2, 50, value=15, step=1, label="UMAP Neighbors", info="Lower = local structure, Higher = global.")
-                                ds_umap_dist = gr.Slider(0.0, 1.0, value=0.1, step=0.01, label="UMAP Min Dist", info="Clump tightness.")
-                                ds_arr_samples = gr.Slider(1, 20, value=5, step=1, label="Min Samples", info="Outlier sensitivity (High = more strict).")
-                                ds_orphans_template = gr.Textbox(label="Orphan Key", value="misc", placeholder="misc")
+                                with gr.Row():
+                                    ds_umap_neighbors = gr.Slider(2, 50, value=15, step=1, label="UMAP Neighbors")
+                                    ds_umap_dist = gr.Slider(0.0, 1.0, value=0.1, step=0.01, label="UMAP Min Dist")
+                                with gr.Row():
+                                    ds_arr_samples = gr.Slider(1, 20, value=5, step=1, label="Min Samples")
+                                    ds_orphans_template = gr.Textbox(label="Orphan Key", value="misc", placeholder="misc")
                                 
                         # Filters
                         with gr.Accordion('Advanced Filters', open=False, visible=True) as adv_filter_group:
-                            ds_filter = gr.Dropdown(['none', '1k', '21k'], label='Sub-Filter', value='none')
-                            ds_strict = gr.Checkbox(label='Strict Lexical Match', value=True)
-                            ds_blacklist = gr.Checkbox(label='Hide Abstract Concepts', value=False)
+                            with gr.Row():
+                                ds_filter = gr.Dropdown(['none', '1k', '21k'], label='Sub-Filter', value='none')
+                                ds_strict = gr.Checkbox(label='Strict Lexical Match', value=True)
+                            with gr.Row():
+                                ds_blacklist = gr.Checkbox(label='Hide Abstract Concepts', value=False)
+                                ds_bbox_only = gr.Checkbox(label='Legacy BBox Mode', value=False, visible=False) # Bound to ds_openimages_group logic but kept here
+                            
                             ds_exclude_subtree = gr.Textbox(label='Exclude Subtrees', placeholder='comma-separated wnids')
                             ds_exclude_regex = gr.Textbox(label='Exclude Regex', placeholder='regex patterns')
 
                         with gr.Group(visible=False) as ds_openimages_group:
-                            ds_bbox_only = gr.Checkbox(label='Legacy BBox Mode', value=False)
+                            # This is a dummy group used for visibility logic in update_ds_ui
+                            pass
 
                     # --- Right Column: Analysis & Output ---
-                    with gr.Column(scale=1):
-                         # Block 1: Analysis Panel
-                         with gr.Group(elem_classes=['analysis-panel']):
-                             gr.Markdown('### 📊 Analysis', elem_classes=['section-header'])
+                    with gr.Column(scale=3):
+                         # Block 1: Analysis & Status
+                         with gr.Row():
+                             with gr.Column(scale=2):
+                                 with gr.Group(elem_classes=['analysis-panel']):
+                                     with gr.Row():
+                                         gr.Markdown('### 📊 Analysis', elem_classes=['section-header'], scale=2)
+                                         ds_analyze_btn = gr.Button('🔍 Run', size='sm', variant='secondary', scale=1)
+                                         ds_apply_suggest = gr.Button('✅ Apply', size='sm', interactive=False, scale=1)
+                                     
+                                     # Stale Indicator
+                                     stale_warning = gr.Markdown('⚠️ **Settings Changed**: Analysis may be out of date.', visible=False, elem_classes=['stale-warning'])
+                                     
+                                     with gr.Accordion('Analysis Report', open=True) as analysis_accordion:
+                                         ds_analysis_stats = gr.Markdown('*Run analysis to see structure stats and suggestions.*')
+                                     
+                                     with gr.Accordion('Run History', open=False):
+                                         ds_history_view = gr.Markdown('No runs yet.')
                              
-                             # Stale Indicator
-                             stale_warning = gr.Markdown('⚠️ **Settings Changed**: Analysis may be out of date.', visible=False, elem_classes=['stale-warning'])
-                             
-                             with gr.Row():
-                                 ds_analyze_btn = gr.Button('🔍 Analyze Structure', size='sm', variant='secondary')
-                                 ds_apply_suggest = gr.Button('✅ Apply Suggestions', size='sm', interactive=False)
-                             
-                             ds_analysis_stats = gr.Markdown('*Run analysis to see structure stats and optimization suggestions.*')
-                             
-                             with gr.Accordion('Run History', open=False):
-                                 ds_history_view = gr.Markdown('No runs yet.')
+                             with gr.Column(scale=1):
+                                 with gr.Group(elem_classes=['analysis-panel']):
+                                     gr.Markdown('### 🚀 Status', elem_classes=['section-header'])
+                                     ds_summary = gr.Markdown('_Waiting for generation..._')
 
                          # Block 2: Preview
                          with gr.Column():
-                             gr.Markdown('**Preview output**')
-                             ds_prev = gr.Code(language='yaml', label='YAML Preview', lines=40, max_lines=40, elem_classes=['preview-code'])
-                             ds_out_name = gr.Textbox(label='Output Filename', value='skeleton.yaml', show_label=False)
+                             with gr.Row():
+                                 gr.Markdown('**Preview output**', scale=4)
+                                 ds_out_name = gr.Textbox(label='Output Filename', value='skeleton.yaml', show_label=False, scale=2)
+                             
+                             ds_prev = gr.Code(language='yaml', label='YAML Preview', lines=35, max_lines=35, elem_classes=['preview-code'])
 
                          # Block 3: Run Controls
-                         gr.Markdown('---')
-                         ds_summary = gr.Markdown('')
                          with gr.Row():
-                             ds_fast_preview = gr.Checkbox(label='⚡ Fast Preview', value=False, info='Limit to ~500 items for rapid tuning.')
+                             ds_fast_preview = gr.Checkbox(label='⚡ Fast Preview', value=False, info='Limit to ~500 items.')
                              ds_btn = gr.Button('🚀 Generate Skeleton', variant='primary', size='lg')
-                             ds_file = gr.File(label='Download Files (YAML, Log, JSON)', height=100, file_count='multiple')
+                             ds_file = gr.File(label='Download Files', height=80, file_count='multiple')
 
             # === TAB 2: AI ASSISTANT (LLM) ===
             with gr.Tab('🧠 AI Assistant'):
@@ -813,14 +829,13 @@ def launch_gui(share=False):
             ds_umap_neighbors.change, ds_umap_dist.change, ds_arr_samples.change
         ]
         
-        # Wire each trigger to the live_preview_handler with debounce
+        # Wire each trigger to the live_preview_handler
+        # Note: Gradio 6.x uses 'always_last' as the default for .change() events
         for trigger in live_preview_triggers:
             trigger(
-                live_preview_handler, 
-                inputs=all_gen_inputs, 
+                live_preview_handler,
+                inputs=all_gen_inputs,
                 outputs=[ds_prev, ds_summary, ds_file],
-                trigger_mode="debounce", 
-                trigger_scale=1.0,
                 concurrency_limit=1,
                 show_progress="hidden"
             )

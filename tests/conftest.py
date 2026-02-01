@@ -117,37 +117,48 @@ def mock_wn(sample_hierarchy):
 @pytest.fixture
 def mock_arranger_deps():
     """
-    Mocks hdbscan, sklearn, and their submodules to prevent ImportErrors
-    when these optional dependencies are missing.
-    Returns the dictionary of mocks used.
+    Mocks hdbscan, umap, sklearn, and their submodules to prevent ImportErrors
+    and heavy processing during tests.
     """
-    mock_hdbscan_module = MagicMock()
+    mock_hdbscan = MagicMock()
+    mock_umap = MagicMock()
     mock_sklearn = MagicMock()
-    mock_sklearn_metrics = MagicMock()
-    mock_sklearn_metrics_pairwise = MagicMock()
-
-    mock_sklearn.metrics = mock_sklearn_metrics
-    mock_sklearn.metrics.pairwise = mock_sklearn_metrics_pairwise
-
+    
+    # Mock specific submodules
+    mock_tfidf_mod = MagicMock()
+    mock_sklearn.feature_extraction.text = mock_tfidf_mod
+    
     modules_to_patch = {
-        "hdbscan": mock_hdbscan_module,
+        "hdbscan": mock_hdbscan,
+        "umap": mock_umap,
         "sklearn": mock_sklearn,
-        "sklearn.metrics": mock_sklearn_metrics,
-        "sklearn.metrics.pairwise": mock_sklearn_metrics_pairwise
+        "sklearn.metrics": mock_sklearn.metrics,
+        "sklearn.metrics.pairwise": mock_sklearn.metrics.pairwise,
+        "sklearn.feature_extraction": mock_sklearn.feature_extraction,
+        "sklearn.feature_extraction.text": mock_tfidf_mod
     }
 
     with patch.dict(sys.modules, modules_to_patch):
-        # Configure standard happy path
+        # Configure standard happy path for HDBSCAN
         MockHDBSCAN = MagicMock()
-        mock_hdbscan_module.HDBSCAN = MockHDBSCAN
+        mock_hdbscan.HDBSCAN = MockHDBSCAN
         mock_clusterer = MockHDBSCAN.return_value
         mock_clusterer.fit.return_value = None
+        mock_clusterer.labels_ = [0, 0, 1, -1] # Example labels
+        mock_clusterer.probabilities_ = [0.9, 0.9, 0.8, 0.1]
+
+        # Configure UMAP
+        MockUMAP = MagicMock()
+        mock_umap.UMAP = MockUMAP
+        mock_umap_obj = MockUMAP.return_value
+        mock_umap_obj.fit_transform.return_value = [[0.1, 0.2], [0.1, 0.2], [0.9, 0.8], [0.5, 0.5]]
 
         yield {
-            "hdbscan": mock_hdbscan_module,
-            "HDBSCAN": MockHDBSCAN,
-            "clusterer": mock_clusterer,
-            "sklearn": mock_sklearn
+            "hdbscan": mock_hdbscan,
+            "umap": mock_umap,
+            "sklearn": mock_sklearn,
+            "tfidf_mod": mock_tfidf_mod,
+            "clusterer": mock_clusterer
         }
 
 @pytest.fixture(autouse=True)
