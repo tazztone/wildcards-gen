@@ -4,6 +4,8 @@ import yaml
 import logging
 import datetime
 from nltk.corpus import wordnet as wn
+
+# Local Imports
 from wildcards_gen.core.datasets import imagenet, coco, openimages, tencent
 from wildcards_gen.core.structure import StructureManager
 from wildcards_gen.core.config import config
@@ -11,6 +13,9 @@ from wildcards_gen.core.llm import LLMEngine
 from wildcards_gen.core.stats import StatsCollector
 from .core.presets import SMART_PRESETS, DATASET_PRESET_OVERRIDES
 
+# =============================================================================
+# 1. SETUP & LOGGING
+# =============================================================================
 logger = logging.getLogger(__name__)
 
 # Load Custom CSS
@@ -18,6 +23,9 @@ CSS_PATH = os.path.join(os.path.dirname(__file__), 'custom.css')
 with open(CSS_PATH, 'r') as f:
     CUSTOM_CSS = f.read()
 
+# =============================================================================
+# 2. CONSTANTS
+# =============================================================================
 # Defined at module level to be shared by multiple UI components
 COMMON_ROOTS = {
     '— General —': '',
@@ -58,48 +66,9 @@ COMMON_ROOTS = {
     'Communication': 'communication.n.02'
 }
 
-def save_and_preview(data, output_name):
-    """Helper to save structure and return path + content."""
-    mgr = StructureManager()
-    yaml_str = mgr.to_string(data)
-    
-    output_dir = config.output_dir
-    os.makedirs(output_dir, exist_ok=True)
-    if not output_name.endswith('.yaml'):
-        output_name += '.yaml'
-    output_path = os.path.join(output_dir, output_name)
-    
-    with open(output_path, 'w', encoding='utf-8') as f:
-        f.write(yaml_str)
-        
-    # Truncate for preview to avoid UI lag
-    lines = yaml_str.split('\n')
-    if len(lines) > 500:
-        preview_str = '\n'.join(lines[:500]) + '\n\n# ... (Preview truncated. Download file to view full content.)'
-    else:
-        preview_str = yaml_str
-
-    return output_path, preview_str
-
-def search_wordnet(query):
-    """Search for synsets matching the query."""
-    if not query or len(query) < 2:
-        return 'Please enter at least 2 characters.'
-    
-    try:
-        synsets = wn.synsets(query.replace(' ', '_'))
-        if not synsets:
-            return f"No results found for '{query}'."
-        
-        results = []
-        for s in synsets:
-            wnid = f'{s.pos()}{s.offset():08d}'
-            results.append(f'**{s.name()}** (`{wnid}`)\n_{s.definition()}_\n')
-            
-        return '\n'.join(results)
-    except Exception as e:
-        return f'Error: {str(e)}'
-
+# =============================================================================
+# 3. UTILITY FUNCTIONS (PURE & FORMATTING)
+# =============================================================================
 def clean_filename(s):
     """Clean string for use in filename."""
     import re
@@ -143,6 +112,51 @@ def update_en_filename(topic):
     if not topic: return 'enriched.yaml'
     return f'enriched_{clean_filename(topic)[:20]}.yaml'
 
+# =============================================================================
+# 4. LOGIC HELPERS (IO & STATE)
+# =============================================================================
+def save_and_preview(data, output_name):
+    """Helper to save structure and return path + content."""
+    mgr = StructureManager()
+    yaml_str = mgr.to_string(data)
+    
+    output_dir = config.output_dir
+    os.makedirs(output_dir, exist_ok=True)
+    if not output_name.endswith('.yaml'):
+        output_name += '.yaml'
+    output_path = os.path.join(output_dir, output_name)
+    
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write(yaml_str)
+        
+    # Truncate for preview to avoid UI lag
+    lines = yaml_str.split('\n')
+    if len(lines) > 500:
+        preview_str = '\n'.join(lines[:500]) + '\n\n# ... (Preview truncated. Download file to view full content.)'
+    else:
+        preview_str = yaml_str
+
+    return output_path, preview_str
+
+def search_wordnet(query):
+    """Search for synsets matching the query."""
+    if not query or len(query) < 2:
+        return 'Please enter at least 2 characters.'
+    
+    try:
+        synsets = wn.synsets(query.replace(' ', '_'))
+        if not synsets:
+            return f"No results found for '{query}'."
+        
+        results = []
+        for s in synsets:
+            wnid = f'{s.pos()}{s.offset():08d}'
+            results.append(f'**{s.name()}** (`{wnid}`)\n_{s.definition()}_\n')
+            
+        return '\n'.join(results)
+    except Exception as e:
+        return f'Error: {str(e)}'
+
 def update_ds_ui(dataset_name, strategy):
     """Calculate visibility and state updates for dataset-related UI components."""
     is_imagenet = (dataset_name == 'ImageNet')
@@ -158,6 +172,9 @@ def update_ds_ui(dataset_name, strategy):
         gr.update(visible=(dataset_name == 'Open Images')), # ds_openimages_group
     ]
 
+# =============================================================================
+# 5. EVENT HANDLERS
+# =============================================================================
 def on_dataset_change(dataset_name, strategy):
     """Handle all UI updates when the source dataset or extraction mode changes."""
     # 1. Run the existing UI visibility logic
@@ -524,6 +541,9 @@ def lint_handler(file_obj, model, threshold, progress=gr.Progress()):
         logger.exception('Linter failed')
         return f'Error: {str(e)}', gr.update(visible=False), None
 
+# =============================================================================
+# 6. UI CONSTRUCTION
+# =============================================================================
 def launch_gui(share=False):
     # Initial API key from config or env
     initial_key = config.api_key or os.environ.get('OPENROUTER_API_KEY', '')
@@ -890,7 +910,7 @@ def launch_gui(share=False):
     if hf_token:
         os.environ['HF_TOKEN'] = hf_token
     
-    logger.info(f'🌐 GUI is starting at http://{server_name or '127.0.0.1'}:{server_port or 7860}')
+    logger.info(f'🌐 GUI is starting at http://{server_name or "127.0.0.1"}:{server_port or 7860}')
     
     # NOTE: Gradio 6.0 migration: theme and css moved to launch()
     demo.launch(
