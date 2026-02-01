@@ -147,6 +147,11 @@ class ConstraintShaper:
         if other_label not in processed_node:
              processed_node[other_label] = []
         
+        # Safety: If other_label is one of the keys we planned to merge, 
+        # remove it from the merge list so we don't pop the destination.
+        if other_label in small_keys:
+            small_keys.remove(other_label)
+        
         if isinstance(processed_node[other_label], list):
              for k in small_keys:
                  items = processed_node.pop(k)

@@ -527,9 +527,6 @@ def generate_tencent_hierarchy(
             except Exception:
                 pass
             
-            except Exception:
-                pass
-            
     # Post-process with ConstraintShaper
     if smart and smart_config.enabled and (min_leaf_size > 0 or merge_orphans):
          from ..shaper import ConstraintShaper
