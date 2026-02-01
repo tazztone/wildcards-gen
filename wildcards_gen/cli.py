@@ -437,6 +437,18 @@ def cmd_enrich(args):
     print(f"✓ Saved enriched hierarchy to {output}")
 
 
+def cmd_batch(args):
+    """Handle batch command."""
+    from .batch import BatchProcessor
+    
+    if not os.path.exists(args.manifest):
+        print(f"Error: Manifest file not found: {args.manifest}")
+        sys.exit(1)
+        
+    processor = BatchProcessor(args.manifest, workers=args.workers)
+    processor.run()
+
+
 def cmd_gui(args):
     """Handle gui command."""
     from .gui import launch_gui
@@ -650,6 +662,12 @@ def main():
     p_comp.add_argument('other_file', help='Second file path')
     p_comp.set_defaults(func=cmd_compare)
     
+    # === BATCH COMMAND ===
+    p_batch = subparsers.add_parser('batch', help='Run batch generation jobs from manifest')
+    p_batch.add_argument('manifest', help='Path to YAML manifest file')
+    p_batch.add_argument('--workers', type=int, default=1, help='Number of parallel workers')
+    p_batch.set_defaults(func=cmd_batch)
+
     args = parser.parse_args()
     args.func(args)
 
