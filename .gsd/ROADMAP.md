@@ -1,39 +1,34 @@
 # ROADMAP.md
 
-> **Current Milestone**: v0.8.0 - Stability & UI Polish
+> **Current Milestone**: v0.8.0 - Stability & UI Polish [COMPLETE]
 > **Goal**: Resolve regressions, harden tests, and streamline the CV generation interface.
 
 ## Must-Haves
-- [ ] Fix `TypeError` in Dataset generation modules.
-- [ ] Implement signature validation tests.
-- [ ] Remove obsolete Analysis/History panels.
-- [ ] Implement 2-column layout for CV Datasets tab.
-- [ ] Improve Smart Tuning tooltips.
+- [x] Fix `TypeError` in Dataset generation modules.
+- [x] Implement signature validation tests.
+- [x] Remove obsolete Analysis/History panels.
+- [x] Implement 2-column layout for CV Datasets tab.
+- [x] Improve Smart Tuning tooltips.
 
 ## Phases
 
 ### Phase 1: Stability & Validation
-- **Objective**: Fix the immediate crash and prevent future interface regressions.
-- **Tasks**:
-    - Update ImageNet, Tencent, and Open Images generators to accept all Smart Tuning parameters.
-    - Create `tests/test_signatures.py` to programmatically verify that dataset handlers and core functions are in sync.
-- **Verification**: Tests passing; no more `TypeError` when tweaking UMAP/HDBSCAN settings in GUI.
+**Status**: ✅ Complete
 
 ### Phase 2: UI Structure
-- **Objective**: Reorganize the interface for better ergonomics and space usage.
-- **Tasks**:
-    - Remove "Analysis Report" and "Run History" Accordions from `gui.py`.
-    - Refactor "CV Datasets" tab internal layout to a 2-column format.
-- **Verification**: Browser screenshot confirming cleaner layout and reclaimed space.
+**Status**: ✅ Complete
 
 ### Phase 3: UX Polish
-- **Objective**: Improve the educational value of the settings.
-- **Tasks**:
-    - Add descriptive `info` strings to all Smart Tuning UI components in `gui.py`.
-- **Verification**: All settings show helpful tooltips or inline text.
+**Status**: ✅ Complete
 
 ---
 ## Archived Milestones
+
+### v0.8.0 - Stability & UI Polish
+- ✅ **Stability**: Fixed signature mismatch regressions.
+- ✅ **Test Coverage**: Added `tests/test_interface_sync.py` to target parameter mismatches.
+- ✅ **UI Design**: Implemented 2-column CV Layout and removed obsolete analysis sections.
+- ✅ **UX Guidance**: Added comprehensive info tooltips to all smart tuning settings.
 
 ### v0.7.0 - GUI Refactor
 - ✅ **Logical Structure**: Organized `gui.py` into clear sections.
