@@ -1,32 +1,29 @@
 # State - Milestone v0.9.0 [IN PROGRESS]
 
 ## Current Position
-- **Phase**: 1 (Throughput & Scaling)
-- **Task**: Cleanup & Handoff
+- **Phase**: 2 (Interoperability)
+- **Task**: Finalization
 - **Status**: Completed
 
 ## Last Session Summary
-- **Cleanup**: Refactored `DB_PATH` to `config.py` and removed redundant exception handling in `arranger.py`.
-- **Phase 1 Execution**: 
-    - Implemented `batch` command (multiprocessing, manifest-driven).
-    - Implemented persistent SQLite embedding cache.
-    - Verified with extensive tests (`test_batch_integration`, `test_arranger_persistence`).
-- **Verification**: All 122 tests passed (118 original + 4 new).
+- **Phase 2 (Completed)**:
+    - **JSONL Export**: Implemented and verified via `StructureManager` and CLI.
+    - **Templates**: Centralized instruction formatting in `config.py` and refactored all dataset generators to use it.
+    - **Verification**: Passed `test_structure_extended.py` and CLI smoke tests for COCO (JSONL & YAML).
 
 ## In-Progress Work
-- Ready for Phase 2 (Interoperability).
+- Ready for release or next milestone.
 
 ## Context Dump
 
 ### Decisions Made
-- `DB_PATH` is now centralized in `wildcards_gen/core/config.py`.
-- Batch reports use recursive node counting to be accurate.
+- **JSONL**: Flattens hierarchy to `{"text": "term", "label": "parent", "hierarchy": ["p", "c"]}`.
+- **Templates**: Default is `"instruction: {gloss}"`. `ruamel.yaml` handles the `#`.
 
 ### Files of Interest
-- `wildcards_gen/batch.py`
-- `wildcards_gen/core/arranger.py`
+- `wildcards_gen/core/structure.py`
 - `wildcards_gen/core/config.py`
+- `wildcards_gen/cli.py`
 
 ## Next Steps
-1. Begin Phase 2: Add JSONL export support.
-2. Implement template-based instruction generation.
+1. Release v0.9.0.

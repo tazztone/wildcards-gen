@@ -5,12 +5,14 @@ Uses ruamel.yaml to maintain # instruction: comments in the generated YAML.
 Ported from wildcards-categorize.
 """
 
+import json
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap, CommentedSeq
 from typing import Dict, Any, Optional, List
 import io
 import os
 import logging
+from .config import config
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +29,13 @@ class StructureManager:
     def create_empty_structure(self) -> CommentedMap:
         """Create an empty CommentedMap structure."""
         return CommentedMap()
+
+    def _format_comment(self, text: str) -> str:
+        """Format comment using global template."""
+        try:
+            return config.instruction_template.format(gloss=text)
+        except Exception:
+            return f"instruction: {text}"
 
     def add_category_with_instruction(
         self,
@@ -52,7 +61,7 @@ class StructureManager:
                     pass  # Comment exists
                 else:
                     parent_node.yaml_add_eol_comment(
-                        f"instruction: {instruction}",
+                        self._format_comment(instruction),
                         key
                     )
             except Exception as e:
@@ -80,7 +89,7 @@ class StructureManager:
         if instruction:
             try:
                 parent_node.yaml_add_eol_comment(
-                    f"instruction: {instruction}",
+                    self._format_comment(instruction),
                     key
                 )
             except Exception as e:
@@ -99,10 +108,27 @@ class StructureManager:
             logger.error(f"Failed to load structure from {file_path}: {e}")
             return self.create_empty_structure()
 
-    def save_structure(self, data: Any, file_path: str) -> None:
-        """Save YAML structure to file, preserving comments."""
-        content = self.to_string(data)
+    def save_structure(self, data: Any, file_path: str, format: Optional[str] = None) -> None:
+        """
+        Save structure to file.
+        
+        Args:
+            data: Hierarchy data
+            file_path: Output path
+            format: 'yaml' or 'jsonl'. Auto-detected from extension if None.
+        """
+        if format is None:
+            if file_path.endswith('.jsonl'):
+                format = 'jsonl'
+            else:
+                format = 'yaml'
+                
+        if format == 'jsonl':
+            self._save_as_jsonl(data, file_path)
+            return
 
+        # Default YAML save
+        content = self.to_string(data)
         try:
             os.makedirs(os.path.dirname(os.path.abspath(file_path)), exist_ok=True)
             with open(file_path, 'w', encoding='utf-8') as f:
@@ -110,6 +136,35 @@ class StructureManager:
             logger.info(f"Saved structure to {file_path}")
         except Exception as e:
             logger.error(f"Failed to save structure to {file_path}: {e}")
+
+    def _save_as_jsonl(self, data: Any, file_path: str) -> None:
+        """Save flattened hierarchy as JSONL."""
+        try:
+            os.makedirs(os.path.dirname(os.path.abspath(file_path)), exist_ok=True)
+            
+            with open(file_path, 'w', encoding='utf-8') as f:
+                self._write_jsonl_recursive(data, [], f)
+                
+            logger.info(f"Saved JSONL to {file_path}")
+        except Exception as e:
+            logger.error(f"Failed to save JSONL to {file_path}: {e}")
+
+    def _write_jsonl_recursive(self, node: Any, path: List[str], file_obj) -> None:
+        if isinstance(node, dict):
+            for k, v in node.items():
+                self._write_jsonl_recursive(v, path + [k], file_obj)
+        elif isinstance(node, list):
+            # Leaf list
+            # Label is the immediate parent (last item in path)
+            label = path[-1] if path else "root"
+            
+            for item in node:
+                entry = {
+                    "text": item,
+                    "label": label,
+                    "hierarchy": path
+                }
+                file_obj.write(json.dumps(entry) + "\n")
 
     def to_string(self, data: Any) -> str:
         """Convert structure to YAML string."""

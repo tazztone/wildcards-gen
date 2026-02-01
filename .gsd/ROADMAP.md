@@ -4,10 +4,10 @@
 > **Goal**: Scale generation capabilities through batch processing and improved throughput.
 
 ## Must-Haves
-- [ ] Implement CLI batch mode for processing multiple roots/datasets.
+- [x] Implement CLI batch mode for processing multiple roots/datasets.
 - [ ] Add JSONL export support for machine-learning ingest compatibility.
 - [ ] Create customizable instruction templates for LLM enrichment.
-- [ ] Parallelize embedding generation in `Arranger` for 2x faster clustering.
+- [x] Parallelize embedding generation in `Arranger` for 2x faster clustering.
 
 ## Phases
 
@@ -16,11 +16,11 @@
 **Objective**: Address qualitative regressions identified in the Tencent run (naming, casing, redundancy).
 
 ### Phase 1: Throughput & Scaling
-**Status**: 🏃 In Progress
+**Status**: ✅ Completed
 **Objective**: Optimize the Arranger for multi-core processing and implement batch CLI commands.
 
 ### Phase 2: Interoperability
-**Status**: ⏳ Planned
+**Status**: 🏃 In Progress
 **Objective**: Expand export formats and implement template-based instruction generation.
 
 ---

@@ -175,7 +175,7 @@ def cmd_dataset_imagenet(args):
     
     output_path = resolve_output_path(args.output)
     mgr = StructureManager()
-    mgr.save_structure(hierarchy, output_path)
+    mgr.save_structure(hierarchy, output_path, format=args.format)
     # Save stats
     if config.get("generation.save_stats"):
         # Always save stats to the configured output directory
@@ -197,7 +197,7 @@ def cmd_dataset_coco(args):
     )
     
     mgr = StructureManager()
-    mgr.save_structure(hierarchy, args.output)
+    mgr.save_structure(hierarchy, args.output, format=args.format)
     print(f"✓ Saved COCO hierarchy to {args.output}")
 
 
@@ -257,7 +257,7 @@ def cmd_dataset_openimages(args):
     
     output_path = resolve_output_path(args.output)
     mgr = StructureManager()
-    mgr.save_structure(hierarchy, output_path)
+    mgr.save_structure(hierarchy, output_path, format=args.format)
     # Save stats
     if config.get("generation.save_stats"):
         # Always save stats to the configured output directory
@@ -319,7 +319,7 @@ def cmd_dataset_tencent(args):
     
     output_path = resolve_output_path(args.output)
     mgr = StructureManager()
-    mgr.save_structure(hierarchy, output_path)
+    mgr.save_structure(hierarchy, output_path, format=args.format)
     print(f"✓ Saved Tencent ML-Images hierarchy to {output_path}")
 
     # Save stats
@@ -575,6 +575,8 @@ def main():
         parser.add_argument('--debug-arrangement', action='store_true', help='[Smart] Show arrangement stats')
         parser.add_argument('--skip-nodes', nargs='+', help='[Smart] Nodes (WNID or name) to structurally skip (elide) while promoting children')
         parser.add_argument('--orphans-label-template', type=str, default=None, help='[Smart] Template for orphan categories (e.g. "other_{}")')
+        # Format
+        parser.add_argument('--format', choices=['yaml', 'jsonl'], default=None, help='Output format (yaml/jsonl). Defaults to yaml unless output ext is .jsonl')
 
     # ImageNet
     p_imagenet = dataset_sub.add_parser('imagenet', help='ImageNet (WordNet-based) hierarchy')
@@ -584,7 +586,7 @@ def main():
     p_imagenet.add_argument('--no-glosses', action='store_true', help='Skip WordNet glosses')
     p_imagenet.add_argument('--no-strict', action='store_true', help='Disable strict filtering')
     p_imagenet.add_argument('--blacklist', action='store_true', help='Blacklist abstract categories')
-    p_imagenet.add_argument('--exclude-regex', nargs='+', help='Regex patterns to exclude (e.g. ".*sex.*" ".*nudity.*")')
+    p_imagenet.add_argument('--exclude-regex', nargs='+', help='Regex patterns to exclude (e.g. ".*sex.*" ".*nudity.*"')
     p_imagenet.add_argument('--exclude-subtree', nargs='+', help='Subtree root WNIDs/names to exclude (e.g. "n02121808" "feline")')
     add_smart_args(p_imagenet)
     p_imagenet.add_argument('-o', '--output', default=os.path.join(config.output_dir, 'imagenet.yaml'))
@@ -595,6 +597,7 @@ def main():
     p_coco.add_argument('--depth', type=int, default=10)
     p_coco.add_argument('--no-glosses', action='store_true')
     p_coco.add_argument('-o', '--output', default=os.path.join(config.output_dir, 'coco.yaml'))
+    p_coco.add_argument('--format', choices=['yaml', 'jsonl'], default=None, help='Output format (yaml/jsonl)')
     p_coco.set_defaults(func=cmd_dataset_coco)
     
     # OpenImages
