@@ -1,0 +1,31 @@
+{
+  "execution": {
+    "duration_seconds": 1.68,
+    "timestamp": "2026-02-01T20:14:07Z"
+  },
+  "metadata": {
+    "job_name": "matrix_leaf_size10",
+    "dataset": "imagenet",
+    "smart_config": {
+      "enabled": true,
+      "min_depth": 6,
+      "min_hyponyms": 10,
+      "min_leaf_size": 10,
+      "merge_orphans": false,
+      "semantic_cleanup": false,
+      "semantic_model": "minilm",
+      "semantic_threshold": 0.1,
+      "semantic_arrangement": false,
+      "semantic_arrangement_threshold": 0.1,
+      "semantic_arrangement_min_cluster": 5,
+      "semantic_arrangement_method": "eom",
+      "umap_n_neighbors": 15,
+      "umap_min_dist": 0.1,
+      "umap_n_components": 5,
+      "hdbscan_min_samples": null,
+      "orphans_label_template": null,
+      "skip_nodes": []
+    }
+  },
+  "events": []
+}

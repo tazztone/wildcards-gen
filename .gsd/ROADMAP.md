@@ -1,6 +1,6 @@
 # ROADMAP.md
 
-> **Current Milestone**: v0.9.0 - Performance & Expansion [PLANNING]
+> **Current Milestone**: v0.9.0 - Performance & Expansion [IN PROGRESS]
 > **Goal**: Scale generation capabilities through batch processing and improved throughput.
 
 ## Must-Haves
@@ -12,11 +12,11 @@
 ## Phases
 
 ### Phase 0: Quality Hardening (The "Gold Standard")
-**Status**: ⏳ Planned
+**Status**: ✅ Completed
 **Objective**: Address qualitative regressions identified in the Tencent run (naming, casing, redundancy).
 
 ### Phase 1: Throughput & Scaling
-**Status**: ⏳ Planned
+**Status**: 🏃 In Progress
 **Objective**: Optimize the Arranger for multi-core processing and implement batch CLI commands.
 
 ### Phase 2: Interoperability

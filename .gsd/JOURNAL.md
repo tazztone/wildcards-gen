@@ -107,3 +107,26 @@ Resolved test regressions caused by casing normalization and improved the semant
 - All 118 tests passed.
 - Phase 0 verification complete.
 - Semantic logic hardened against "hallucinated" categories.
+
+---
+
+## 2026-02-01 - Phase 1 Execution: Batch Processing & Analysis
+
+### Summary
+Implemented and verified the full automated research workflow for Smart Tuning.
+
+### Accomplished
+- **Batch System**: Implemented `wildcards-gen batch` with matrix expansion and parallel execution using `BatchProcessor` and `ProcessPoolExecutor`.
+- **Persistence**: Replaced in-memory cache with SQLite (`embeddings.db`) to enable efficient multiprocessing.
+- **Analysis Tools**: Created `scripts/analyze_study.py` to compute fragmentation, orphan rates, and cluster sizes across batch runs.
+- **Verification**:
+    - Created extensive tests: `tests/test_arranger_persistence.py` (concurrency) and `tests/test_batch_integration.py` (workflow).
+    - Ran a 12-job experiment on Tencent (`experiments/tuning_study.yaml`).
+
+### Findings
+- The batch system works perfectly.
+- **Insight**: Limiting `preview_limit` to 2000 items masks the effect of tuning parameters like `min_leaf_size`, as the hierarchy is truncated before dense leaves are formed. Meaningful tuning analysis requires larger runs.
+
+### Status
+- Phase 1 Complete.
+- Ready for heavy-duty experiments.

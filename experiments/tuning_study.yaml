@@ -1,0 +1,22 @@
+config:
+  dataset: "tencent"
+  output_dir: "experiments/tuning_study_v1"
+  default_params:
+    smart: true
+    preview_limit: 2000  # Limit traversal to ~2k items for rapid feedback
+    no_glosses: true     # Faster generation
+    merge_orphans: true  # Baseline assumption
+
+matrix:
+  base_params: {}
+  axes:
+    # 1. Granularity: How small can a category be?
+    min_leaf_size: [10, 30, 50]
+    
+    # 2. Cleaning: How strict should we be about "outliers" in a list?
+    semantic_threshold: [0.1, 0.2]
+    
+    # 3. Clustering: Should we try to sub-group large flat lists?
+    semantic_arrange: [false, true]
+
+# Total Jobs: 3 * 2 * 2 = 12 variations
