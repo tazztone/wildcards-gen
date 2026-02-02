@@ -141,21 +141,30 @@ def save_and_preview(data, output_name):
 def search_wordnet(query):
     """Search for synsets matching the query."""
     if not query or len(query) < 2:
-        return 'Please enter at least 2 characters.'
+        return gr.update(visible=False), gr.update(value='Please enter at least 2 characters.', visible=True)
     
     try:
         synsets = wn.synsets(query.replace(' ', '_'))
         if not synsets:
-            return f"No results found for '{query}'."
+            return gr.update(visible=False), gr.update(value=f"No results found for '{query}'.", visible=True)
         
-        results = []
-        for s in synsets:
+        choices = []
+        for s in synsets[:15]:  # Limit to top 15
             wnid = f'{s.pos()}{s.offset():08d}'
-            results.append(f'**{s.name()}** (`{wnid}`)\n_{s.definition()}_\n')
+            # Label: dog.n.01 (n02084071): a domesticated carnivorous...
+            # Value: dog.n.01
+            # Truncate definition to keep UI clean
+            definition = s.definition()
+            if len(definition) > 80:
+                definition = definition[:80] + "..."
+
+            label = f"{s.name()} ({wnid}): {definition}"
+            value = s.name()
+            choices.append((label, value))
             
-        return '\n'.join(results)
+        return gr.update(choices=choices, visible=True, value=None), gr.update(value="", visible=False)
     except Exception as e:
-        return f'Error: {str(e)}'
+        return gr.update(visible=False), gr.update(value=f'Error: {str(e)}', visible=True)
 
 def update_ds_ui(dataset_name, strategy):
     """Calculate visibility and state updates for dataset-related UI components."""
@@ -601,9 +610,14 @@ def launch_gui(share=False):
                                     with gr.Accordion('🔍 WordNet Lookup', open=False):
                                         search_in = gr.Textbox(label='Search Term', placeholder='camera...', show_label=False, info='Search ImageNet for valid WordNet synsets.')
                                         search_btn = gr.Button('Search', size='sm')
-                                        search_out = gr.Markdown('')
-                                        search_btn.click(search_wordnet, inputs=[search_in], outputs=[search_out])
-                                        search_in.submit(search_wordnet, inputs=[search_in], outputs=[search_out])
+
+                                        search_msg = gr.Markdown(visible=False)
+                                        search_results = gr.Radio(label="Select to apply", choices=[], visible=False, interactive=True)
+
+                                        search_btn.click(search_wordnet, inputs=[search_in], outputs=[search_results, search_msg])
+                                        search_in.submit(search_wordnet, inputs=[search_in], outputs=[search_results, search_msg])
+
+                                        search_results.change(lambda x: x, inputs=[search_results], outputs=[ds_root])
                         
                         # General Depth
                         ds_depth = gr.Slider(1, 12, value=config.get('generation.default_depth'), step=1, label='Max Generation Depth', info='Limit recursion depth to prevent massive output files.')
