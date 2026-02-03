@@ -1,4 +1,3 @@
-
 import os
 import pytest
 from unittest.mock import patch, MagicMock
@@ -33,7 +32,7 @@ def test_generate_tencent_hierarchy(mock_ensure, mock_gloss, mock_get_synset, mo
     mock_gloss.return_value = "A definition."
     
     # Run generation
-    hierarchy = tencent.generate_tencent_hierarchy(max_depth=5, with_glosses=True)
+    hierarchy = tencent.generate_tencent_hierarchy(max_depth=5, with_glosses=True, min_leaf_size=0, merge_orphans=False)
     
     # Verify structure
     assert 'thing' in hierarchy
@@ -50,7 +49,7 @@ def test_generate_tencent_hierarchy(mock_ensure, mock_gloss, mock_get_synset, mo
     output = stream.getvalue()
     
     assert "thing:" in output
-    assert "# instruction:" in output 
+    assert "# instruction:" in output
 
 @patch('wildcards_gen.core.datasets.tencent.download_tencent_hierarchy')
 @patch('wildcards_gen.core.datasets.tencent.get_synset_from_wnid')

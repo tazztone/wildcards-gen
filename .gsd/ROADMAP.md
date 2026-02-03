@@ -20,8 +20,12 @@
 **Objective**: Optimize the Arranger for multi-core processing and implement batch CLI commands.
 
 ### Phase 2: Interoperability
-**Status**: 🏃 In Progress
+**Status**: ✅ Completed
 **Objective**: Expand export formats and implement template-based instruction generation.
+
+### Phase 3: Smart Arrangement Investigation
+**Status**: 🔬 Researching
+**Objective**: Diagnose and fix critical instability in the Arranger (duplication loops and data loss) identified in Tuning Study v1.
 
 ---
 

@@ -1,29 +1,19 @@
-# State - Milestone v0.9.0 [IN PROGRESS]
+# Project State
 
 ## Current Position
-- **Phase**: 2 (Interoperability)
-- **Task**: Finalization
-- **Status**: Completed
+- **Phase**: 3 (Smart Arrangement Stability)
+- **Task**: Final Verification & Cleanup
+- **Status**: COMPLETED
 
-## Last Session Summary
-- **Phase 2 (Completed)**:
-    - **JSONL Export**: Implemented and verified via `StructureManager` and CLI.
-    - **Templates**: Centralized instruction formatting in `config.py` and refactored all dataset generators to use it.
-    - **Verification**: Passed `test_structure_extended.py` and CLI smoke tests for COCO (JSONL & YAML).
-
-## In-Progress Work
-- Ready for release or next milestone.
-
-## Context Dump
-
-### Decisions Made
-- **JSONL**: Flattens hierarchy to `{"text": "term", "label": "parent", "hierarchy": ["p", "c"]}`.
-- **Templates**: Default is `"instruction: {gloss}"`. `ruamel.yaml` handles the `#`.
-
-### Files of Interest
-- `wildcards_gen/core/structure.py`
-- `wildcards_gen/core/config.py`
-- `wildcards_gen/cli.py`
+## Recent Accomplishments
+- Fixed critical data loss bug in `tencent.py` where arranged items were discarded during flattening.
+- Fixed `TraversalBudget` bug where `preview_limit=0` caused immediate termination.
+- Standardized `apply_semantic_arrangement` return types and handling in `tencent.py`.
+- Fixed parameter propagation bug in `batch.py` for semantic thresholds.
+- Updated 122 unit/integration tests to ensure compatibility with new structural behaviors.
+- Verified fixes against synthetic reproduction of Data Loss, Empty Categories, and Explosion issues.
+- Cleaned up debug logging and temporary scripts.
 
 ## Next Steps
-1. Release v0.9.0.
+- Finalize documentation updates for Smart Arrangement mode.
+- Initiate next milestone if requested.
