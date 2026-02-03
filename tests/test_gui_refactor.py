@@ -7,15 +7,15 @@ from wildcards_gen.core.config import config
 
 class TestGUIRefactor(unittest.TestCase):
     def setUp(self):
-        # Reset config
-        config._config['generation']['preview_limit'] = 10
+        pass
         
     def test_live_preview_robustness(self):
         """Test that live_preview_handler survives bad inputs and respects config limit."""
         
         # 1. Test robust arg handling (boolean extraction)
         # Mock generate handler to avoid real work
-        with patch('wildcards_gen.gui.generate_dataset_handler') as mock_gen:
+        with patch('wildcards_gen.gui.generate_dataset_handler') as mock_gen, \
+             patch.object(config, 'get', return_value=10):
             mock_gen.return_value = ("YAML", "Summary", [])
             
             # Case A: Fast Preview ON (True at end)

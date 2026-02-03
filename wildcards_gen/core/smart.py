@@ -243,6 +243,13 @@ def apply_semantic_arrangement(
     
     leftovers = []
     metadata = {}
+    
+    # Normalize result
+    if isinstance(result, list):
+        # arrange_hierarchy returned a flat list (failed to cluster)
+        leftovers = result
+        result = {}
+    
     return (result, leftovers, metadata) if return_metadata else (result, leftovers)
 
 

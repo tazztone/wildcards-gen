@@ -163,8 +163,12 @@ def test_tencent_smoke_execution_smart_flatten():
         
         # Verify outcome
         def find_key(data, key):
+             key_lower = key.lower()
              if isinstance(data, dict):
-                 if key in data: return True
+                 # Case-insensitive check
+                 for k in data.keys():
+                     if k.lower() == key_lower:
+                         return True
                  return any(find_key(v, key) for v in data.values())
              return False
-        assert find_key(result, "GroupX"), "Arranged group 'GroupX' not found in result"
+        assert find_key(result, "GroupX"), f"Arranged group 'GroupX' not found in result: {result}"

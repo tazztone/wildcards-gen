@@ -1,5 +1,6 @@
 
 import logging
+print("DEBUG: Loaded tencent.py from source")
 import csv
 import functools
 from collections import defaultdict
@@ -108,31 +109,31 @@ def build_recursive(current_idx: int, categories: Dict, children_map: Dict, dept
     return child_dict
 
 def generate_tencent_hierarchy(
-    max_depth: int = 5, 
+    max_depth: int = 5,
     with_glosses: bool = True,
-    smart: bool = False,
-    min_significance_depth: int = 6,
-    min_hyponyms: int = 10,
-    min_leaf_size: int = 3,
-    merge_orphans: bool = False,
+    smart: bool = True,
     smart_overrides: Optional[Dict] = None,
+    # Direct pass-throughs for smart logic (CLI compatibility)
+    min_significance_depth: int = 1,
+    min_hyponyms: int = 10,
+    min_leaf_size: int = 5,
+    merge_orphans: bool = True,
     semantic_cleanup: bool = False,
-    semantic_model: str = "minilm",
-    semantic_threshold: float = 0.1,
+    semantic_model: str = "all-MiniLM-L12-v2",
+    semantic_threshold: float = 0.35,
     semantic_arrangement: bool = False,
-    semantic_arrangement_threshold: float = 0.1,
-    semantic_arrangement_min_cluster: int = 5,
-    semantic_arrangement_method: str = "eom",
+    semantic_arrangement_threshold: float = 0.25,
+    semantic_arrangement_min_cluster: int = 3,
+    semantic_arrangement_method: str = "hdbscan",
     debug_arrangement: bool = False,
     skip_nodes: Optional[List[str]] = None,
     orphans_label_template: Optional[str] = None,
-    stats: Optional[Any] = None,
-    preview_limit: Optional[int] = None,
+    preview_limit: int = 0,
     umap_n_neighbors: int = 15,
     umap_min_dist: float = 0.1,
-    hdbscan_min_samples: Optional[int] = None
-) -> Dict:
-    """Generate Tencent ML-Images hierarchy."""
+    hdbscan_min_samples: int = 5,
+    stats: Optional[Any] = None
+) -> CommentedMap:
     file_path = download_tencent_hierarchy()
     categories, children_map, roots = parse_hierarchy_file(file_path)
     
@@ -193,7 +194,7 @@ def generate_tencent_hierarchy(
     if stats:
         stats.set_metadata("smart_config", smart_config.to_dict())
 
-    budget = TraversalBudget(preview_limit)
+    budget = TraversalBudget(preview_limit if preview_limit and preview_limit > 0 else None)
 
     def merge_nodes(existing: Any, new_val: Any) -> Any:
         # Merge two hierarchy nodes (list or dict)
@@ -276,34 +277,20 @@ def generate_tencent_hierarchy(
                 from ..smart import apply_semantic_arrangement
                 arranged_structure, leftovers, metadata = apply_semantic_arrangement(filtered_leaves, config, stats=stats, context=name, return_metadata=True)
                 
-                if isinstance(arranged_structure, dict):
-                    # Created a sub-hierarchy.
-                    # Construction logic:
-                    # We need to return this dict as the new structure.
-                    # Comments should be added if possible.
-                    # arrange_hierarchy returns simple dicts.
-                    # We can convert to CommentedMap.
+                if isinstance(arranged_structure, dict) and (arranged_structure or leftovers):
                     mini_tree = CommentedMap()
+                    if arranged_structure:
+                        for g_name, g_terms in arranged_structure.items():
+                            mini_tree[g_name] = sorted(g_terms, key=str.casefold)
                     
-                    # Recursively copy and add comments? 
-                    # Or just use merging utility? - merge_nodes works for dicts.
-                    # But we want to preserve metadata instructions if apply_semantic_arrangement returned them?
-                    # arrange_hierarchy is structural only. Metadata is lost unless we changed it.
-                    # The smart wrapper returns (result, metadata) tuple?
-                    # No, we updated smart.py to return JUST the result structure (lines 180+ in smart.py).
-                    # Wait, smart.py line 213: `return result`.
-                    # So we don't get metadata anymore!
-                    # The old logic used metadata for "is_hybrid" comments.
-                    # We lost that capability temporarily.
-                    # That is acceptable for Gap Closure (functionality first).
+                    if leftovers:
+                        label = config.orphans_label_template.format(name) if "{}" in config.orphans_label_template else config.orphans_label_template
+                        mini_tree[label] = sorted(leftovers, key=str.casefold)
                     
-                    # So arranged_structure is the mini-tree.
-                    # We might want to convert to CommentedMap for better behavior downstream.
-                    # But merge_nodes handles dicts.
-                    return arranged_structure, []
+                    return mini_tree, []
                 else:
-                    # Flat list
-                    return arranged_structure if arranged_structure else None, []
+                    # Pure list result
+                    return (arranged_structure if arranged_structure else (leftovers if leftovers else None)), []
 
 
             return (filtered_leaves if filtered_leaves else None), []
@@ -403,7 +390,7 @@ def generate_tencent_hierarchy(
                 from ..smart import apply_semantic_arrangement
                 arranged_orphans, leftovers, metadata = apply_semantic_arrangement(orphan_leaves, config, stats=stats, context=f"orphans of {name}", return_metadata=True)
                 
-                if isinstance(arranged_orphans, dict):
+                if isinstance(arranged_orphans, dict) and arranged_orphans:
                     # Merge groups into CM (as siblings)
                     # merge_nodes handles dict merging
                     for k, v in arranged_orphans.items():
@@ -411,10 +398,12 @@ def generate_tencent_hierarchy(
                              cm[k] = merge_nodes(cm[k], v)
                          else:
                              cm[k] = v
+                             valid_items_added += 1
                     
-                    # We consumed all orphans into groups
-                    orphan_leaves = [] 
+                    # We consumed orphans into groups, leftovers become the new orphan list
+                    orphan_leaves = leftovers 
                 else:
+                    # Flat list (failed to cluster)
                     orphan_leaves = arranged_orphans
 
 
@@ -422,17 +411,32 @@ def generate_tencent_hierarchy(
             if "{}" in orphan_label:
                 orphan_label = orphan_label.format(name)
 
-            cm[orphan_label] = orphan_leaves
-            # Add instruction to misc
-            try:
-                cm.yaml_add_eol_comment(config.instruction_template.format(gloss=f"Miscellaneous {name} items"), orphan_label)
-            except: pass
+            if orphan_leaves:
+                cm[orphan_label] = orphan_leaves
+                # Add instruction to misc
+                try:
+                    cm.yaml_add_eol_comment(config.instruction_template.format(gloss=f"Miscellaneous {name} items"), orphan_label)
+                except: pass
+            elif orphan_label in cm and len(cm) > 1:
+                # If we merged everything into groups, remove the empty misc if there are other things
+                # (but only if we didn't just create it? actually CM is new here)
+                pass
             
             # Do NOT increment valid_items_added here.
             # If we only have orphans (no sub-categories), we want to fall through
             # to the flatten logic below to return a list instead of {misc: [...]}.
 
+        # Check if we should flatten
+        # We flatten if we have no valid children AND (cm is empty OR cm only contains unarranged orphans)
+        should_flatten = False
         if valid_items_added == 0:
+             if not cm:
+                 should_flatten = True
+             elif len(cm) == 1 and orphan_label in cm:
+                 # Only orphans, so flatten
+                 should_flatten = True
+        
+        if should_flatten:
             # If all children were pruned/merged, flatten itself
             if smart and config.enabled:
                 # In smart mode, we trust our traversal (orphan_leaves) and do not grab everything
@@ -460,36 +464,37 @@ def generate_tencent_hierarchy(
                  from ..smart import apply_semantic_arrangement
                  named_groups, leftovers, metadata = apply_semantic_arrangement(filtered_leaves, config, stats=stats, context=name, return_metadata=True)
                  
-                 if isinstance(named_groups, dict):
+                 if isinstance(named_groups, dict) and (named_groups or leftovers):
                      mini_tree = CommentedMap()
-                     for g_name, g_terms in named_groups.items():
-                         mini_tree[g_name] = sorted(g_terms, key=str.casefold)
-                         
-                         # Instruction Injection
-                         if g_name in metadata:
-                              meta = metadata[g_name]
-                              wnid = meta.get("wnid")
-                              instr = None
-                              if wnid:
-                                  synset = get_synset_from_wnid(wnid)
-                                  if synset:
-                                      instr = get_synset_gloss(synset)
-                              if instr:
-                                  try:
-                                      mini_tree.yaml_add_eol_comment(config.instruction_template.format(gloss=instr), g_name)
-                                  except: pass
+                     if named_groups:
+                         for g_name, g_terms in named_groups.items():
+                             mini_tree[g_name] = sorted(g_terms, key=str.casefold)
+                             # Instruction Injection
+                             if g_name in metadata:
+                                  meta = metadata[g_name]
+                                  wnid = meta.get("wnid")
+                                  instr = None
+                                  if wnid:
+                                      synset = get_synset_from_wnid(wnid)
+                                      if synset:
+                                          instr = get_synset_gloss(synset)
+                                  if instr:
+                                      try:
+                                          mini_tree.yaml_add_eol_comment(config.instruction_template.format(gloss=instr), g_name)
+                                      except: pass
                      
                      if leftovers:
-                         orphan_label = config.orphans_label_template
-                         if "{}" in orphan_label:
-                             orphan_label = orphan_label.format(name)
-                         mini_tree[orphan_label] = sorted(leftovers, key=str.casefold)
+                         label = config.orphans_label_template.format(name) if "{}" in config.orphans_label_template else config.orphans_label_template
+                         mini_tree[label] = sorted(leftovers, key=str.casefold)
                          try:
-                              mini_tree.yaml_add_eol_comment(config.instruction_template.format(gloss=f"Miscellaneous {name} items"), orphan_label)
+                              mini_tree.yaml_add_eol_comment(config.instruction_template.format(gloss=f"Miscellaneous {name} items"), label)
                          except: pass
                      
                      return mini_tree, []
-                 return leftovers if leftovers else None, []
+                 
+                 # Flat list result
+                 res = named_groups if isinstance(named_groups, list) else leftovers
+                 return res if res else None, []
 
             return (filtered_leaves if filtered_leaves else None), []
         

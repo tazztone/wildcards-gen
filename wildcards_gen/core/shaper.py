@@ -201,7 +201,7 @@ class ConstraintShaper:
             # Protect leaf lists from flattening (preserves Category name for list)
             # UNLESS the key is a generic container like 'misc' or 'Other'
             if isinstance(val, list):
-                if key not in ["misc", "Other"]:
+                if key not in ["misc", "Other", "misc (Category 1)"]:
                     return new_node
             
             # Promote single child content (whether dict or list)

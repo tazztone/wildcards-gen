@@ -612,7 +612,7 @@ def launch_gui(share=False):
                                         search_btn = gr.Button('Search', size='sm')
 
                                         search_msg = gr.Markdown(visible=False)
-                                        search_results = gr.Radio(label="Select to apply", choices=[], visible=False, interactive=True)
+                                        search_results = gr.Radio(label="Select to apply", choices=[], visible=False, interactive=True, info="Click a synset to populate the Root Synset field.")
 
                                         search_btn.click(search_wordnet, inputs=[search_in], outputs=[search_results, search_msg])
                                         search_in.submit(search_wordnet, inputs=[search_in], outputs=[search_results, search_msg])
