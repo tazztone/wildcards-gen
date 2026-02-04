@@ -1,19 +1,18 @@
 # Project State
 
 ## Current Position
-- **Phase**: 3 (Smart Arrangement Stability)
-- **Task**: Final Verification & Cleanup
-- **Status**: COMPLETED
+- **Milestone**: v0.9.0 (Performance & Expansion) - **ARCHIVED**
+- **Phase**: 4 (Final Verification & Cleanup)
+- **Task**: Planning v1.0.0
+- **Status**: PLANNED
 
 ## Recent Accomplishments
-- Fixed critical data loss bug in `tencent.py` where arranged items were discarded during flattening.
-- Fixed `TraversalBudget` bug where `preview_limit=0` caused immediate termination.
-- Standardized `apply_semantic_arrangement` return types and handling in `tencent.py`.
-- Fixed parameter propagation bug in `batch.py` for semantic thresholds.
-- Updated 122 unit/integration tests to ensure compatibility with new structural behaviors.
-- Verified fixes against synthetic reproduction of Data Loss, Empty Categories, and Explosion issues.
-- Cleaned up debug logging and temporary scripts.
+- **v0.9.0 COMPLETE**: Verified Batch Mode, JSONL Export, and Instruction Templates.
+- **Smart Arrangement Stability**: Fixed critical data loss and duplication loops in `tencent.py` and `arranger.py`.
+- **Parameter Propagation**: Fixed bug in `batch.py` for semantic thresholds.
+- **Test Coverage**: Successfully passed full-stack integration and regression tests for all new features.
+- **Project Sync**: Updated `ROADMAP.md` and `SPEC.md` to reflect current reality.
 
 ## Next Steps
-- Finalize documentation updates for Smart Arrangement mode.
-- Initiate next milestone if requested.
+- Define specific tasks for v1.0.0 Production Readiness.
+- Archive Phase 3 summary files.

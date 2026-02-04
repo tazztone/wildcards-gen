@@ -13,8 +13,8 @@ Harden the core extraction engine and streamline the UI for a focused, "one-shot
 - **Educational UX**: Add/improve info tooltips for all Smart Tuning settings.
 
 ## Success Criteria
-- [ ] Dataset generation completes successfully for ImageNet, Tencent, and Open Images with various Smart Tuning settings.
-- [ ] New test suite `tests/test_signatures.py` validates that all dataset handlers accept the full range of parameters passed from the GUI.
-- [ ] "Analysis" and "Run History" sections are removed from the GUI.
-- [ ] CV Datasets tab displays a balanced 2-column configuration.
-- [ ] All Smart Tuning sliders and checkboxes have descriptive `info` text.
+- [x] Dataset generation completes successfully for ImageNet, Tencent, and Open Images with various Smart Tuning settings.
+- [x] New test suite `tests/test_signatures.py` (and `tests/test_interface_sync.py`) validates that all dataset handlers accept the full range of parameters passed from the GUI.
+- [x] "Analysis" and "Run History" sections are removed from the GUI.
+- [x] CV Datasets tab displays a balanced 2-column configuration.
+- [x] All Smart Tuning sliders and checkboxes have descriptive `info` text.
