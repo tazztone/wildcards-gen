@@ -28,7 +28,7 @@ class Config:
     
     # GUI Defaults
     gui_share: bool = False
-    gui_port: int = 7860
+    gui_port: int = 7862
     
     def get(self, key, default=None):
         """Mock get method for compatibility with dict-like usage in some places."""

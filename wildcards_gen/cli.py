@@ -452,7 +452,7 @@ def cmd_batch(args):
 def cmd_gui(args):
     """Handle gui command."""
     from .gui import launch_gui
-    launch_gui(share=args.share)
+    launch_gui(share=args.share, port=args.port)
 
 
 def cmd_lint(args):

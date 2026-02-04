@@ -543,7 +543,7 @@ def lint_handler(file_obj, model, threshold, progress=gr.Progress()):
 # =============================================================================
 # 6. UI CONSTRUCTION
 # =============================================================================
-def launch_gui(share=False):
+def launch_gui(share=False, port=None):
     # Initial API key from config or env
     initial_key = config.api_key or os.environ.get('OPENROUTER_API_KEY', '')
     initial_hf_token = config.get('hf_token') or os.environ.get('HF_TOKEN', '')
@@ -862,7 +862,7 @@ def launch_gui(share=False):
     logging.getLogger("huggingface_hub").setLevel(logging.WARNING)
 
     server_name = config.get('gui.server_name')
-    server_port = config.get('gui.server_port')
+    server_port = port or config.get('gui.server_port')
     
     # HF Token Handling
     hf_token = config.get('hf_token') or os.environ.get('HF_TOKEN')
