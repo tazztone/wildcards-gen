@@ -7,10 +7,9 @@
 - **Status**: PLANNED
 
 ## Recent Accomplishments
+- **GUI Launch Fix**: Resolved "Exception in ASGI application" by fixing port propagation from CLI to GUI and clearing port conflicts.
+- **Port Reconfiguration**: Updated default GUI port to `7862` as requested (+1).
 - **v0.9.0 COMPLETE**: Verified Batch Mode, JSONL Export, and Instruction Templates.
-- **Smart Arrangement Stability**: Fixed critical data loss and duplication loops in `tencent.py` and `arranger.py`.
-- **Parameter Propagation**: Fixed bug in `batch.py` for semantic thresholds.
-- **Test Coverage**: Successfully passed full-stack integration and regression tests for all new features.
 - **Project Sync**: Updated `ROADMAP.md` and `SPEC.md` to reflect current reality.
 
 ## Next Steps
