@@ -41,10 +41,10 @@ graph TD
 ### Core Components (`wildcards_gen/core/`)
 - **Structure Manager (`structure.py`)**: Wraps `ruamel.yaml` to handle `CommentedMap` preservation, ensuring `# instruction:` comments survive manipulation.
 - **Smart Manager (`smart.py`)**: Configuration hub for "Smart Mode" (pruning, clustering parameters) and entry point for semantic operations.
-- **Arranger (`arranger.py`)**: The "Brain". Uses `sentence-transformers`, `UMAP`, and `HDBSCAN` to recursively cluster large lists of terms into semantic hierarchies.
-- **Shaper (`shaper.py`)**: The "Editor". Post-processes generated hierarchies to enforce constraints (min leaf size, orphan merging, flattening singles).
+- **Arranger (`arranger.py`)**: The "Brain". Uses `sentence-transformers`, `UMAP`, and `HDBSCAN` to recursively cluster large lists of terms. Now **Parent-Aware**: cluster names are filtered to avoid redundancy with the parent category name.
+- **Shaper (`shaper.py`)**: The "Editor". Post-processes hierarchies to enforce constraints. Now features **Recursive Tautology Pruning** to collapse deep redundant layers and preserve top-level semantic anchors.
 - **Linter (`linter.py`)**: Analyzes YAML files for structural quality, identifying "outliers" (semantic anomalies) and large lists.
-- **WordNet (`wordnet.py`)**: NLTK wrapper for fetching synsets, glosses, and traversing hypernym paths.
+- **WordNet (`wordnet.py`)**: NLTK wrapper for synsets. Now uses **Domain Prioritization** to prefer physical objects (food, animals) over people or abstract entities.
 
 ### Datasets (`wildcards_gen/core/datasets/`)
 - **ImageNet (`imagenet.py`)**: Generates hierarchy from ImageNet-1k/21k synsets.

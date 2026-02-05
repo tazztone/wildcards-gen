@@ -31,9 +31,9 @@ class ConstraintShaper:
                 # Since _flatten_singles recurses, we just manually recurse on the value.
                 key = list(processed.keys())[0]
                 val = processed[key]
-                processed[key] = self._flatten_singles(val)
+                processed[key] = self._flatten_singles(val, is_root=False)
             else:
-                processed = self._flatten_singles(processed)
+                processed = self._flatten_singles(processed, is_root=True)
 
         # 4. Normalize Casing (Categories: Title Case, Items: lowercase)
         processed = self._normalize_casing(processed)
@@ -80,7 +80,6 @@ class ConstraintShaper:
     def _prune_tautologies(self, node: Any) -> Any:
         """
         Recursively remove nodes where parent name equals child name.
-        e.g. {Fish: {Fish: [...]}} -> {Fish: [...] }
         """
         if not isinstance(node, dict):
             return node
@@ -90,24 +89,54 @@ class ConstraintShaper:
             # First recurse down
             v = self._prune_tautologies(v)
             
-            # Check for tautology with single child
-            if isinstance(v, dict) and len(v) == 1:
-                child_key = list(v.keys())[0]
-                if k.lower().strip() == child_key.lower().strip():
-                    # Promote child's value to current key
-                    new_node[k] = v[child_key]
-                    # Preserve comment from child if it exists
-                    if isinstance(v, CommentedMap) and child_key in v.ca.items:
-                         new_node.ca.items[k] = v.ca.items[child_key]
+            # Check for tautology in children
+            if isinstance(v, dict):
+                k_norm = k.lower().strip()
+                # Find any child that matches the parent name
+                match_key = next((ck for ck in v.keys() if ck.lower().strip() == k_norm), None)
+                
+                if match_key:
+                    child_val = v[match_key]
+                    # If it's the ONLY child, promote it entirely
+                    if len(v) == 1:
+                         new_node[k] = child_val
+                         # Preserve comment
+                         if isinstance(v, CommentedMap) and match_key in v.ca.items:
+                              new_node.ca.items[k] = v.ca.items[match_key]
+                    else:
+                         # It has siblings. We should "dissolve" the matching child into the parent.
+                         # BUT: a dict key 'k' can't hold both a list and other dicts easily in YAML 
+                         # without a sub-key.
+                         
+                         # Actually, if the child matches the parent, it usually means 
+                         # those items BELONG in the parent directly.
+                         # We'll keep the other siblings as sub-categories.
+                         
+                         # To avoid complex merging, if child_val is a list, and others are dicts:
+                         # We'll just rename the matching child to something like "General" or similar?
+                         # Or just keep it. 
+                         
+                         # Let's try: if the matching child is a list, we can't merge it into the 
+                         # parent dict 'k' without a key. 
+                         
+                         # Re-read the user's example: 
+                         # Wine:
+                         #   Wine: [...]
+                         #   Misc: [...]
+                         # This IS what they had. They want to avoid the double 'Wine'.
+                         
+                         # Best fix: Rename the sub-'Wine' to 'General' or 'Base'
+                         v[f"General {k}"] = v.pop(match_key)
+                         new_node[k] = v
                     continue
-            
+
             new_node[k] = v
             # Preserve comment from current key
             if isinstance(node, CommentedMap) and k in node.ca.items:
                  new_node.ca.items[k] = node.ca.items[k]
             
         return new_node
-    
+
     def _merge_orphans(self, node: Any, min_size: int, orphans_label_template: Optional[str] = None) -> Any:
         """
         Recursively merge small sibling groups into 'Other'.
@@ -181,7 +210,10 @@ class ConstraintShaper:
                         if match:
                             instr_context = f"{match.group(1)} related items"
                     
-                    comment = config.instruction_template.format(gloss=f"Miscellaneous {instr_context}")
+                    if instr_context.lower() in ["other", "misc"]:
+                         comment = config.instruction_template.format(gloss=f"Miscellaneous items")
+                    else:
+                         comment = config.instruction_template.format(gloss=f"Miscellaneous {instr_context}")
                     processed_node.yaml_add_eol_comment(comment, other_label)
                 except Exception as e:
                     logger.debug(f"Failed to add shaper comment: {e}")
@@ -202,25 +234,9 @@ class ConstraintShaper:
         
         return processed_node
 
-    def _flatten_singles(self, node: Any) -> Any:
+    def _flatten_singles(self, node: Any, is_root: bool = False) -> Any:
         """
         Recursively remove intermediate nodes with only 1 child.
-        e.g. {A: {B: ...}} -> {A: ...} (rename A to B? or keep A?)
-        Usually: Keep Parent Name, pull Child Content up.
-        Actually: logical flattening usually means "A/B" -> "B".
-        
-        Logic: If node is dict and len(node) == 1:
-           child_key = list(node.keys())[0]
-           child_val = node[child_key]
-           return _flatten_singles(child_val)
-           
-        But strict flattening might lose context.
-        Strategy: Only flatten if the child is a DICT. If child is LIST, it's a leaf node.
-        We generally keep {Category: [items]}
-        We want to remove {Category: {SubCategory: [items]}} -> {Category: [items]}?
-        Or {Category: {SubCategory: [items]}} -> {SubCategory: [items]}?
-        
-        Let's do: Promotion. Content moves up.
         """
         if isinstance(node, list):
             return node
@@ -231,7 +247,7 @@ class ConstraintShaper:
         # Recurse values first
         new_node = type(node)() if isinstance(node, dict) else {}
         for k, v in node.items():
-            new_node[k] = self._flatten_singles(v)
+            new_node[k] = self._flatten_singles(v, is_root=False)
             # Preserve comment from current key
             if isinstance(node, CommentedMap) and k in node.ca.items:
                  new_node.ca.items[k] = node.ca.items[k]
@@ -242,16 +258,35 @@ class ConstraintShaper:
             key = list(new_node.keys())[0]
             val = new_node[key]
             
+            # If we are at the root level, we generally want to keep the name
+            # e.g. Matter: { Food: ... } -> Keep Matter.
+            if is_root:
+                 return new_node
+
             # Protect leaf lists from flattening (preserves Category name for list)
             # UNLESS the key is a generic container like 'misc' or 'Other'
             if isinstance(val, list):
                 if key not in ["misc", "Other", "misc (Category 1)"]:
                     return new_node
             
-            # Promote single child content (whether dict or list)
-            # This effectively removes the current node's wrapper (key).
-            # e.g. {Sub: {Deep: ...}} -> {Deep: ...}
+            # Promote single child content
+            # Only promote if:
+            # 1. Child is a list AND key is generic (Other/Misc)
+            # 2. Child is a dict and we have explicit redundancy (already handled by _prune_tautologies)
+            # 3. Parent key is a "wrapper" node with only 1 child and it's not a root.
+            
+            # If we want to keep Matter -> Food -> Beverage -> Wine:
+            # Beverage: { Wine: [...] } must NOT flatten to Wine: [...]
+            if isinstance(val, dict):
+                 # Keep the hierarchy if the names are different
+                 return new_node
+                 
+            if isinstance(val, list):
+                # Only flatten generic wrappers for lists
+                if key.lower() in ["misc", "other"]:
+                    return val
+                return new_node
+            
             return val
 
-                 
         return new_node

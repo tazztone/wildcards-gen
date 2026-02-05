@@ -1,17 +1,19 @@
 # Project State
 
 ## Current Position
-- **Milestone**: v0.9.0 (Performance & Expansion) - **ARCHIVED**
-- **Phase**: 4 (Final Verification & Cleanup)
-- **Task**: Planning v1.0.0
-- **Status**: PLANNED
+- **Milestone**: v0.9.0-hardened
+- **Phase**: 5 (Hardening & Quality)
+- **Task**: Completed Structural Hardening
+- **Status**: FINALIZED
 
 ## Recent Accomplishments
-- **GUI Launch Fix**: Resolved "Exception in ASGI application" by fixing port propagation from CLI to GUI and clearing port conflicts.
-- **Port Reconfiguration**: Updated default GUI port to `7862` as requested (+1).
-- **v0.9.0 COMPLETE**: Verified Batch Mode, JSONL Export, and Instruction Templates.
-- **Project Sync**: Updated `ROADMAP.md` and `SPEC.md` to reflect current reality.
+- **Hierarchy-Aware Arrangement**: Updated `Arranger` to prevent naming clusters with the same name as their parent (e.g., Beverage -> Beverage).
+- **Domain-Prioritized WordNet**: Refined synset selection to prioritize food/objects over people, eliminating labels like "Reactionary" for Bourbon.
+- **Recursive Tautology Pruning**: Enhanced `ConstraintShaper` to collapse deep redundant hierarchies (Dish -> Dish -> Dish) and rename remaining sibling tautologies to "General [Category]".
+- **Conservative Flattening**: Updated `_flatten_singles` to preserve deep semantic hierarchies (Matter -> Food -> Beverage) while still removing generic wrappers.
+- **Labeling Quality**: Implemented TF-IDF coverage checks (>= 20%) and prefix filtering to avoid redundant labels like "Sauce (Sauce)".
+- **Comment Persistence**: Guaranteed YAML comment retention across all structural transformations.
 
 ## Next Steps
-- Define specific tasks for v1.0.0 Production Readiness.
-- Archive Phase 3 summary files.
+- Final E2E verification on full datasets before v1.0.0.
+- Update documentation to reflect the new "Parent-Aware" arrangement logic.

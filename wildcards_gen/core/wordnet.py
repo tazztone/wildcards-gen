@@ -57,12 +57,36 @@ def get_primary_synset(word: str) -> Optional[Any]:
     """
     Get the primary (most common) synset for a word.
     
-    This filters out obscure or secondary meanings.
+    This filters out obscure or secondary meanings and prioritizes 
+    domain-relevant lexical categories (food, plants, animals, artifacts).
     """
     try:
-        synsets = wn.synsets(word.replace(' ', '_'))
-        if synsets:
-            return synsets[0]
+        synsets = wn.synsets(word.replace(' ', '_'), pos=wn.NOUN)
+        if not synsets:
+            return None
+            
+        # Priority Lexnames (categories from WordNet)
+        # We want to avoid noun.person or noun.act if noun.food or noun.animal is available.
+        PRIORITY_LEXNAMES = {
+            'noun.food', 'noun.animal', 'noun.plant', 'noun.artifact', 
+            'noun.object', 'noun.body', 'noun.substance'
+        }
+        
+        # Sort by: 
+        # 1. Is in priority lexnames (True/False -> 0/1)
+        # 2. Original WordNet order (frequency)
+        
+        def score_synset(s):
+            lex = s.lexname()
+            # noun.person is often a distractor (e.g. bourbon)
+            if lex == 'noun.person':
+                return 100 
+            if lex in PRIORITY_LEXNAMES:
+                return 0
+            return 50 # Middle ground (noun.attribute, noun.group, etc.)
+
+        best_synset = min(synsets, key=score_synset)
+        return best_synset
     except Exception:
         pass
     return None
