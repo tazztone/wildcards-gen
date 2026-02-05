@@ -212,7 +212,7 @@ def generate_tencent_hierarchy(
         return existing
     
     
-    def build_commented(current_idx: int, current_depth: int, config: SmartConfig, stats: Optional[Any] = None, budget: Optional[TraversalBudget] = None) -> Tuple[Any, List[str]]:
+    def build_commented(current_idx: int, current_depth: int, smart_config: SmartConfig, stats: Optional[Any] = None, budget: Optional[TraversalBudget] = None) -> Tuple[Any, List[str]]:
         if budget and not budget.consume(1):
             if budget.is_exhausted() and stats:
                 stats.log_event("limit_reached", message=f"Traversal limit {budget.limit} reached during build_commented", data={"limit": budget.limit})
@@ -240,7 +240,7 @@ def generate_tencent_hierarchy(
         # Decision logic: keep as category or flatten?
         should_flatten = False
         
-        if smart and config.enabled:
+        if smart and smart_config.enabled:
             synset = get_synset_from_wnid(wnid)
             is_root = categories[current_idx]['parent'] == -1
             
@@ -248,7 +248,7 @@ def generate_tencent_hierarchy(
                 synset=synset, 
                 child_count=len(children), 
                 is_root=is_root, 
-                config=config
+                config=smart_config
             )
         else:
             # Traditional depth-based pruning
@@ -262,20 +262,20 @@ def generate_tencent_hierarchy(
             filtered_leaves = sorted(list(set([l for l in leaves if l.lower() != normalized_name])), key=str.casefold)
             
             # Semantic cleaning
-            if smart and config.enabled and config.semantic_cleanup:
-                filtered_leaves = apply_semantic_cleaning(filtered_leaves, config)
+            if smart and smart_config.enabled and smart_config.semantic_cleanup:
+                filtered_leaves = apply_semantic_cleaning(filtered_leaves, smart_config)
 
             # Min leaf size check for smart mode
-            if smart and config.enabled and len(filtered_leaves) < config.min_leaf_size:
-                if config.merge_orphans:
+            if smart and smart_config.enabled and len(filtered_leaves) < smart_config.min_leaf_size:
+                if smart_config.merge_orphans:
                      # Merge into parent (bubble up these leaves)
                      return None, filtered_leaves
                      return filtered_leaves, []
             
             # Smart Mode: Semantic Arrangement Re-grow
-            if smart and config.enabled and config.semantic_arrangement:
+            if smart and smart_config.enabled and smart_config.semantic_arrangement:
                 from ..smart import apply_semantic_arrangement
-                arranged_structure, leftovers, metadata = apply_semantic_arrangement(filtered_leaves, config, stats=stats, context=name, return_metadata=True)
+                arranged_structure, leftovers, metadata = apply_semantic_arrangement(filtered_leaves, smart_config, stats=stats, context=name, return_metadata=True)
                 
                 if isinstance(arranged_structure, dict) and (arranged_structure or leftovers):
                     mini_tree = CommentedMap()
@@ -299,7 +299,7 @@ def generate_tencent_hierarchy(
                                         logger.debug(f"Failed to add arranged group comment: {e}")
                     
                     if leftovers:
-                        label = config.orphans_label_template.format(name) if "{}" in config.orphans_label_template else config.orphans_label_template
+                        label = smart_config.orphans_label_template.format(name) if "{}" in smart_config.orphans_label_template else smart_config.orphans_label_template
                         mini_tree[label] = sorted(leftovers, key=str.casefold)
                         try:
                             mini_tree.yaml_add_eol_comment(config.instruction_template.format(gloss=f"Miscellaneous {name} items"), label)
@@ -331,10 +331,10 @@ def generate_tencent_hierarchy(
             
             # Check skip list (by WNID or Name)
             should_skip = False
-            if smart and config.enabled and config.skip_nodes:
-                 if c_wnid in config.skip_nodes:
+            if smart and smart_config.enabled and smart_config.skip_nodes:
+                 if c_wnid in smart_config.skip_nodes:
                      should_skip = True
-                 elif c_name in config.skip_nodes:
+                 elif c_name in smart_config.skip_nodes:
                      should_skip = True
             
             if should_skip and processed_skips < 1000: # Safety break
@@ -353,11 +353,11 @@ def generate_tencent_hierarchy(
         for child_idx in sorted_children:
             child_name = categories[child_idx]['name'].split(',')[0].strip()
             
-            # Calculate child config
-            child_config = config
-            if smart and config.enabled:
+            # Calculate child smart_config
+            child_config = smart_config
+            if smart and smart_config.enabled:
                  child_wnid = categories[child_idx]['id']
-                 child_config = config.get_child_config(child_name, child_wnid)
+                 child_config = smart_config.get_child_config(child_name, child_wnid)
             
             child_val, child_orphans = build_commented(child_idx, current_depth + 1, child_config, stats=stats, budget=budget)
             
@@ -401,13 +401,13 @@ def generate_tencent_hierarchy(
             # If they bubble up, they join a new group (misc), so maybe clean again?
             # Or just clean once at source?
             # If we merge orphans, they end up in 'misc'. We probably want 'misc' to be clean too.
-            if smart and config.enabled and config.semantic_cleanup:
-                 orphan_leaves = apply_semantic_cleaning(orphan_leaves, config)
+            if smart and smart_config.enabled and smart_config.semantic_cleanup:
+                 orphan_leaves = apply_semantic_cleaning(orphan_leaves, smart_config)
 
             # Semantic Arrangement for Orphans
-            if smart and config.enabled and config.semantic_arrangement:
+            if smart and smart_config.enabled and smart_config.semantic_arrangement:
                 from ..smart import apply_semantic_arrangement
-                arranged_orphans, leftovers, metadata = apply_semantic_arrangement(orphan_leaves, config, stats=stats, context=f"orphans of {name}", return_metadata=True)
+                arranged_orphans, leftovers, metadata = apply_semantic_arrangement(orphan_leaves, smart_config, stats=stats, context=f"orphans of {name}", return_metadata=True)
                 
                 if isinstance(arranged_orphans, dict) and arranged_orphans:
                     # Merge groups into CM (as siblings)
@@ -426,7 +426,8 @@ def generate_tencent_hierarchy(
                     orphan_leaves = arranged_orphans
 
 
-            orphan_label = config.orphans_label_template
+            # Determine target label for orphans
+            orphan_label = smart_config.orphans_label_template
             if "{}" in orphan_label:
                 orphan_label = orphan_label.format(name)
 
@@ -436,28 +437,20 @@ def generate_tencent_hierarchy(
                 try:
                     cm.yaml_add_eol_comment(config.instruction_template.format(gloss=f"Miscellaneous {name} items"), orphan_label)
                 except: pass
-            elif orphan_label in cm and len(cm) > 1:
-                # If we merged everything into groups, remove the empty misc if there are other things
-                # (but only if we didn't just create it? actually CM is new here)
-                pass
             
-            # Do NOT increment valid_items_added here.
-            # If we only have orphans (no sub-categories), we want to fall through
-            # to the flatten logic below to return a list instead of {misc: [...]}.
-
-        # Check if we should flatten
-        # We flatten if we have no valid children AND (cm is empty OR cm only contains unarranged orphans)
-        should_flatten = False
-        if valid_items_added == 0:
-             if not cm:
-                 should_flatten = True
-             elif len(cm) == 1 and orphan_label in cm:
-                 # Only orphans, so flatten
-                 should_flatten = True
+            # Check if we should flatten
+            # We flatten if we have no valid children AND (cm is empty OR cm only contains unarranged orphans)
+            should_flatten = False
+            if valid_items_added == 0:
+                 if not cm:
+                     should_flatten = True
+                 elif len(cm) == 1 and orphan_label in cm:
+                     # Only orphans, so flatten
+                     should_flatten = True
         
         if should_flatten:
             # If all children were pruned/merged, flatten itself
-            if smart and config.enabled:
+            if smart and smart_config.enabled:
                 # In smart mode, we trust our traversal (orphan_leaves) and do not grab everything
                 leaves = []
             else:
@@ -471,17 +464,17 @@ def generate_tencent_hierarchy(
             filtered_leaves = sorted(list(set([l for l in leaves if isinstance(l, str) and l.lower() != normalized_name])), key=str.casefold)
             
             # Semantic cleaning
-            if smart and config.enabled and config.semantic_cleanup:
-                filtered_leaves = apply_semantic_cleaning(filtered_leaves, config)
+            if smart and smart_config.enabled and smart_config.semantic_cleanup:
+                filtered_leaves = apply_semantic_cleaning(filtered_leaves, smart_config)
 
             # Check min leaf size again?
-            if smart and config.enabled and len(filtered_leaves) < config.min_leaf_size:
+            if smart and smart_config.enabled and len(filtered_leaves) < smart_config.min_leaf_size:
                  return None, filtered_leaves # Bubble further up
             
             # Semantic Arrangement (Re-grow)
-            if smart and config.enabled and config.semantic_arrangement:
+            if smart and smart_config.enabled and smart_config.semantic_arrangement:
                  from ..smart import apply_semantic_arrangement
-                 named_groups, leftovers, metadata = apply_semantic_arrangement(filtered_leaves, config, stats=stats, context=name, return_metadata=True)
+                 named_groups, leftovers, metadata = apply_semantic_arrangement(filtered_leaves, smart_config, stats=stats, context=name, return_metadata=True)
                  
                  if isinstance(named_groups, dict) and (named_groups or leftovers):
                      mini_tree = CommentedMap()
@@ -503,7 +496,7 @@ def generate_tencent_hierarchy(
                                       except: pass
                      
                      if leftovers:
-                         label = config.orphans_label_template.format(name) if "{}" in config.orphans_label_template else config.orphans_label_template
+                         label = smart_config.orphans_label_template.format(name) if "{}" in smart_config.orphans_label_template else smart_config.orphans_label_template
                          mini_tree[label] = sorted(leftovers, key=str.casefold)
                          try:
                               mini_tree.yaml_add_eol_comment(config.instruction_template.format(gloss=f"Miscellaneous {name} items"), label)
