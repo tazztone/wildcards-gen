@@ -296,7 +296,12 @@ def extract_unique_keywords(cluster_terms: List[str], all_terms: List[str], top_
             # Simple check: does it appear at least twice OR is the score very high?
             count = cluster_doc.lower().count(word.lower())
             
-            if score > 0.2 and (count >= 2 or score > 0.5):
+            # Coverage check: How many individual terms actually contain this word?
+            # We want the label to be representative of the group.
+            covered_items = [t for t in cluster_terms if word.lower() in t.lower()]
+            coverage = len(covered_items) / len(cluster_terms) if cluster_terms else 0
+            
+            if score > 0.2 and (count >= 2 or score > 0.5) and coverage >= 0.2:
                 keywords.append(word)
                 if len(keywords) >= top_n:
                     break
@@ -308,18 +313,27 @@ def extract_unique_keywords(cluster_terms: List[str], all_terms: List[str], top_
         return []
 
 
-def generate_contextual_label(terms: List[str], context_terms: List[str], fallback: str = "Other") -> str:
+def generate_contextual_label(terms: List[str], context_terms: List[str], fallback: Optional[str] = None) -> str:
     """
     Generate a descriptive label for a group of terms using TF-IDF.
     """
+    if fallback is None:
+        fallback = config.orphans_label_template if config.orphans_label_template else "Other"
+    
+    # Clean fallback if it has template placeholders
+    if "{}" in fallback:
+        fallback = "Other" # Use "Other" instead of literal template
+    
     if not terms:
         return fallback
         
     try:
         keywords = extract_unique_keywords(terms, context_terms, top_n=1)
         if keywords:
-            # Score check is already inside extract_unique_keywords (> 0.1)
-            return f"{fallback} ({keywords[0].title()})"
+            # Score check is already inside extract_unique_keywords (> 0.2, > 0.2 coverage)
+            # Use title case for fallback if it was Other/misc
+            base = fallback.title() if fallback.lower() in ["other", "misc"] else fallback
+            return f"{base} ({keywords[0].title()})"
     except Exception:
         pass
         
@@ -716,7 +730,7 @@ def arrange_hierarchy(
         for g_items in groups.values():
             context_terms.extend(g_items[:5]) # Sample 5 from each group
             
-        label = generate_contextual_label(leftovers, context_terms, fallback="Other")
+        label = generate_contextual_label(leftovers, context_terms, fallback=None)
         result[label] = sorted(leftovers)
         
     return result

@@ -532,7 +532,11 @@ def generate_tencent_hierarchy(
         if isinstance(root_val, dict):
             if root_orphans:
                  # Add orphans to root's 'misc'
-                 root_val['misc'] = sorted(list(set(root_orphans)), key=str.casefold)
+                 label = smart_config.orphans_label_template if smart_config.orphans_label_template else "misc"
+                 root_val[label] = sorted(list(set(root_orphans)), key=str.casefold)
+                 try:
+                     root_val.yaml_add_eol_comment(config.instruction_template.format(gloss=f"Miscellaneous {root_name} items"), label)
+                 except: pass
             final_map[root_name] = root_val
         elif isinstance(root_val, list):
             # Root itself became a list?
