@@ -4,44 +4,38 @@
 - **Milestone**: v0.9.0-hardened
 - **Phase**: 5 (Hardening & Quality)
 - **Task**: Structural & Semantic Hardening
-- **Status**: Ready for execution (Phase 5.1 Planned)
+- **Status**: Paused at 2026-02-05 13:58
 
 ## Last Session Summary
-Harden the wildcard generation pipeline by implementing a context-aware framework. Successfully resolved "Reactionary" label hallucination, eliminated redundant nesting (tautologies), and ensured YAML comment preservation.
-
-Codebase mapping complete:
-- 3 core components identified (Core, UI, Scripts)
-- 3 tech debt items found (root hallucination, deep nesting, tautologies).
+Mapped codebase (`/map`) and researched architectural improvements for Phase 5. Created Plan 5.1 ("Centralized Configuration") after user validated that "Matter" roots and deep nesting are desirable features, not bugs.
 
 ## In-Progress Work
-All hardening logic for Phase 5 is implemented and committed.
-- Files modified: `arranger.py`, `shaper.py`, `wordnet.py`, `tencent.py`
-- Tests status: Recently verified with regression scripts; full E2E run pending.
+- Plan 5.1 created: `.gsd/phases/5/5.1-PLAN.md`
+- Research updated: `.gsd/phases/5/RESEARCH.md`
+- Work is ready for execution (waiting for approval/start).
 
 ## Blockers
 None.
 
 ## Context Dump
-The system now treats hierarchy generation as a context-aware process rather than a pure mathematical clustering.
+User Explicitly Validated:
+1. **"Matter" is a valid root**: The system should allow it explicitly via config, not just accidentally via fallback.
+2. **Deep Nesting is Good**: `Food -> Beverage -> Alcohol` is preferred over flattening.
 
 ### Decisions Made
-- **WordNet Prioritization**: Prioritize physical domain lexnames (food, animal, artifact) to avoid "People" synsets for common nouns (e.g., Bourbon).
-- **Parent-Aware Naming**: The Arranger blacklists the parent name from being used as a child cluster label.
-- **Recursive Shaper**: Tautology pruning is now recursive and handles sibling clashes by renaming to "General [Category]".
-- **Conservative Flattening**: Preserves top-level semantic nodes even if they have only one child to maintain UX coherence.
+- **Centralized Config**: We will control `BLACKLIST_CATEGORIES` via `config.py` to ensure consistent naming rules across `arranger.py` and `wordnet.py`.
+- **Constraint Preservation**: We will add regression tests to `test_shaper.py` to ensure deep hierarchies are NOT flattened.
 
 ### Approaches Tried
-- **Sibling Merging**: Attempted to merge tautological children into the parent dict, but this caused YAML structural conflicts (list/dict mix). Resolved by "General" renaming.
-
-### Current Hypothesis
-The architectural interaction between Arranger (naming) and Shaper (pruning) is now stable. Full-scale datasets should no longer produce "Matter -> Wine" or "Wine -> Wine".
+- **Original Plan 5.1**: Tried to "fix" deep nesting and "Matter" root. **Abandoned** after user feedback.
+- **Revised Plan 5.1**: Focuses on explicitly supporting these features via clean architecture.
 
 ### Files of Interest
-- `wildcards_gen/core/arranger.py`: Logic for context-aware naming.
-- `wildcards_gen/core/shaper.py`: Recursive tautology and flattening logic.
-- `wildcards_gen/core/wordnet.py`: Lexname prioritization logic.
+- `wildcards_gen/core/config.py`
+- `wildcards_gen/core/arranger.py`
+- `.gsd/phases/5/5.1-PLAN.md`
 
 ## Next Steps
-1. Perform a full E2E production run of Tencent ML-Images to verify all fixes at scale.
-2. Prepare final audit report for v0.9.0-hardened.
-3. Plan v1.0.0 Production Readiness.
+1. Approve/Start Plan 5.1 (Centralized Configuration).
+2. Execute architectural cleanup.
+3. Verify that taxonomy structure remains unchanged (regression test).
