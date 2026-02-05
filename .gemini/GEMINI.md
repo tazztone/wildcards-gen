@@ -98,6 +98,18 @@ A fresh context with documented state often immediately sees the solution.
 
 ---
 
+## Rule 5: Augmented Documentation Retrieval 📚
+
+**Agents MUST actively use Context7 documentation when available:**
+
+1. **Check `.gsd/STACK.md`** for library-specific Context7 IDs before starting research.
+2. **Retrieve Documentation**: If an ID exists, use `@[/mcp-context7] query-docs` to get official examples and API details.
+3. **Verify Implementation**: Use documentation to validate that proposed code follows best practices and correct parameter signatures.
+
+**Rationale:** Prevents API hallucinations and ensures the use of up-to-date patterns for key dependencies like Gradio or Transformers.
+
+---
+
 ## Workflow Integration
 
 These rules integrate with the GSD workflows:
@@ -110,6 +122,7 @@ These rules integrate with the GSD workflows:
 | `/verify` | Enforces Empirical Validation |
 | `/pause` | Triggers Context Hygiene state dump |
 | `/resume` | Loads state from STATE.md |
+| `/mcp-context7` | Augmented documentation lookup (Rule 5) |
 
 ---
 
@@ -117,6 +130,7 @@ These rules integrate with the GSD workflows:
 
 ```
 Before coding    → Check SPEC.md is FINALIZED
+During research  → Use Context7/STACK.md IDs (Rule 5)
 After each task  → Update STATE.md
 After 3 failures → State dump + fresh session
 Before "Done"    → Empirical proof captured

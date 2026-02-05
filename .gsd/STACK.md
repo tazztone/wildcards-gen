@@ -11,23 +11,23 @@
 ## Dependencies
 
 ### Production
-| Package | Version | Purpose |
-|---------|---------|---------|
-| ruamel.yaml | >=0.17.0 | YAML parsing with comment preservation |
-| nltk | >=3.8.0 | WordNet access |
-| requests | >=2.28.0 | Downloading resources |
-| tqdm | >=4.64.0 | Progress bars |
-| gradio | >=4.0.0 | GUI interface |
+| Package | Version | Purpose | Context7 ID |
+|---------|---------|---------|-------------|
+| ruamel.yaml | >=0.17.0 | YAML parsing with comment preservation | `/pycontribs/ruamel-yaml` |
+| nltk | >=3.8.0 | WordNet access | `/nltk/nltk` |
+| requests | >=2.28.0 | Downloading resources | - |
+| tqdm | >=4.64.0 | Progress bars | - |
+| gradio | >=4.0.0 | GUI interface | `/gradio-app/gradio` |
 
 ### Optional / Data Science ("lint")
-| Package | Version | Purpose |
-|---------|---------|---------|
-| sentence-transformers | >=2.7.0 | Text embeddings |
-| transformers | >=4.51.0 | HF Models |
-| hdbscan | >=0.8.33 | Density-based clustering |
-| umap-learn | >=0.5.0 | Dimensionality reduction |
-| scikit-learn | >=1.2.0 | ML utilities |
-| numpy | >=1.24.0 | Math |
+| Package | Version | Purpose | Context7 ID |
+|---------|---------|---------|-------------|
+| sentence-transformers | >=2.7.0 | Text embeddings | `/huggingface/sentence-transformers` |
+| transformers | >=4.51.0 | HF Models | `/huggingface/transformers` |
+| hdbscan | >=0.8.33 | Density-based clustering | `/scikit-learn-contrib/hdbscan` |
+| umap-learn | >=0.5.0 | Dimensionality reduction | - |
+| scikit-learn | >=1.2.0 | ML utilities | `/scikit-learn/scikit-learn` |
+| numpy | >=1.24.0 | Math | `/numpy/numpy` |
 
 ### Development
 | Package | Version | Purpose |
