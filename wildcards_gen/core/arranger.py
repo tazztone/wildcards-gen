@@ -172,7 +172,8 @@ def get_medoid_name(cluster_embeddings: np.ndarray, cluster_terms: List[str]) ->
 def _generate_descriptive_name(
     lca_name: Optional[str], 
     cluster_embeddings: np.ndarray, 
-    cluster_terms: List[str]
+    cluster_terms: List[str],
+    parent_context: Optional[str] = None
 ) -> Tuple[str, Dict[str, Any]]:
     """
     Generate a descriptive name using Hybrid Strategy (LCA + Medoid).
@@ -202,41 +203,42 @@ def _generate_descriptive_name(
     
     # Decision Logic
     # 1. LCA Validation: Ensure LCA is consistent with the Medoid
-    # If LCA says "Cereal" but Medoid is "Egg", and Egg isn't a Cereal, LCA is misleading.
-    # We check if LCA is a hypernym of the Medoid.
     lca_valid = False
     if lca_name and medoid_term:
         lca_synset = get_primary_synset(lca_name)
         medoid_synset = get_primary_synset(medoid_term)
         
         if lca_synset and medoid_synset:
-            # Check if lca_synset is a hypernym of medoid_synset
-            # set(medoid.closure(hypernyms)) contains lca?
-            # Using common_hypernyms is faster than full closure check if we just check one?
-            # Or just: lca_synset in list(medoid_synset.closure(lambda s: s.hypernyms()))
-            # Optimization: check lowest common hypernym of (LCA, Medoid) == LCA
             lcas = medoid_synset.lowest_common_hypernyms(lca_synset)
             if lcas and lcas[0] == lca_synset:
                 lca_valid = True
             elif lca_name.lower() == medoid_term.lower():
                 lca_valid = True
                 
-    if lca_name and (not medoid_term or lca_valid):
+    # Parent-Awareness: If LCA or Medoid matches the parent name, it's a tautology.
+    # We should deprioritize it.
+    p_norm = parent_context.lower().strip() if parent_context else ""
+    
+    def is_tautology(candidate: Optional[str]) -> bool:
+        if not candidate or not p_norm: return False
+        c_norm = candidate.lower().strip()
+        return c_norm == p_norm or c_norm + "s" == p_norm or p_norm + "s" == c_norm
+
+    if lca_name and (not medoid_term or lca_valid) and not is_tautology(lca_name):
         name = lca_name
         metadata["source"] = "lca"
         s = get_primary_synset(lca_name)
         if s:
             metadata["wnid"] = get_synset_wnid(s)
             
-    elif medoid_hypernym:
+    elif medoid_hypernym and not is_tautology(medoid_hypernym):
         name = medoid_hypernym
         metadata["source"] = "medoid_hypernym"
         s = get_primary_synset(medoid_hypernym)
         if s:
             metadata["wnid"] = get_synset_wnid(s)
     else:
-        # Fallback: Try TF-IDF
-        # (Same logic as before...)
+        # Fallback: TF-IDF
         name = "Group"
         metadata["source"] = "fallback"
 
@@ -250,7 +252,7 @@ def _generate_descriptive_name(
 
 
 
-def extract_unique_keywords(cluster_terms: List[str], all_terms: List[str], top_n: int = 1) -> List[str]:
+def extract_unique_keywords(cluster_terms: List[str], all_terms: List[str], top_n: int = 1, context: Optional[str] = None) -> List[str]:
     """
     Extract top keywords that distinguish this cluster from the global set using TF-IDF.
     """
@@ -261,12 +263,7 @@ def extract_unique_keywords(cluster_terms: List[str], all_terms: List[str], top_
             return []
             
         # 1. Construct Corpus
-        # Doc 0: The cluster
-        # Doc 1: Everything else (context)
         cluster_doc = " ".join(cluster_terms)
-        
-        # Performance optimization: Sample context if too large? 
-        # For now, full context is fine for <10k items.
         context_doc = " ".join([t for t in all_terms if t not in cluster_terms])
         
         if not context_doc: # If cluster IS everything
@@ -286,22 +283,23 @@ def extract_unique_keywords(cluster_terms: List[str], all_terms: List[str], top_
         top_indices = cluster_scores.argsort()[::-1]
         
         keywords = []
+        ctx_norm = context.lower().strip() if context else ""
+
         for idx in top_indices:
             word = feature_names[idx]
-            # Ensure word is actually relevant (score > 0.2)
-            # AND it should appear in at least a decent portion of the cluster doc
-            # to be representative, especially for "Other" naming.
             score = cluster_scores[idx]
             
-            # Simple check: does it appear at least twice OR is the score very high?
-            count = cluster_doc.lower().count(word.lower())
-            
-            # Coverage check: How many individual terms actually contain this word?
-            # We want the label to be representative of the group.
+            # Filter out words that are too similar to the context (parent name)
+            if ctx_norm:
+                 w_norm = word.lower().strip()
+                 if w_norm == ctx_norm or w_norm + "s" == ctx_norm or ctx_norm + "s" == w_norm:
+                      continue
+
+            # Coverage check
             covered_items = [t for t in cluster_terms if word.lower() in t.lower()]
             coverage = len(covered_items) / len(cluster_terms) if cluster_terms else 0
             
-            if score > 0.2 and (count >= 2 or score > 0.5) and coverage >= 0.2:
+            if score > 0.2 and (coverage >= 0.2):
                 keywords.append(word)
                 if len(keywords) >= top_n:
                     break
@@ -321,7 +319,8 @@ def generate_contextual_label(terms: List[str], context_terms: List[str], fallba
         return fallback
         
     try:
-        keywords = extract_unique_keywords(terms, context_terms, top_n=1)
+        # Use fallback as the 'context' to avoid labels like 'Other (Other)'
+        keywords = extract_unique_keywords(terms, context_terms, top_n=1, context=fallback)
         if keywords:
             # Score check is already inside extract_unique_keywords (> 0.2, > 0.2 coverage)
             # Use title case for fallback if it was Other/misc
@@ -408,6 +407,7 @@ def _arrange_single_pass(
     threshold: float,
     cluster_selection_method: str = 'eom',
     min_samples: Optional[int] = None,
+    parent_context: Optional[str] = None,
     **kwargs
 ) -> Tuple[Dict[str, List[str]], List[str], Dict, Dict[str, Dict]]:
 
@@ -513,7 +513,7 @@ def _arrange_single_pass(
         lca_name = get_lca_name(cluster_items)
         cluster_embs = embeddings[indices]
         
-        base_name, meta = _generate_descriptive_name(lca_name, cluster_embs, cluster_items)
+        base_name, meta = _generate_descriptive_name(lca_name, cluster_embs, cluster_items, parent_context=parent_context)
         
         # Collision Handling (Hybrid Naming)
         name = base_name
@@ -529,7 +529,7 @@ def _arrange_single_pass(
                 # We need context. Use leftovers + other clusters as context?
                 # Or just all other terms in this pass.
                 other_terms_in_pass = [t for t in terms if t not in cluster_items]
-                keywords = extract_unique_keywords(cluster_items, other_terms_in_pass, top_n=1)
+                keywords = extract_unique_keywords(cluster_items, other_terms_in_pass, top_n=1, context=parent_context)
                 if keywords:
                     suffix = keywords[0].title()
                     meta["tfidf_keyword"] = suffix
@@ -576,6 +576,7 @@ def arrange_list(
     cluster_selection_method: str = 'eom',
     return_stats: bool = False,
     return_metadata: bool = False,
+    context: Optional[str] = None,
     **kwargs
 ) -> Tuple[Dict[str, List[str]], List[str], Optional[Dict], Optional[Dict[str, Dict]]]:
     """
@@ -609,6 +610,7 @@ def arrange_list(
         min_cluster_size=min_cluster_size, 
         threshold=threshold,
         cluster_selection_method=cluster_selection_method,
+        parent_context=context,
         **kwargs
     )
     
@@ -632,7 +634,8 @@ def arrange_list(
             min_cluster_size=2,          # Use smallest possible size
             min_samples=2,               # Strict
             threshold=max(0.15, threshold * 1.5), # Higher threshold safeguard
-            cluster_selection_method='leaf' # 'leaf' is better for micro-clusters
+            cluster_selection_method='leaf', # 'leaf' is better for micro-clusters
+            parent_context=context
         )
         
         # Merge Results
@@ -672,6 +675,7 @@ def arrange_hierarchy(
     max_depth: int = 2,
     current_depth: int = 0,
     max_leaf_size: int = 50,
+    context: Optional[str] = None,
     **kwargs
 ) -> Any:
     """
@@ -687,7 +691,7 @@ def arrange_hierarchy(
     kwargs.pop('return_stats', None)
     kwargs.pop('return_metadata', None)
     
-    groups, leftovers = arrange_list(terms, return_stats=False, return_metadata=False, **kwargs)
+    groups, leftovers = arrange_list(terms, return_stats=False, return_metadata=False, context=context, **kwargs)
     
     # If clustering failed to find meaningful structure (all leftovers or 1 group), return flat
     if not groups or (len(groups) == 1 and not leftovers):
@@ -705,6 +709,7 @@ def arrange_hierarchy(
                 max_depth=max_depth,
                 current_depth=current_depth + 1,
                 max_leaf_size=max_leaf_size,
+                context=name,
                 **kwargs
             )
         else:
