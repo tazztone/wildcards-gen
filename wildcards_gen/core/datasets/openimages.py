@@ -619,7 +619,12 @@ def generate_openimages_hierarchy(
          from ..shaper import ConstraintShaper
          logger.info("Shaping hierarchy (merging orphans, flattening)...")
          shaper = ConstraintShaper(result)
-         result = shaper.shape(min_leaf_size=min_leaf_size, flatten_singles=True, preserve_roots=True)
+         result = shaper.shape(
+             min_leaf_size=min_leaf_size, 
+             flatten_singles=True, 
+             preserve_roots=True,
+             orphans_label_template=smart_config.orphans_label_template
+         )
 
     return result
 

@@ -24,7 +24,7 @@ class Config:
     db_path: str = DB_PATH
     
     # Generation Defaults
-    instruction_template: str = "instruction: {gloss}"
+    instruction_template: str = "# instruction: {gloss}"
     
     # GUI Defaults
     gui_share: bool = False
