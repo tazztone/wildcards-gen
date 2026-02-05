@@ -212,3 +212,4 @@ output/
 experiments/experiments/*/*.json
 experiments/experiments/*/*.yaml
 *.db
+embeddings.db
