@@ -21,7 +21,7 @@ class ConstraintShaper:
         preserve_roots: if True, do not flatten the top-level dictionary even if it has 1 key.
         """
         processed = self._merge_orphans(self.tree, min_leaf_size, orphans_label_template)
-        
+
         # 2. Prune Tautologies (A -> A -> B)
         processed = self._prune_tautologies(processed)
         
@@ -34,6 +34,7 @@ class ConstraintShaper:
                 processed[key] = self._flatten_singles(val)
             else:
                 processed = self._flatten_singles(processed)
+
         # 4. Normalize Casing (Categories: Title Case, Items: lowercase)
         processed = self._normalize_casing(processed)
         
@@ -121,6 +122,9 @@ class ConstraintShaper:
         processed_node = type(node)() if isinstance(node, dict) else {}
         for k, v in node.items():
             processed_node[k] = self._merge_orphans(v, min_size, orphans_label_template)
+            # Preserve comment for this key
+            if isinstance(node, CommentedMap) and k in node.ca.items:
+                 processed_node.ca.items[k] = node.ca.items[k]
 
             
         # 2. Process current level
