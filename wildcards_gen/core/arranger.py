@@ -313,17 +313,10 @@ def extract_unique_keywords(cluster_terms: List[str], all_terms: List[str], top_
         return []
 
 
-def generate_contextual_label(terms: List[str], context_terms: List[str], fallback: Optional[str] = None) -> str:
+def generate_contextual_label(terms: List[str], context_terms: List[str], fallback: str = "Other") -> str:
     """
     Generate a descriptive label for a group of terms using TF-IDF.
     """
-    if fallback is None:
-        fallback = config.orphans_label_template if config.orphans_label_template else "Other"
-    
-    # Clean fallback if it has template placeholders
-    if "{}" in fallback:
-        fallback = "Other" # Use "Other" instead of literal template
-    
     if not terms:
         return fallback
         
@@ -730,7 +723,7 @@ def arrange_hierarchy(
         for g_items in groups.values():
             context_terms.extend(g_items[:5]) # Sample 5 from each group
             
-        label = generate_contextual_label(leftovers, context_terms, fallback=None)
+        label = generate_contextual_label(leftovers, context_terms, fallback="Other")
         result[label] = sorted(leftovers)
         
     return result
