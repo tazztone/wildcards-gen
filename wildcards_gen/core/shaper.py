@@ -1,6 +1,7 @@
 
 import logging
 from typing import Dict, List, Any, Union, Optional
+from ruamel.yaml.comments import CommentedMap
 from .config import config
 
 logger = logging.getLogger(__name__)
@@ -46,7 +47,7 @@ class ConstraintShaper:
         if isinstance(node, list):
             # Sort and deduplicate items while lowercasing
             return sorted(list(set(str(item).lower() for item in node)))
-            
+        
         if not isinstance(node, dict):
             return node
 
@@ -67,7 +68,11 @@ class ConstraintShaper:
                     new_node[title_k] = norm_v
             else:
                 new_node[title_k] = norm_v
-                
+            
+            # Preserve comments
+            if isinstance(node, CommentedMap) and k in node.ca.items:
+                 new_node.ca.items[title_k] = node.ca.items[k]
+
         return new_node
 
 
@@ -90,13 +95,18 @@ class ConstraintShaper:
                 if k.lower().strip() == child_key.lower().strip():
                     # Promote child's value to current key
                     new_node[k] = v[child_key]
+                    # Preserve comment from child if it exists
+                    if isinstance(v, CommentedMap) and child_key in v.ca.items:
+                         new_node.ca.items[k] = v.ca.items[child_key]
                     continue
             
             new_node[k] = v
+            # Preserve comment from current key
+            if isinstance(node, CommentedMap) and k in node.ca.items:
+                 new_node.ca.items[k] = node.ca.items[k]
             
         return new_node
-
-
+    
     def _merge_orphans(self, node: Any, min_size: int, orphans_label_template: Optional[str] = None) -> Any:
         """
         Recursively merge small sibling groups into 'Other'.
@@ -118,29 +128,34 @@ class ConstraintShaper:
         orphan_items = []
         context_items = []
         
+        # Target label base
+        target_label_base = orphans_label_template if orphans_label_template else "Other"
+
         for k, v in processed_node.items():
-            if k == "Other":
-                continue
+            # If this key is already a generic bin, we might want to merge it
+            is_existing_generic = k.lower() in ["other", "misc"] or k.startswith("Other (") or k.startswith("misc (")
             
             if isinstance(v, list):
-                if len(v) < min_size:
+                if len(v) < min_size or is_existing_generic:
                     small_keys.append(k)
                     orphan_items.extend(v)
                 else:
                     context_items.extend(v)
             elif isinstance(v, dict):
                 # We don't merge dicts, but they provide context
-                # (Ideally we'd recursive gather, but sibling list items are usually enough)
                 pass
 
         if not small_keys:
             return processed_node
             
         # Determine Label
-        other_label = orphans_label_template if orphans_label_template else "Other"
+        other_label = target_label_base
         
         # Use contextual naming if possible (only if it's the generic "Other" or "misc")
-        if other_label in ["Other", "misc"]:
+        # We check both to catch different default conventions
+        is_generic = other_label.lower() in ["other", "misc"]
+        
+        if is_generic:
             try:
                 from .arranger import generate_contextual_label
                 other_label = generate_contextual_label(orphan_items, context_items, fallback=other_label)
@@ -150,6 +165,24 @@ class ConstraintShaper:
         # Move to new label
         if other_label not in processed_node:
              processed_node[other_label] = []
+             # Add instruction comment if it's a CommentedMap
+             if isinstance(processed_node, CommentedMap):
+                try:
+                    # If it's a renamed label like "Other (Fish)", use that context
+                    instr_context = other_label
+                    if is_generic and "(" in other_label:
+                        # Extract the part in parenthesis
+                        import re
+                        match = re.search(r"\((.*?)\)", other_label)
+                        if match:
+                            instr_context = f"{match.group(1)} related items"
+                    
+                    comment = config.instruction_template.format(gloss=f"Miscellaneous {instr_context}")
+                    processed_node.yaml_add_eol_comment(comment, other_label)
+                except Exception as e:
+                    logger.debug(f"Failed to add shaper comment: {e}")
+             else:
+                logger.debug(f"processed_node is NOT CommentedMap, it is {type(processed_node)}")
         
         # Safety: If other_label is one of the keys we planned to merge, 
         # remove it from the merge list so we don't pop the destination.
@@ -161,7 +194,7 @@ class ConstraintShaper:
                  items = processed_node.pop(k)
                  if isinstance(items, list):
                      processed_node[other_label].extend(items)
-             processed_node[other_label] = sorted(processed_node[other_label])
+             processed_node[other_label] = sorted(list(set(processed_node[other_label])), key=str.casefold)
         
         return processed_node
 
@@ -195,6 +228,9 @@ class ConstraintShaper:
         new_node = type(node)() if isinstance(node, dict) else {}
         for k, v in node.items():
             new_node[k] = self._flatten_singles(v)
+            # Preserve comment from current key
+            if isinstance(node, CommentedMap) and k in node.ca.items:
+                 new_node.ca.items[k] = node.ca.items[k]
 
             
         # Check if single child
