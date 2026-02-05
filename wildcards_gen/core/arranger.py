@@ -288,9 +288,15 @@ def extract_unique_keywords(cluster_terms: List[str], all_terms: List[str], top_
         keywords = []
         for idx in top_indices:
             word = feature_names[idx]
-            # Filter out generic words if needed, though stop_words handles most
-            # Ensure word is actually relevant (score > 0)
-            if cluster_scores[idx] > 0.1:
+            # Ensure word is actually relevant (score > 0.2)
+            # AND it should appear in at least a decent portion of the cluster doc
+            # to be representative, especially for "Other" naming.
+            score = cluster_scores[idx]
+            
+            # Simple check: does it appear at least twice OR is the score very high?
+            count = cluster_doc.lower().count(word.lower())
+            
+            if score > 0.2 and (count >= 2 or score > 0.5):
                 keywords.append(word)
                 if len(keywords) >= top_n:
                     break

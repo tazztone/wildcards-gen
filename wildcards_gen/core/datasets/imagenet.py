@@ -476,7 +476,11 @@ def generate_imagenet_tree(
         # result is modified in-place? No, shaper returns new structure.
         # But we want to preserve comments on 'result' root?
         # 'result' is the map.
-        result = shaper.shape(min_leaf_size=min_leaf_size, flatten_singles=True) # Flatten singles true?
+        result = shaper.shape(
+            min_leaf_size=min_leaf_size, 
+            flatten_singles=True,
+            orphans_label_template=smart_config.orphans_label_template
+        ) # Flatten singles true?
         # Maybe expose flatten_singles to CLI? It wasn't in original args.
         # Let's default to True as per research.
 

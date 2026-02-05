@@ -211,3 +211,4 @@ __marimo__/
 output/
 experiments/experiments/*/*.json
 experiments/experiments/*/*.yaml
+*.db

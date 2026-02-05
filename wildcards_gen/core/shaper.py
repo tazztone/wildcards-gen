@@ -1,6 +1,7 @@
 
 import logging
-from typing import Dict, List, Any, Union
+from typing import Dict, List, Any, Union, Optional
+from .config import config
 
 logger = logging.getLogger(__name__)
 
@@ -13,12 +14,12 @@ class ConstraintShaper:
     def __init__(self, tree: Dict[str, Any]):
         self.tree = tree
 
-    def shape(self, min_leaf_size: int = 10, flatten_singles: bool = True, preserve_roots: bool = True) -> Dict[str, Any]:
+    def shape(self, min_leaf_size: int = 10, flatten_singles: bool = True, preserve_roots: bool = True, orphans_label_template: Optional[str] = None) -> Dict[str, Any]:
         """
         Run all shaping passes.
         preserve_roots: if True, do not flatten the top-level dictionary even if it has 1 key.
         """
-        processed = self._merge_orphans(self.tree, min_leaf_size)
+        processed = self._merge_orphans(self.tree, min_leaf_size, orphans_label_template)
         
         # 2. Prune Tautologies (A -> A -> B)
         processed = self._prune_tautologies(processed)
@@ -96,7 +97,7 @@ class ConstraintShaper:
         return new_node
 
 
-    def _merge_orphans(self, node: Any, min_size: int) -> Any:
+    def _merge_orphans(self, node: Any, min_size: int, orphans_label_template: Optional[str] = None) -> Any:
         """
         Recursively merge small sibling groups into 'Other'.
         """
@@ -109,7 +110,7 @@ class ConstraintShaper:
         # 1. Recurse down first
         processed_node = type(node)() if isinstance(node, dict) else {}
         for k, v in node.items():
-            processed_node[k] = self._merge_orphans(v, min_size)
+            processed_node[k] = self._merge_orphans(v, min_size, orphans_label_template)
 
             
         # 2. Process current level
@@ -136,12 +137,15 @@ class ConstraintShaper:
             return processed_node
             
         # Determine Label
-        other_label = "Other"
-        try:
-            from .arranger import generate_contextual_label
-            other_label = generate_contextual_label(orphan_items, context_items)
-        except (ImportError, Exception):
-            pass
+        other_label = orphans_label_template if orphans_label_template else "Other"
+        
+        # Use contextual naming if possible (only if it's the generic "Other" or "misc")
+        if other_label in ["Other", "misc"]:
+            try:
+                from .arranger import generate_contextual_label
+                other_label = generate_contextual_label(orphan_items, context_items, fallback=other_label)
+            except (ImportError, Exception):
+                pass
 
         # Move to new label
         if other_label not in processed_node:

@@ -282,10 +282,29 @@ def generate_tencent_hierarchy(
                     if arranged_structure:
                         for g_name, g_terms in arranged_structure.items():
                             mini_tree[g_name] = sorted(g_terms, key=str.casefold)
+                            
+                            # Instruction Injection for arranged groups
+                            if g_name in metadata:
+                                meta = metadata[g_name]
+                                wnid = meta.get("wnid")
+                                instr = None
+                                if wnid:
+                                    synset = get_synset_from_wnid(wnid)
+                                    if synset:
+                                        instr = get_synset_gloss(synset)
+                                if instr:
+                                    try:
+                                        mini_tree.yaml_add_eol_comment(config.instruction_template.format(gloss=instr), g_name)
+                                    except Exception as e:
+                                        logger.debug(f"Failed to add arranged group comment: {e}")
                     
                     if leftovers:
                         label = config.orphans_label_template.format(name) if "{}" in config.orphans_label_template else config.orphans_label_template
                         mini_tree[label] = sorted(leftovers, key=str.casefold)
+                        try:
+                            mini_tree.yaml_add_eol_comment(config.instruction_template.format(gloss=f"Miscellaneous {name} items"), label)
+                        except Exception as e:
+                            logger.debug(f"Failed to add leftovers comment: {e}")
                     
                     return mini_tree, []
                 else:
@@ -537,7 +556,12 @@ def generate_tencent_hierarchy(
     if smart and smart_config.enabled and (min_leaf_size > 0 or merge_orphans):
          from ..shaper import ConstraintShaper
          shaper = ConstraintShaper(final_map)
-         final_map = shaper.shape(min_leaf_size=min_leaf_size, flatten_singles=True, preserve_roots=True)
+         final_map = shaper.shape(
+             min_leaf_size=min_leaf_size, 
+             flatten_singles=True, 
+             preserve_roots=True,
+             orphans_label_template=smart_config.orphans_label_template
+         )
             
     return final_map
 
