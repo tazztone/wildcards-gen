@@ -3,19 +3,23 @@ CLI Integration Tests.
 
 Smoke tests for CLI commands.
 """
-import unittest
-import subprocess
+
 import os
 import shutil
+import subprocess
+import unittest
+
 
 class TestCLIIntegration(unittest.TestCase):
     """End-to-End smoke tests for CLI commands."""
-    
+
+    test_dir: str
+
     @classmethod
     def setUpClass(cls):
         cls.test_dir = "tests/temp_output"
         os.makedirs(cls.test_dir, exist_ok=True)
-        
+
     @classmethod
     def tearDownClass(cls):
         if os.path.exists(cls.test_dir):
@@ -38,5 +42,6 @@ class TestCLIIntegration(unittest.TestCase):
         self.assertEqual(result.returncode, 0)
         self.assertIn("imagenet", result.stdout.lower())
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

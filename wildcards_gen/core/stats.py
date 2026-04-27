@@ -1,8 +1,8 @@
 import json
 import time
-import os
-from typing import List, Dict, Any, Optional
-from dataclasses import dataclass, asdict, field
+from dataclasses import asdict, dataclass, field
+from typing import Any, Dict, List, Optional
+
 
 @dataclass
 class StatsEvent:
@@ -12,23 +12,31 @@ class StatsEvent:
     message: str
     data: Dict[str, Any] = field(default_factory=dict)
 
+
 class StatsCollector:
     """
     Collects structured metrics and events during skeleton generation.
     """
+
     def __init__(self):
         self.start_time = time.time()
         self.events: List[StatsEvent] = []
         self.metadata: Dict[str, Any] = {}
 
-    def log_event(self, event_type: str, message: str, context: Optional[str] = None, data: Optional[Dict[str, Any]] = None):
+    def log_event(
+        self,
+        event_type: str,
+        message: str,
+        context: Optional[str] = None,
+        data: Optional[Dict[str, Any]] = None,
+    ):
         """Record a structured event."""
         event = StatsEvent(
             timestamp=time.time() - self.start_time,
             event_type=event_type,
             context=context,
             message=message,
-            data=data or {}
+            data=data or {},
         )
         self.events.append(event)
 
@@ -41,16 +49,16 @@ class StatsCollector:
         return {
             "execution": {
                 "duration_seconds": round(time.time() - self.start_time, 2),
-                "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+                "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             },
             "metadata": self.metadata,
-            "events": [asdict(e) for e in self.events]
+            "events": [asdict(e) for e in self.events],
         }
 
     def save_to_json(self, path: str):
         """Save structured stats to a JSON file."""
         try:
-            with open(path, 'w', encoding='utf-8') as f:
+            with open(path, "w", encoding="utf-8") as f:
                 json.dump(self.to_dict(), f, indent=2)
         except Exception as e:
             print(f"Failed to save stats JSON: {e}")
@@ -58,10 +66,10 @@ class StatsCollector:
     def save_summary_log(self, path: str):
         """Save a human-readable summary log."""
         try:
-            with open(path, 'w', encoding='utf-8') as f:
+            with open(path, "w", encoding="utf-8") as f:
                 f.write(f"Generation Summary - {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
-                f.write("="*60 + "\n\n")
-                
+                f.write("=" * 60 + "\n\n")
+
                 # Grouped by type for readability
                 arrangements = [e for e in self.events if e.event_type == "arrangement"]
                 if arrangements:
@@ -72,9 +80,12 @@ class StatsCollector:
                         if e.data:
                             # Reformat/Clean repeated text
                             details = []
-                            if 'items' in e.data: details.append(f"{e.data['items']} items")
-                            if 'clusters' in e.data: details.append(f"{e.data['clusters']} groups")
-                            if 'noise' in e.data: details.append(f"noise: {e.data['noise']:.1%}")
+                            if "items" in e.data:
+                                details.append(f"{e.data['items']} items")
+                            if "clusters" in e.data:
+                                details.append(f"{e.data['clusters']} groups")
+                            if "noise" in e.data:
+                                details.append(f"noise: {e.data['noise']:.1%}")
                             if details:
                                 f.write(f"           ({', '.join(details)})\n")
                     f.write("\n")

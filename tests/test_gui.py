@@ -1,90 +1,146 @@
-import pytest
-from unittest.mock import patch, MagicMock, mock_open
-import sys
+from unittest.mock import MagicMock, mock_open, patch
 
 # We don't hack sys.modules anymore because other tests load real gradio
 from wildcards_gen import gui
 
+
 def test_generate_dataset_handler_logic():
     """Test the generation wrapper function logic."""
-    with patch('wildcards_gen.core.datasets.imagenet.generate_imagenet_tree') as mock_img, \
-         patch('wildcards_gen.gui.StructureManager') as mock_mgr_cls, \
-         patch('builtins.open', mock_open()) as mocked_file, \
-         patch('os.makedirs'):
-         
+    with (
+        patch("wildcards_gen.core.datasets.imagenet.generate_imagenet_tree") as mock_img,
+        patch("wildcards_gen.gui.StructureManager") as mock_mgr_cls,
+        patch("builtins.open", mock_open()) as mocked_file,
+        patch("os.makedirs"),
+    ):
         mock_mgr = mock_mgr_cls.return_value
         mock_mgr.to_string.return_value = "root:\n- child"
         mock_img.return_value = {"root": ["child"]}
-        
+
         content, summary, files = gui.generate_dataset_handler(
-            "ImageNet", "Standard", "entity.n.01", 3, "out.yaml",
-            True, "none", True, False,
-            6, 10, 3, False, False,
-            None, None, 0.1, False, 0.1, 5
+            "ImageNet",
+            "Standard",
+            "entity.n.01",
+            3,
+            "out.yaml",
+            True,
+            "none",
+            True,
+            False,
+            6,
+            10,
+            3,
+            False,
+            False,
+            None,
+            None,
+            0.1,
+            False,
+            0.1,
+            5,
         )
         path = files[0] if files else None
-        
+
         assert path is not None
         assert "out.yaml" in path
         assert "root:" in content
         mock_img.assert_called_once()
 
+
 def test_generate_dataset_handler_error():
     """Test error handling in generation."""
     # We patch inside gui.py's namespace for consistency
-    with patch('wildcards_gen.gui.imagenet.generate_imagenet_tree', side_effect=Exception("Boom")):
+    with patch(
+        "wildcards_gen.gui.imagenet.generate_imagenet_tree",
+        side_effect=Exception("Boom"),
+    ):
         content, summary, files = gui.generate_dataset_handler(
-            "ImageNet", "Standard", "root", 3, "out.yaml",
-            True, "none", True, False,
-            6, 10, 3, False, False,
-            None, None, 0.1, False, 0.1, 5
+            "ImageNet",
+            "Standard",
+            "root",
+            3,
+            "out.yaml",
+            True,
+            "none",
+            True,
+            False,
+            6,
+            10,
+            3,
+            False,
+            False,
+            None,
+            None,
+            0.1,
+            False,
+            0.1,
+            5,
         )
-        path = files[0] if files else None # Should be empty list on error
+        path = files[0] if files else None  # Should be empty list on error
         assert path is None
         assert "Boom" in content
 
+
 def test_generate_dataset_handler_openimages():
     """Test OpenImages handler passing bbox_only."""
-    with patch('wildcards_gen.core.datasets.openimages.generate_openimages_hierarchy') as mock_oi, \
-         patch('wildcards_gen.gui.StructureManager') as mock_mgr_cls, \
-         patch('builtins.open', mock_open()), \
-         patch('os.makedirs'):
-         
+    with (
+        patch("wildcards_gen.core.datasets.openimages.generate_openimages_hierarchy") as mock_oi,
+        patch("wildcards_gen.gui.StructureManager") as mock_mgr_cls,
+        patch("builtins.open", mock_open()),
+        patch("os.makedirs"),
+    ):
         mock_mgr = mock_mgr_cls.return_value
         mock_mgr.to_string.return_value = "res"
         mock_oi.return_value = {}
-        
+
         # Test valid call with bbox_only=True
         content, summary, files = gui.generate_dataset_handler(
-            "Open Images", "Smart", "", 3, "out.yaml",
-            True, "none", False, False,
-            4, 10, 3, False, True,
-            None, None, 0.1, False, 0.1, 5
+            "Open Images",
+            "Smart",
+            "",
+            3,
+            "out.yaml",
+            True,
+            "none",
+            False,
+            False,
+            4,
+            10,
+            3,
+            False,
+            True,
+            None,
+            None,
+            0.1,
+            False,
+            0.1,
+            5,
         )
         path = files[0] if files else None
-        
+
         assert path is not None
         mock_oi.assert_called_once()
         # Verify bbox_only was passed as True
         args, kwargs = mock_oi.call_args
-        assert kwargs.get('bbox_only') is True
+        assert kwargs.get("bbox_only") is True
+
 
 def test_create_handler_logic():
     """Test the LLM create handler logic."""
-    with patch('wildcards_gen.gui.LLMEngine') as mock_engine_cls, \
-         patch('wildcards_gen.gui.StructureManager') as mock_mgr_cls, \
-         patch('builtins.open', mock_open()), \
-         patch('os.makedirs'):
-            
+    with (
+        patch("wildcards_gen.gui.LLMEngine") as mock_engine_cls,
+        patch("wildcards_gen.gui.StructureManager") as mock_mgr_cls,
+        patch("builtins.open", mock_open()),
+        patch("os.makedirs"),
+    ):
         mock_engine = mock_engine_cls.return_value
         mock_engine.generate_dynamic_structure.return_value = "topic:\n- item"
-        
+
         mock_mgr = mock_mgr_cls.return_value
         mock_mgr.from_string.return_value = {"topic": ["item"]}
         mock_mgr.to_string.return_value = "topic:\n- item"
-        
+
         path, content = gui.create_handler("Topic", "model", "key", "out.yaml")
-        
+
         assert path is not None
         assert "topic:" in content
         mock_engine.generate_dynamic_structure.assert_called_once_with("Topic")
@@ -93,6 +149,7 @@ def test_create_handler_logic():
     assert path is None
     assert "API Key required" in content
 
+
 def test_launch_gui_construction():
     """
     Test that the GUI layout can be constructed without errors using real Gradio.
@@ -100,68 +157,75 @@ def test_launch_gui_construction():
     """
     # We patch config to avoid filesystem reads
     # We patch Blocks.launch to prevent the server from actually starting
-    with patch('wildcards_gen.gui.config') as mock_config, \
-         patch('gradio.Blocks.launch') as mock_launch:
-        
+    with (
+        patch("wildcards_gen.gui.config") as mock_config,
+        patch("gradio.Blocks.launch") as mock_launch,
+    ):
         # Setup config mocks
         mock_config.api_key = "test_key"
         mock_config.model = "test_model"
         mock_config.get.return_value = "info"
-        
+
         # Call the launch function
         # This will execute all the component constructors (gr.Row, gr.Accordion, etc.)
         gui.launch_gui(share=False)
-        
+
         # Verify launch was called on the demo instance
         mock_launch.assert_called_once()
+
 
 def test_update_ds_filename():
     """Test filename generation logic."""
     # ImageNet: Should include root
     f1 = gui.update_ds_filename("ImageNet", "entity.n.01", 3, "Standard")
     assert "imagenet_entity_d3.yaml" == f1
-    
+
     # OpenImages: Should NOT include root even if passed (as UI might hold old value)
     f2 = gui.update_ds_filename("Open Images", "entity.n.01", 3, "Standard")
     assert "open_images_d3.yaml" == f2
-    
+
     # OpenImages Smart
     f3 = gui.update_ds_filename("Open Images", "entity.n.01", 4, "Smart", 4, 50, 5)
     assert "open_images_d4_s4_f50_l5_smart.yaml" == f3
-    
+
     # OpenImages Smart BBox
     f4 = gui.update_ds_filename("Open Images", "", 4, "Smart", 4, 50, 5, bbox_only=True)
     assert "open_images_d4_s4_f50_l5_smart_bbox.yaml" == f4
-    
+
     # Tencent: Should NOT include root
     f5 = gui.update_ds_filename("Tencent ML-Images", "entity.n.01", 3, "Smart", 4, 100, 3)
     assert "tencent_mlimages_d3_s4_f100_l3_smart.yaml" == f5
 
+
 def test_lint_handler_logic():
     """Test the linter handler logic."""
-    with patch('wildcards_gen.core.linter.lint_file') as mock_lint, \
-         patch('wildcards_gen.core.linter.clean_structure') as mock_clean, \
-         patch('wildcards_gen.gui.StructureManager') as mock_mgr_cls, \
-         patch('builtins.open', mock_open()), \
-         patch('os.path.dirname', return_value='/tmp'), \
-         patch('os.path.basename', return_value='test.yaml'):
-         
+    with (
+        patch("wildcards_gen.core.linter.lint_file") as mock_lint,
+        patch("wildcards_gen.core.linter.clean_structure") as mock_clean,
+        patch("wildcards_gen.gui.StructureManager") as mock_mgr_cls,
+        patch("builtins.open", mock_open()),
+        patch("os.path.dirname", return_value="/tmp"),
+        patch("os.path.basename", return_value="test.yaml"),
+    ):
         mock_file = MagicMock()
         mock_file.name = "test.yaml"
-        
+
         # Scenario: Outliers found
-        mock_lint.return_value = ({"issues": [{"path": "a", "outliers": [{"term": "x", "score": 0.5}]}]}, {"a": ["x", "y"]})
+        mock_lint.return_value = (
+            {"issues": [{"path": "a", "outliers": [{"term": "x", "score": 0.5}]}]},
+            {"a": ["x", "y"]},
+        )
         mock_clean.return_value = {"a": ["y"]}
         mock_mgr = mock_mgr_cls.return_value
         mock_mgr.to_string.return_value = "cleaned_content"
-        
+
         report, vis_update, path = gui.lint_handler(mock_file, "qwen3", 0.1)
-        
+
         assert "Found 1 Potential Outliers" in report
-        assert vis_update['visible'] is True
+        assert vis_update["visible"] is True
         assert "cleaned.yaml" in path
-        
+
         # Scenario: No file
         report, vis_update, path = gui.lint_handler(None, "qwen3", 0.1)
         assert "Error" in report
-        assert vis_update['visible'] is False
+        assert vis_update["visible"] is False

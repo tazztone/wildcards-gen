@@ -5,13 +5,15 @@ Uses ruamel.yaml to maintain # instruction: comments in the generated YAML.
 Ported from wildcards-categorize.
 """
 
+import io
 import json
+import logging
+import os
+from typing import Any, Dict, List, Optional
+
 from ruamel.yaml import YAML
 from ruamel.yaml.comments import CommentedMap, CommentedSeq
-from typing import Dict, Any, Optional, List
-import io
-import os
-import logging
+
 from .config import config
 
 logger = logging.getLogger(__name__)
@@ -38,14 +40,11 @@ class StructureManager:
             return f"instruction: {text}"
 
     def add_category_with_instruction(
-        self,
-        parent_node: CommentedMap,
-        key: str,
-        instruction: Optional[str] = None
+        self, parent_node: CommentedMap, key: str, instruction: Optional[str] = None
     ) -> None:
         """
         Add a category with an instruction comment to a parent node.
-        
+
         Args:
             parent_node: The parent CommentedMap to add to
             key: Category name
@@ -57,13 +56,10 @@ class StructureManager:
         if instruction:
             try:
                 # Check if comment already exists
-                if hasattr(parent_node, 'ca') and key in parent_node.ca.items:
+                if hasattr(parent_node, "ca") and key in parent_node.ca.items:
                     pass  # Comment exists
                 else:
-                    parent_node.yaml_add_eol_comment(
-                        self._format_comment(instruction),
-                        key
-                    )
+                    parent_node.yaml_add_eol_comment(self._format_comment(instruction), key)
             except Exception as e:
                 logger.warning(f"Failed to add comment for {key}: {e}")
 
@@ -72,11 +68,11 @@ class StructureManager:
         parent_node: CommentedMap,
         key: str,
         items: List[str],
-        instruction: Optional[str] = None
+        instruction: Optional[str] = None,
     ) -> None:
         """
         Add a leaf list (list of wildcard items) to a category.
-        
+
         Args:
             parent_node: The parent CommentedMap
             key: Category name
@@ -85,13 +81,10 @@ class StructureManager:
         """
         seq = CommentedSeq(items)
         parent_node[key] = seq
-        
+
         if instruction:
             try:
-                parent_node.yaml_add_eol_comment(
-                    self._format_comment(instruction),
-                    key
-                )
+                parent_node.yaml_add_eol_comment(self._format_comment(instruction), key)
             except Exception as e:
                 logger.warning(f"Failed to add comment for {key}: {e}")
 
@@ -101,7 +94,7 @@ class StructureManager:
             return self.create_empty_structure()
 
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, "r", encoding="utf-8") as f:
                 data = self.yaml.load(f)
             return data if data is not None else self.create_empty_structure()
         except Exception as e:
@@ -111,19 +104,19 @@ class StructureManager:
     def save_structure(self, data: Any, file_path: str, format: Optional[str] = None) -> None:
         """
         Save structure to file.
-        
+
         Args:
             data: Hierarchy data
             file_path: Output path
             format: 'yaml' or 'jsonl'. Auto-detected from extension if None.
         """
         if format is None:
-            if file_path.endswith('.jsonl'):
-                format = 'jsonl'
+            if file_path.endswith(".jsonl"):
+                format = "jsonl"
             else:
-                format = 'yaml'
-                
-        if format == 'jsonl':
+                format = "yaml"
+
+        if format == "jsonl":
             self._save_as_jsonl(data, file_path)
             return
 
@@ -131,7 +124,7 @@ class StructureManager:
         content = self.to_string(data)
         try:
             os.makedirs(os.path.dirname(os.path.abspath(file_path)), exist_ok=True)
-            with open(file_path, 'w', encoding='utf-8') as f:
+            with open(file_path, "w", encoding="utf-8") as f:
                 f.write(content)
             logger.info(f"Saved structure to {file_path}")
         except Exception as e:
@@ -141,10 +134,10 @@ class StructureManager:
         """Save flattened hierarchy as JSONL."""
         try:
             os.makedirs(os.path.dirname(os.path.abspath(file_path)), exist_ok=True)
-            
-            with open(file_path, 'w', encoding='utf-8') as f:
+
+            with open(file_path, "w", encoding="utf-8") as f:
                 self._write_jsonl_recursive(data, [], f)
-                
+
             logger.info(f"Saved JSONL to {file_path}")
         except Exception as e:
             logger.error(f"Failed to save JSONL to {file_path}: {e}")
@@ -157,13 +150,9 @@ class StructureManager:
             # Leaf list
             # Label is the immediate parent (last item in path)
             label = path[-1] if path else "root"
-            
+
             for item in node:
-                entry = {
-                    "text": item,
-                    "label": label,
-                    "hierarchy": path
-                }
+                entry = {"text": item, "label": label, "hierarchy": path}
                 file_obj.write(json.dumps(entry) + "\n")
 
     def to_string(self, data: Any) -> str:
@@ -176,11 +165,7 @@ class StructureManager:
         """Parse YAML string to structure."""
         return self.yaml.load(text)
 
-    def merge_categorized_data(
-        self,
-        current_structure: CommentedMap,
-        categorized_data: Dict[str, Any]
-    ) -> None:
+    def merge_categorized_data(self, current_structure: CommentedMap, categorized_data: Dict[str, Any]) -> None:
         """
         Recursively merge categorized data into existing structure.
         Modifies current_structure in place.
@@ -194,8 +179,7 @@ class StructureManager:
                     self.merge_categorized_data(current_structure[key], value)
                 else:
                     logger.warning(
-                        f"Conflict at '{key}': existing is {type(current_structure[key])}, "
-                        f"incoming is dict. Skipping."
+                        f"Conflict at '{key}': existing is {type(current_structure[key])}, incoming is dict. Skipping."
                     )
 
             elif isinstance(value, list):
@@ -209,8 +193,7 @@ class StructureManager:
                             current_structure[key].append(item)
                 else:
                     logger.warning(
-                        f"Conflict at '{key}': existing is {type(current_structure[key])}, "
-                        f"incoming is list. Skipping."
+                        f"Conflict at '{key}': existing is {type(current_structure[key])}, incoming is list. Skipping."
                     )
 
     def extract_terms(self, data: Any) -> List[str]:

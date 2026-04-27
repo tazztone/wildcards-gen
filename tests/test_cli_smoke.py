@@ -1,6 +1,8 @@
 import subprocess
 import sys
+
 import pytest
+
 
 def test_cli_semantic_arrange_args():
     """
@@ -16,12 +18,16 @@ def test_cli_semantic_arrange_args():
     # 2. Verify CLI accepts the flags (using --help to avoid execution/download)
     # This ensures argparse is configured correctly for --semantic-arrange
     cmd_args = [
-        sys.executable, "-m", "wildcards_gen.cli", 
-        "dataset", "openimages", 
-        "--smart", 
-        "--semantic-arrange", 
-        "--semantic-arrange-threshold", "0.5",
-        "--help"
+        sys.executable,
+        "-m",
+        "wildcards_gen.cli",
+        "dataset",
+        "openimages",
+        "--smart",
+        "--semantic-arrange",
+        "--semantic-arrange-threshold",
+        "0.5",
+        "--help",
     ]
     result = subprocess.run(cmd_args, capture_output=True, text=True)
     assert result.returncode == 0, f"CLI failed to parse args: {result.stderr}"
@@ -33,10 +39,11 @@ def test_cli_semantic_arrange_args():
     # explicit import of openimages (checks the fixed top-level import)
     # explicit import of arranger (checks sentence_transformers dependency)
     cmd_import = [
-        sys.executable, "-c",
+        sys.executable,
+        "-c",
         "from wildcards_gen.core.datasets import openimages; "
         "from wildcards_gen.core import arranger; "
-        "print('Imports Successful')"
+        "print('Imports Successful')",
     ]
     result_import = subprocess.run(cmd_import, capture_output=True, text=True)
     assert result_import.returncode == 0, f"Import check failed: {result_import.stderr}"

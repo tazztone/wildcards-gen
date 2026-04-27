@@ -9,7 +9,7 @@ Provides functions to:
 
 import functools
 import logging
-from typing import Optional, Set, List, Any
+from typing import Any, Collection, List, Optional, Set
 
 import nltk
 from nltk.corpus import wordnet as wn
@@ -24,8 +24,8 @@ def ensure_nltk_data() -> None:
     except LookupError:
         logger.info("Downloading WordNet data...")
         try:
-            nltk.download('wordnet', quiet=True)
-            nltk.download('omw-1.4', quiet=True)
+            nltk.download("wordnet", quiet=True)
+            nltk.download("omw-1.4", quiet=True)
         except Exception as e:
             logger.error(f"Failed to download WordNet data: {e}")
             raise
@@ -35,10 +35,10 @@ def ensure_nltk_data() -> None:
 def get_synset_from_wnid(wnid: str) -> Optional[Any]:
     """
     Get a WordNet synset from a WNID (e.g., 'n02084071').
-    
+
     Args:
         wnid: WordNet ID in format 'n12345678'
-        
+
     Returns:
         Synset object or None if not found
     """
@@ -56,34 +56,39 @@ def get_synset_from_wnid(wnid: str) -> Optional[Any]:
 def get_primary_synset(word: str) -> Optional[Any]:
     """
     Get the primary (most common) synset for a word.
-    
-    This filters out obscure or secondary meanings and prioritizes 
+
+    This filters out obscure or secondary meanings and prioritizes
     domain-relevant lexical categories (food, plants, animals, artifacts).
     """
     try:
-        synsets = wn.synsets(word.replace(' ', '_'), pos=wn.NOUN)
+        synsets = wn.synsets(word.replace(" ", "_"), pos=wn.NOUN)
         if not synsets:
             return None
-            
+
         # Priority Lexnames (categories from WordNet)
         # We want to avoid noun.person or noun.act if noun.food or noun.animal is available.
         PRIORITY_LEXNAMES = {
-            'noun.food', 'noun.animal', 'noun.plant', 'noun.artifact', 
-            'noun.object', 'noun.body', 'noun.substance'
+            "noun.food",
+            "noun.animal",
+            "noun.plant",
+            "noun.artifact",
+            "noun.object",
+            "noun.body",
+            "noun.substance",
         }
-        
-        # Sort by: 
+
+        # Sort by:
         # 1. Is in priority lexnames (True/False -> 0/1)
         # 2. Original WordNet order (frequency)
-        
+
         def score_synset(s):
             lex = s.lexname()
             # noun.person is often a distractor (e.g. bourbon)
-            if lex == 'noun.person':
-                return 100 
+            if lex == "noun.person":
+                return 100
             if lex in PRIORITY_LEXNAMES:
                 return 0
-            return 50 # Middle ground (noun.attribute, noun.group, etc.)
+            return 50  # Middle ground (noun.attribute, noun.group, etc.)
 
         best_synset = min(synsets, key=score_synset)
         return best_synset
@@ -92,19 +97,19 @@ def get_primary_synset(word: str) -> Optional[Any]:
     return None
 
 
-def get_synset_name(synset) -> str:
+def get_synset_name(synset: Any) -> str:
     """Get clean name from synset (e.g., 'dog' from 'dog.n.01')."""
-    return synset.lemmas()[0].name().replace('_', ' ')
+    return str(synset.lemmas()[0].name().replace("_", " "))
 
 
-def get_synset_gloss(synset) -> str:
+def get_synset_gloss(synset: Any) -> str:
     """
     Get the gloss (definition) of a synset.
-    
+
     This is used as the default instruction text.
     Example: "a domesticated carnivorous mammal"
     """
-    return synset.definition()
+    return str(synset.definition())
 
 
 def get_synset_wnid(synset) -> str:
@@ -112,7 +117,7 @@ def get_synset_wnid(synset) -> str:
     return f"{synset.pos()}{synset.offset():08d}"
 
 
-def is_in_valid_set(synset, valid_wnids: Optional[Set[str]]) -> bool:
+def is_in_valid_set(synset: Any, valid_wnids: Optional[Collection[str]]) -> bool:
     """Check if synset's WNID is in the valid set."""
     if valid_wnids is None:
         return True
@@ -120,10 +125,7 @@ def is_in_valid_set(synset, valid_wnids: Optional[Set[str]]) -> bool:
 
 
 @functools.lru_cache(maxsize=1024)
-def _get_all_descendants_cached(
-    synset,
-    valid_wnids: Optional[frozenset] = None
-) -> List[str]:
+def _get_all_descendants_cached(synset, valid_wnids: Optional[frozenset] = None) -> List[str]:
     """Cached implementation of descendant traversal."""
     descendants = set()
     try:
@@ -141,10 +143,7 @@ def _get_all_descendants_cached(
     return sorted(list(descendants))
 
 
-def get_all_descendants(
-    synset,
-    valid_wnids: Optional[Set[str]] = None
-) -> List[str]:
+def get_all_descendants(synset, valid_wnids: Optional[Set[str]] = None) -> List[str]:
     """
     Get all descendant names of a synset.
     Wrapper that handles caching by freezing the validation set.
@@ -155,13 +154,22 @@ def get_all_descendants(
 
 # Categories to optionally blacklist (too abstract)
 ABSTRACT_CATEGORIES = {
-    'entity', 'abstraction', 'communication', 'measure',
-    'attribute', 'state', 'event', 'act', 'group',
-    'relation', 'possession', 'phenomenon'
+    "entity",
+    "abstraction",
+    "communication",
+    "measure",
+    "attribute",
+    "state",
+    "event",
+    "act",
+    "group",
+    "relation",
+    "possession",
+    "phenomenon",
 }
 
 
 def is_abstract_category(synset) -> bool:
     """Check if synset is an abstract category that should be blacklisted."""
-    lemma = synset.name().split('.')[0]
+    lemma = synset.name().split(".")[0]
     return lemma in ABSTRACT_CATEGORIES

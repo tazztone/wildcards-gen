@@ -17,7 +17,7 @@ wildcards-gen = "wildcards_gen.cli:main"
 benchmark = "wildcards_gen.benchmark:main"
 
 [project.optional-dependencies]
-lint = [
+analysis = [
     "sentence-transformers>=2.7.0",
     "transformers>=4.51.0",
     "hdbscan>=0.8.33",
@@ -28,6 +28,8 @@ lint = [
 dev = [
     "pytest>=7.0.0",
     "pytest-mock>=3.10.0",
+    "ruff>=0.1.0",
+    "mypy>=1.0.0",
 ]
 
 [build-system]
@@ -36,3 +38,41 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 include = ["wildcards_gen*"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "B", "I"]
+ignore = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"wildcards_gen/gui.py" = ["B008"]
+"wildcards_gen/core/linter.py" = ["F401", "E402"]
+"tests/**" = ["F841", "E741", "B007", "F401"]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
+check_untyped_defs = true
+exclude = ["^scripts/"]
+
+[[tool.mypy.overrides]]
+module = [
+    "gradio.*",
+    "ruamel.*",
+    "hdbscan.*",
+    "sentence_transformers.*",
+    "umap.*",
+    "nltk.*",
+    "tqdm.*",
+    "sklearn.*",
+    "numpy.*",
+    "yaml.*",
+    "pytest.*",
+    "requests.*"
+]
+ignore_missing_imports = true

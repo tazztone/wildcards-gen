@@ -4,10 +4,13 @@ Import Walker Test.
 Traverses the wildcards_gen package and attempts to import every module.
 catches syntax errors/missing deps early.
 """
-import unittest
-import pkgutil
+
 import importlib
+import pkgutil
+import unittest
+
 import wildcards_gen
+
 
 class TestImportsWalk(unittest.TestCase):
     def test_import_all_modules(self):
@@ -21,5 +24,6 @@ class TestImportsWalk(unittest.TestCase):
             except Exception as e:
                 self.fail(f"Failed to import module {name}: {e}")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

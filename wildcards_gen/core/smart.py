@@ -1,13 +1,15 @@
 """
 Unified Smart Pruning Logic.
 
-This module encapsulates the "Semantic Significance" logic used to decide 
+This module encapsulates the "Semantic Significance" logic used to decide
 whether a node should be a full category or flattened into a list.
 """
 
-from typing import Optional, Any, List, Tuple
-from .wordnet import get_synset_from_wnid, get_primary_synset, get_synset_name, get_synset_wnid
+from typing import Any, Dict, List, Optional, Tuple
 
+from .wordnet import (
+    get_synset_wnid,
+)
 
 
 class TraversalBudget:
@@ -15,6 +17,7 @@ class TraversalBudget:
     Simple budget tracker for Fast Preview mode.
     Thread-safe enough for recursive calls (not concurrent threads).
     """
+
     def __init__(self, limit: Optional[int]):
         self.limit = limit
         self.current = 0
@@ -22,24 +25,24 @@ class TraversalBudget:
 
     def consume(self, amount: int = 1) -> bool:
         """
-        Consume 'amount' from budget. 
+        Consume 'amount' from budget.
         Returns True if budget was available (success).
         Returns False if budget is exhausted (should stop).
         """
         if self.limit is None:
             return True
-        
+
         if self._exhausted:
             return False
-            
+
         self.current += amount
         if self.current > self.limit:
             self._exhausted = True
             return False
-            
+
         if self.current == self.limit:
             self._exhausted = True
-            
+
         return True
 
     def is_exhausted(self) -> bool:
@@ -47,31 +50,35 @@ class TraversalBudget:
             return False
         return self._exhausted
 
+
 class SmartConfig:
     """Configuration for smart pruning."""
-    def __init__(self, 
-                 enabled: bool = False,
-                 min_depth: int = 6,
-                 min_hyponyms: int = 10,
-                 min_leaf_size: int = 3,
-                 merge_orphans: bool = False,
-                 category_overrides: dict = None,
-                 semantic_cleanup: bool = False,
-                 semantic_model: str = "minilm",
-                 semantic_threshold: float = 0.5,
-                 semantic_arrangement: bool = False,
-                 semantic_arrangement_threshold: float = 0.1,
-                 semantic_arrangement_min_cluster: int = 5,
-                 semantic_arrangement_method: str = "eom",
-                 debug_arrangement: bool = False,
-                 skip_nodes: list = None,
-                 orphans_label_template: str = "misc",
-                 preview_limit: Optional[int] = None,
-                 # Advanced Tuning
-                 umap_n_neighbors: int = 15,
-                 umap_min_dist: float = 0.1,
-                 umap_n_components: int = 5,
-                 hdbscan_min_samples: Optional[int] = None):
+
+    def __init__(
+        self,
+        enabled: bool = False,
+        min_depth: int = 6,
+        min_hyponyms: int = 10,
+        min_leaf_size: int = 3,
+        merge_orphans: bool = False,
+        category_overrides: Optional[Dict[str, Any]] = None,
+        semantic_cleanup: bool = False,
+        semantic_model: str = "minilm",
+        semantic_threshold: float = 0.5,
+        semantic_arrangement: bool = False,
+        semantic_arrangement_threshold: float = 0.1,
+        semantic_arrangement_min_cluster: int = 5,
+        semantic_arrangement_method: str = "eom",
+        debug_arrangement: bool = False,
+        skip_nodes: Optional[List[str]] = None,
+        orphans_label_template: str = "misc",
+        preview_limit: Optional[int] = None,
+        # Advanced Tuning
+        umap_n_neighbors: int = 15,
+        umap_min_dist: float = 0.1,
+        umap_n_components: int = 5,
+        hdbscan_min_samples: Optional[int] = None,
+    ):
         """
         Initializes the SmartConfig.
 
@@ -120,7 +127,7 @@ class SmartConfig:
         self.umap_n_components = umap_n_components
         self.hdbscan_min_samples = hdbscan_min_samples
 
-    def get_child_config(self, node_name: str, node_wnid: Optional[str] = None) -> 'SmartConfig':
+    def get_child_config(self, node_name: str, node_wnid: Optional[str] = None) -> "SmartConfig":
         """
         Get a SmartConfig instance for a child node, applying any specific overrides.
         If no overrides match, returns self (optimization).
@@ -131,11 +138,11 @@ class SmartConfig:
         # Check for overrides
         # Match against Name (case-insensitive?) or WNID
         override = None
-        
+
         # Check WNID first (most precise)
         if node_wnid and node_wnid in self.category_overrides:
             override = self.category_overrides[node_wnid]
-        
+
         # Check Name
         if not override and node_name:
             # Try exact match
@@ -144,7 +151,7 @@ class SmartConfig:
             # Try case-insensitive
             elif node_name.lower() in self.category_overrides:
                 override = self.category_overrides[node_name.lower()]
-        
+
         if not override:
             return self
 
@@ -152,27 +159,30 @@ class SmartConfig:
         # Default behavior: overrides are recursive (they become the new base)
         return SmartConfig(
             enabled=self.enabled,
-            min_depth=override.get('min_depth', self.min_depth),
-            min_hyponyms=override.get('min_hyponyms', self.min_hyponyms),
-            min_leaf_size=override.get('min_leaf_size', self.min_leaf_size),
-            merge_orphans=override.get('merge_orphans', self.merge_orphans),
-            category_overrides=self.category_overrides, # Propagate the full map
-            semantic_cleanup=override.get('semantic_cleanup', self.semantic_cleanup),
-            semantic_model=override.get('semantic_model', self.semantic_model),
-            semantic_threshold=override.get('semantic_threshold', self.semantic_threshold),
-            semantic_arrangement=override.get('semantic_arrangement', self.semantic_arrangement),
-            semantic_arrangement_threshold=override.get('semantic_arrangement_threshold', self.semantic_arrangement_threshold),
-            semantic_arrangement_min_cluster=override.get('semantic_arrangement_min_cluster', self.semantic_arrangement_min_cluster),
-            semantic_arrangement_method=override.get('semantic_arrangement_method', self.semantic_arrangement_method),
-
-            debug_arrangement=override.get('debug_arrangement', self.debug_arrangement),
-            skip_nodes=override.get('SKIP_NODES', self.skip_nodes),
-            orphans_label_template=override.get('orphans_label_template', self.orphans_label_template),
-            
-            umap_n_neighbors=override.get('umap_n_neighbors', self.umap_n_neighbors),
-            umap_min_dist=override.get('umap_min_dist', self.umap_min_dist),
-            umap_n_components=override.get('umap_n_components', self.umap_n_components),
-            hdbscan_min_samples=override.get('hdbscan_min_samples', self.hdbscan_min_samples)
+            min_depth=override.get("min_depth", self.min_depth),
+            min_hyponyms=override.get("min_hyponyms", self.min_hyponyms),
+            min_leaf_size=override.get("min_leaf_size", self.min_leaf_size),
+            merge_orphans=override.get("merge_orphans", self.merge_orphans),
+            category_overrides=self.category_overrides,  # Propagate the full map
+            semantic_cleanup=override.get("semantic_cleanup", self.semantic_cleanup),
+            semantic_model=override.get("semantic_model", self.semantic_model),
+            semantic_threshold=override.get("semantic_threshold", self.semantic_threshold),
+            semantic_arrangement=override.get("semantic_arrangement", self.semantic_arrangement),
+            semantic_arrangement_threshold=override.get(
+                "semantic_arrangement_threshold", self.semantic_arrangement_threshold
+            ),
+            semantic_arrangement_min_cluster=override.get(
+                "semantic_arrangement_min_cluster",
+                self.semantic_arrangement_min_cluster,
+            ),
+            semantic_arrangement_method=override.get("semantic_arrangement_method", self.semantic_arrangement_method),
+            debug_arrangement=override.get("debug_arrangement", self.debug_arrangement),
+            skip_nodes=override.get("SKIP_NODES", self.skip_nodes),
+            orphans_label_template=override.get("orphans_label_template", self.orphans_label_template),
+            umap_n_neighbors=override.get("umap_n_neighbors", self.umap_n_neighbors),
+            umap_min_dist=override.get("umap_min_dist", self.umap_min_dist),
+            umap_n_components=override.get("umap_n_components", self.umap_n_components),
+            hdbscan_min_samples=override.get("hdbscan_min_samples", self.hdbscan_min_samples),
         )
 
     def to_dict(self) -> dict:
@@ -195,77 +205,73 @@ class SmartConfig:
             "umap_n_components": self.umap_n_components,
             "hdbscan_min_samples": self.hdbscan_min_samples,
             "orphans_label_template": self.orphans_label_template,
-            "skip_nodes": list(self.skip_nodes)
+            "skip_nodes": list(self.skip_nodes),
         }
 
 
 # ... (skipping unchanged functions) ...
 
+
 def apply_semantic_arrangement(
-    items: List[str], 
-    config: SmartConfig, 
-    stats: Optional[Any] = None, 
+    items: List[str],
+    config: SmartConfig,
+    stats: Optional[Any] = None,
     context: Optional[str] = None,
-    return_metadata: bool = False
-) -> Tuple:
+    return_metadata: bool = False,
+) -> Tuple[Dict[str, Any], List[str], Dict[str, Any]]:
     """
     Arrange a list of items into semantic sub-groups.
     Returns the nested structure (dict or list).
     """
     if not config.enabled or not config.semantic_arrangement or not items:
-        return ({}, items, {}) if return_metadata else ({}, items)
-        
-    from .linter import load_embedding_model, check_dependencies
-    
-    
+        return {}, items, {}
+
+    from .linter import check_dependencies
+
     if not check_dependencies():
-         return ({}, items, {}) if return_metadata else ({}, items)
-    
+        return {}, items, {}
+
     from .arranger import arrange_hierarchy
-    
+
     # Use recursive arrangement
     result = arrange_hierarchy(
-         items,
-         max_depth=2, # Configurable?
-         max_leaf_size=config.semantic_arrangement_min_cluster, # reuse min cluster?
-         # Pass other params via kwargs to arrange_hierarchy if needed?
-         model_name=config.semantic_model,
-         threshold=config.semantic_arrangement_threshold,
-         min_cluster_size=config.semantic_arrangement_min_cluster,
-         method=config.semantic_arrangement_method,
-         return_metadata=return_metadata,
-         # Advanced Tuning
-         umap_n_neighbors=config.umap_n_neighbors,
-         umap_min_dist=config.umap_min_dist,
-         umap_n_components=config.umap_n_components,
-         min_samples=config.hdbscan_min_samples
+        items,
+        max_depth=2,  # Configurable?
+        max_leaf_size=config.semantic_arrangement_min_cluster,  # reuse min cluster?
+        # Pass other params via kwargs to arrange_hierarchy if needed?
+        model_name=config.semantic_model,
+        threshold=config.semantic_arrangement_threshold,
+        min_cluster_size=config.semantic_arrangement_min_cluster,
+        method=config.semantic_arrangement_method,
+        return_metadata=return_metadata,
+        # Advanced Tuning
+        umap_n_neighbors=config.umap_n_neighbors,
+        umap_min_dist=config.umap_min_dist,
+        umap_n_components=config.umap_n_components,
+        min_samples=config.hdbscan_min_samples,
     )
-    
-    leftovers = []
-    metadata = {}
-    
+
+    leftovers: List[str] = []
+    metadata: Dict[str, Any] = {}
+
     # Normalize result
     if isinstance(result, list):
-        # arrange_hierarchy returned a flat list (failed to cluster)
-        leftovers = result
-        result = {}
-    
-    return (result, leftovers, metadata) if return_metadata else (result, leftovers)
+        return {}, result, metadata
 
-
+    return result, leftovers, metadata
 
 
 def is_synset_significant(synset: Any, config: SmartConfig) -> bool:
     """
     Determine if a synset is semantically significant enough to be a category.
-    
+
     A concept is significant if:
     - It's shallow in WordNet hierarchy (fundamental concept), OR
     - It has many hyponyms (useful for organization)
     """
     if not synset or not config.enabled:
         return False
-        
+
     # Check depth (shallower = more fundamental)
     # min_depth() returns the shortest path to root
     try:
@@ -274,7 +280,7 @@ def is_synset_significant(synset: Any, config: SmartConfig) -> bool:
             return True
     except AttributeError:
         pass
-    
+
     # Check hyponym count (mostly for branching factor)
     try:
         # closure is robust but slow-ish; acceptable for offline gen
@@ -283,27 +289,23 @@ def is_synset_significant(synset: Any, config: SmartConfig) -> bool:
             return True
     except AttributeError:
         pass
-        
+
     return False
 
-def should_prune_node(
-    synset: Any, 
-    child_count: int, 
-    is_root: bool, 
-    config: SmartConfig
-) -> bool:
+
+def should_prune_node(synset: Any, child_count: int, is_root: bool, config: SmartConfig) -> bool:
     """
     Decide whether to keep a node as a category or flatten it.
-    
+
     Returns True if the node should be flattened.
     """
     if not config.enabled:
-        return False # Fallback to caller's depth check
-        
+        return False  # Fallback to caller's depth check
+
     # Roots never pruned
     if is_root:
         return False
-        
+
     # 0. Skip List / Force Prune Check
     if config.skip_nodes:
         # Check by name
@@ -313,33 +315,33 @@ def should_prune_node(
         # However, `synset` object is passed here.
         # Check WNID
         try:
-             wnid = get_synset_wnid(synset)
-             if wnid and wnid in config.skip_nodes:
-                 return True
-        except: pass
-        
+            wnid = get_synset_wnid(synset)
+            if wnid and wnid in config.skip_nodes:
+                return True
+        except Exception:
+            pass
+
         # Check Name (Lemma)
         if synset:
-             # Check lemma names
-             for lemma in synset.lemma_names():
-                 if lemma in config.skip_nodes or lemma.replace('_', ' ') in config.skip_nodes:
-                     return True
-    
+            # Check lemma names
+            for lemma in synset.lemma_names():
+                if lemma in config.skip_nodes or lemma.replace("_", " ") in config.skip_nodes:
+                    return True
+
     # 1. Linear Chain Check
     # If it only has 1 child, it's just adding noise depth. Prune it.
-    # UNLESS it's extremely significant? 
-    # No, even significant single-child nodes (like "canine > dog") 
+    # UNLESS it's extremely significant?
+    # No, even significant single-child nodes (like "canine > dog")
     # are usually better flattened if "canine" effectively equals "dog" in this subtree.
     if child_count <= 1:
         return True
-        
+
     # 2. Semantic Significance Check
     if is_synset_significant(synset, config):
         return False
-        
+
     # If not significant and not a root, prune it.
     return True
-
 
 
 def apply_semantic_cleaning(items: List[str], config: SmartConfig) -> List[str]:
@@ -349,14 +351,12 @@ def apply_semantic_cleaning(items: List[str], config: SmartConfig) -> List[str]:
     """
     if not config.enabled or not config.semantic_cleanup or not items:
         return items
-        
-    from .linter import load_embedding_model, check_dependencies, clean_list
-    
+
+    from .linter import check_dependencies, clean_list, load_embedding_model
+
     if not check_dependencies():
         return items
-        
+
     model = load_embedding_model(config.semantic_model)
     cleaned, _ = clean_list(items, model, config.semantic_threshold)
     return cleaned
-
-

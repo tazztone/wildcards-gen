@@ -1,5 +1,7 @@
 import sys
+
 import pytest
+
 
 def main():
     """
@@ -9,6 +11,7 @@ def main():
     # Run pytest on the benchmark test file
     args = ["tests/test_benchmark_preview.py"] + sys.argv[1:]
     sys.exit(pytest.main(args))
+
 
 if __name__ == "__main__":
     main()

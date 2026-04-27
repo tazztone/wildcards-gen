@@ -1,6 +1,8 @@
-import pytest
 import sys
 from unittest.mock import MagicMock, patch
+
+import pytest
+
 
 @pytest.fixture
 def mock_synset_factory():
@@ -32,7 +34,9 @@ def mock_synset_factory():
         s.__lt__ = lambda self, other: self.name() < other.name()
 
         return s
+
     return create_mock_synset
+
 
 @pytest.fixture
 def sample_hierarchy(mock_synset_factory):
@@ -69,16 +73,13 @@ def sample_hierarchy(mock_synset_factory):
         "pug.n.01": s_pug,
         "persian.n.01": s_persian,
         "siamese.n.01": s_siamese,
-        "vehicle.n.01": s_vehicle
+        "vehicle.n.01": s_vehicle,
     }
     for vc in vehicle_children:
         lookup[vc.name()] = vc
 
-    return {
-        "root": s_entity,
-        "lookup": lookup,
-        "vehicle_children": vehicle_children
-    }
+    return {"root": s_entity, "lookup": lookup, "vehicle_children": vehicle_children}
+
 
 @pytest.fixture
 def mock_wn(sample_hierarchy):
@@ -108,11 +109,14 @@ def mock_wn(sample_hierarchy):
     mock_wn_obj.synsets.side_effect = side_effect_synsets
 
     # Patch wherever 'wn' is used
-    with patch("wildcards_gen.core.wordnet.wn", mock_wn_obj), \
-         patch("wildcards_gen.core.datasets.imagenet.wn", mock_wn_obj):
+    with (
+        patch("wildcards_gen.core.wordnet.wn", mock_wn_obj),
+        patch("wildcards_gen.core.datasets.imagenet.wn", mock_wn_obj),
+    ):
         # We also attempt to patch nltk.corpus.wordnet if imported directly elsewhere
         with patch("nltk.corpus.wordnet", mock_wn_obj):
             yield mock_wn_obj
+
 
 @pytest.fixture
 def mock_arranger_deps():
@@ -123,11 +127,11 @@ def mock_arranger_deps():
     mock_hdbscan = MagicMock()
     mock_umap = MagicMock()
     mock_sklearn = MagicMock()
-    
+
     # Mock specific submodules
     mock_tfidf_mod = MagicMock()
     mock_sklearn.feature_extraction.text = mock_tfidf_mod
-    
+
     modules_to_patch = {
         "hdbscan": mock_hdbscan,
         "umap": mock_umap,
@@ -135,7 +139,7 @@ def mock_arranger_deps():
         "sklearn.metrics": mock_sklearn.metrics,
         "sklearn.metrics.pairwise": mock_sklearn.metrics.pairwise,
         "sklearn.feature_extraction": mock_sklearn.feature_extraction,
-        "sklearn.feature_extraction.text": mock_tfidf_mod
+        "sklearn.feature_extraction.text": mock_tfidf_mod,
     }
 
     with patch.dict(sys.modules, modules_to_patch):
@@ -144,25 +148,32 @@ def mock_arranger_deps():
         mock_hdbscan.HDBSCAN = MockHDBSCAN
         mock_clusterer = MockHDBSCAN.return_value
         mock_clusterer.fit.return_value = None
-        mock_clusterer.labels_ = [0, 0, 1, -1] # Example labels
+        mock_clusterer.labels_ = [0, 0, 1, -1]  # Example labels
         mock_clusterer.probabilities_ = [0.9, 0.9, 0.8, 0.1]
 
         # Configure UMAP
         MockUMAP = MagicMock()
         mock_umap.UMAP = MockUMAP
         mock_umap_obj = MockUMAP.return_value
-        mock_umap_obj.fit_transform.return_value = [[0.1, 0.2], [0.1, 0.2], [0.9, 0.8], [0.5, 0.5]]
+        mock_umap_obj.fit_transform.return_value = [
+            [0.1, 0.2],
+            [0.1, 0.2],
+            [0.9, 0.8],
+            [0.5, 0.5],
+        ]
 
         yield {
             "hdbscan": mock_hdbscan,
             "umap": mock_umap,
             "sklearn": mock_sklearn,
             "tfidf_mod": mock_tfidf_mod,
-            "clusterer": mock_clusterer
+            "clusterer": mock_clusterer,
         }
+
 
 @pytest.fixture(autouse=True)
 def clear_caches():
     # Clear lru_caches to ensure mocks are used
     from wildcards_gen.core.wordnet import get_primary_synset
+
     get_primary_synset.cache_clear()

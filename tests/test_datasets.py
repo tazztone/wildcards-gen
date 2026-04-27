@@ -1,21 +1,21 @@
+from unittest.mock import MagicMock, patch
 
 import pytest
-from unittest.mock import patch, MagicMock
-import os
-import shutil
-from wildcards_gen.core.datasets import imagenet, coco, openimages
+
 from wildcards_gen.core import wordnet
-from wildcards_gen.core.structure import StructureManager
+from wildcards_gen.core.datasets import coco, imagenet, openimages
+
 
 @pytest.fixture
 def mock_wn_fixture():
     """Mock WordNet and downloaders to avoid network calls."""
-    with patch('wildcards_gen.core.wordnet.wn') as mock_wn, \
-         patch('wildcards_gen.core.datasets.imagenet.wn') as mock_imagenet_wn, \
-         patch('wildcards_gen.core.datasets.imagenet.ensure_imagenet_1k_data') as mock_1k, \
-         patch('wildcards_gen.core.datasets.downloaders.download_file'), \
-         patch('wildcards_gen.core.datasets.downloaders.unzip_file'):
-        
+    with (
+        patch("wildcards_gen.core.wordnet.wn") as mock_wn,
+        patch("wildcards_gen.core.datasets.imagenet.wn") as mock_imagenet_wn,
+        patch("wildcards_gen.core.datasets.imagenet.ensure_imagenet_1k_data") as mock_1k,
+        patch("wildcards_gen.core.datasets.downloaders.download_file"),
+        patch("wildcards_gen.core.datasets.downloaders.unzip_file"),
+    ):
         # Clear caches
         wordnet.get_primary_synset.cache_clear()
         wordnet.get_synset_from_wnid.cache_clear()
@@ -26,113 +26,140 @@ def mock_wn_fixture():
 
         # Setup basic synset
         mock_synset = MagicMock()
-        mock_synset.name.return_value = 'dog.n.01'
-        mock_synset.definition.return_value = 'a domestic animal'
-        mock_synset.pos.return_value = 'n'
+        mock_synset.name.return_value = "dog.n.01"
+        mock_synset.definition.return_value = "a domestic animal"
+        mock_synset.pos.return_value = "n"
         mock_synset.offset.return_value = 12345
         mock_synset.min_depth.return_value = 5
-        mock_synset.hypernym_paths.return_value = [[mock_synset]] # Path to self for simple mock
-        
+        mock_synset.hypernym_paths.return_value = [[mock_synset]]  # Path to self for simple mock
+
         lemma_mock = MagicMock()
-        lemma_mock.name.return_value = 'dog'
+        lemma_mock.name.return_value = "dog"
         mock_synset.lemmas.return_value = [lemma_mock]
-        
-        mock_synset.hyponyms.return_value = [] # Leaf by default
-        
+
+        mock_synset.hyponyms.return_value = []  # Leaf by default
+
         # Configure both mocks to behave the same
         for wn_mock in [mock_wn, mock_imagenet_wn]:
             wn_mock.synset.return_value = mock_synset
             wn_mock.synsets.return_value = [mock_synset]
             wn_mock.synset_from_pos_and_offset.return_value = mock_synset
-        
+
         yield mock_wn
+
 
 def test_imagenet_tree_generation(mock_wn_fixture):
     # Test that tree generation returns a structure
-    structure = imagenet.generate_imagenet_tree(
-        root_synset_str='entity.n.01',
-        max_depth=2,
-        with_glosses=True
-    )
+    structure = imagenet.generate_imagenet_tree(root_synset_str="entity.n.01", max_depth=2, with_glosses=True)
     assert structure is not None
     # With our mock, we expect 'dog' (name from lemma) to be the node name
     # Since we mocked it as a leaf (no hyponyms), it should be a node with items ['dog']
-    assert structure.name == 'dog'
-    assert 'dog' in structure.items
+    assert structure.name == "dog"
+    assert "dog" in structure.items
+
 
 def test_coco_generation():
     # Mock data loading
     mock_cats = [
         {"id": 1, "name": "bicycle", "supercategory": "vehicle"},
-        {"id": 2, "name": "car", "supercategory": "vehicle"}
+        {"id": 2, "name": "car", "supercategory": "vehicle"},
     ]
-    
-    with patch('wildcards_gen.core.datasets.coco.load_coco_categories', return_value=mock_cats), \
-         patch('wildcards_gen.core.datasets.coco.get_primary_synset') as mock_prim, \
-         patch('wildcards_gen.core.datasets.coco.get_synset_gloss', return_value="gloss"):
-        
+
+    with (
+        patch(
+            "wildcards_gen.core.datasets.coco.load_coco_categories",
+            return_value=mock_cats,
+        ),
+        patch("wildcards_gen.core.datasets.coco.get_primary_synset") as mock_prim,
+        patch("wildcards_gen.core.datasets.coco.get_synset_gloss", return_value="gloss"),
+    ):
         structure = coco.generate_coco_hierarchy(with_glosses=True)
-        
-        assert 'vehicle' in structure
-        assert 'bicycle' in structure['vehicle']
-        assert 'car' in structure['vehicle']
+
+        assert "vehicle" in structure
+        assert "bicycle" in structure["vehicle"]
+        assert "car" in structure["vehicle"]
+
 
 def test_openimages_generation_legacy():
     # Mock data loading
     mock_hierarchy = {
         "LabelName": "/m/root",
-        "Subcategories": [
-            {"LabelName": "/m/cat1"},
-            {"LabelName": "/m/cat2"}
-        ]
+        "Subcategories": [{"LabelName": "/m/cat1"}, {"LabelName": "/m/cat2"}],
     }
     mock_names = {"/m/root": "Entity", "/m/cat1": "Cat1", "/m/cat2": "Cat2"}
-    
-    with patch('wildcards_gen.core.datasets.openimages.load_openimages_data', return_value=(mock_hierarchy, mock_names)), \
-         patch('wildcards_gen.core.datasets.openimages.get_primary_synset'), \
-         patch('wildcards_gen.core.datasets.openimages.get_synset_gloss'):
-         
+
+    with (
+        patch(
+            "wildcards_gen.core.datasets.openimages.load_openimages_data",
+            return_value=(mock_hierarchy, mock_names),
+        ),
+        patch("wildcards_gen.core.datasets.openimages.get_primary_synset"),
+        patch("wildcards_gen.core.datasets.openimages.get_synset_gloss"),
+    ):
         # Test legacy mode explicitly
         structure = openimages.generate_openimages_hierarchy(max_depth=2, bbox_only=True)
-        
+
         # Check if any child matches the expected names
         def find_node(node, name):
-            if node.name == name: return True
+            if node.name == name:
+                return True
             return any(find_node(c, name) for c in node.children)
 
-        assert find_node(structure, 'Cat1') or find_node(structure, 'Entity')
+        assert structure is not None
+        assert find_node(structure, "Cat1") or find_node(structure, "Entity")
+
 
 def test_openimages_generation_full(mock_wn_fixture):
     # Mock data loading
     mock_names = {"/m/cat1": "Dog"}
-    
-    with patch('wildcards_gen.core.datasets.openimages.load_openimages_data', return_value=(None, mock_names)), \
-         patch('wildcards_gen.core.datasets.openimages.get_synset_gloss', return_value="gloss"):
-         
+
+    with (
+        patch(
+            "wildcards_gen.core.datasets.openimages.load_openimages_data",
+            return_value=(None, mock_names),
+        ),
+        patch(
+            "wildcards_gen.core.datasets.openimages.get_synset_gloss",
+            return_value="gloss",
+        ),
+    ):
         # Test full mode (default)
         # We need to make sure build_wordnet_hierarchy works
         structure = openimages.generate_openimages_hierarchy(bbox_only=False)
-        
+
         # In simple non-smart mode, it creates a root node
+        assert structure is not None
         assert structure.name.lower() in ["open images", "openimages full", "dog"]
         if structure.name.lower() == "dog":
             assert True
         else:
-            assert any(c.name.lower() == 'dog' for c in structure.children) or any(i.lower() == 'dog' for i in structure.items)
+            assert any(c.name.lower() == "dog" for c in structure.children) or any(
+                i.lower() == "dog" for i in structure.items
+            )
+
 
 def test_openimages_generation_full_smart(mock_wn_fixture):
     # Mock data loading
     mock_names = {"/m/cat1": "Dog"}
-    
-    with patch('wildcards_gen.core.datasets.openimages.load_openimages_data', return_value=(None, mock_names)), \
-         patch('wildcards_gen.core.datasets.openimages.get_synset_gloss', return_value="gloss"):
-         
+
+    with (
+        patch(
+            "wildcards_gen.core.datasets.openimages.load_openimages_data",
+            return_value=(None, mock_names),
+        ),
+        patch(
+            "wildcards_gen.core.datasets.openimages.get_synset_gloss",
+            return_value="gloss",
+        ),
+    ):
         # In smart mode, it should build a WordNet hierarchy
         structure = openimages.generate_openimages_hierarchy(smart=True, bbox_only=False)
-        
-        # With our mock_synset name 'dog.n.01', it should result in 'dog' category or list
-        assert structure.name.lower() == 'dog' or any(c.name.lower() == 'dog' for c in structure.children)
 
-# Note: Exclusion filter tests (exclude_regex, exclude_subtree) require 
+        # With our mock_synset name 'dog.n.01', it should result in 'dog' category or list
+        assert structure is not None
+        assert structure.name.lower() == "dog" or any(c.name.lower() == "dog" for c in structure.children)
+
+
+# Note: Exclusion filter tests (exclude_regex, exclude_subtree) require
 # extensive WordNet mocking and are better tested via manual integration testing.
 # The core filtering logic itself is straightforward regex/set matching.
