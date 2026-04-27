@@ -338,6 +338,61 @@ python wildcards_gen/cli.py ...
 
 ---
 
+## Design decisions and architecture
+
+Wildcards-gen is built on a set of core architectural decisions to ensure 
+consistency and semantic quality.
+
+### Stabilization and quality
+
+The project prioritizes codebase health and test coverage. This includes 
+capping raw metadata parsing (for example, in the GUI) to ensure fast iterative 
+tuning.
+
+### Context-aware semantic hierarchy
+
+To prevent "semantic hallucinations" (for example, mapping "Bourbon" to a 
+political movement), the tool explicitly prioritizes domains like food, animal, 
+plant, and artifact during WordNet lookups.
+
+### Parent-aware naming
+
+We implement naming logic that prevents tautologies (for example, `Wine -> Wine`). 
+Redundant children are renamed to `General [Parent]` or bubbled up to ensure a 
+cleaner hierarchy.
+
+### Deep nesting preference
+
+Wildcards-gen prefers deep, descriptive hierarchies (for example, 
+`Food -> Beverage -> Alcohol -> Wine`) over flattened structures to provide 
+better context for AI expansion.
+
+---
+
+## Technology stack
+
+- **NLP/ML**: NLTK (WordNet), Sentence Transformers, HDBSCAN, UMAP-learn, 
+  Scikit-learn.
+- **Data**: SQLite (used for embedding caching to accelerate repeated runs), 
+  `ruamel.yaml` (for comment-preserving YAML).
+- **UI**: Gradio.
+- **Testing**: Pytest with `pytest-mock`.
+
+---
+
+## Quality and verification
+
+The project includes a suite of automated tests to ensure stability:
+
+- **Interface synchronization**: Validates that GUI settings and CLI arguments 
+  remain in sync.
+- **Tooltip verification**: Programmatically checks that all UI elements have 
+  descriptive help text.
+- **Deep integration tests**: Full-stack end-to-end tests for dataset 
+  generation.
+
+---
+
 ## Roadmap
 
 Wildcards-gen focuses on automation, structure architecture, and bulk 
@@ -355,6 +410,13 @@ Generator SPA](https://github.com/tazztone/wildcards-generator).
   inconsistent items using embedding models
 - [x] **Robustness testing suite**: Static and dynamic analysis to prevent 
   regressions
+
+### Planned
+
+- [ ] Centralize blacklist configuration.
+- [ ] Implement regression tests for deep nesting.
+- [ ] Streamline output logging (consolidate `.log` and `.json` stats).
+- [ ] Perform E2E production run on Tencent ML-Images.
 
 ---
 
@@ -459,6 +521,7 @@ The shaper manages orphan merging and flattens unnecessary single-path nesting.
 ### Codebase map
 
 - `wildcards_gen/cli.py`: The single entry point, defined using `argparse`.
+- `wildcards_gen/batch.py`: Logic for batch processing and CLI support.
 - `wildcards_gen/gui.py`: Gradio-based web interface.
 - `wildcards_gen/core/`:
     - `config.py`: Hierarchical configuration manager.
@@ -469,6 +532,9 @@ The shaper manages orphan merging and flattens unnecessary single-path nesting.
     - `arranger.py`: Recursive semantic clustering (UMAP + HDBSCAN).
     - `shaper.py`: Post-processing constraints engine.
     - `presets.py`: Single source of truth for pruning presets.
+    - `linter.py`: Semantic outlier detection logic.
+    - `analyze.py`: Utilities for analyzing taxonomy structures.
+    - `stats.py`: Statistics and telemetry collection.
     - `datasets/`: Logic for specific datasets.
 
 ### UI/UX principles (GUI)
@@ -485,16 +551,16 @@ The shaper manages orphan merging and flattens unnecessary single-path nesting.
 When you run a command like `wildcards-gen dataset tencent`:
 
 1. **Orchestration**: `cli.py` initializes the `ConfigManager` and identifies 
-   the generator.
+    the generator.
 2. **Data acquisition**: `downloaders.py` manages local caching from source 
-   repositories.
+    repositories.
 3. **Parsing**: Dataset modules parse raw files into a directed graph.
 4. **Semantic enrichment**: The builder recurses through the graph, querying 
-   WordNet for gloss definitions.
+    WordNet for gloss definitions.
 5. **Smart pruning**: Evaluates nodes for semantic significance, flattening 
-   obscure nodes or bubbling orphans.
+    obscure nodes or bubbling orphans.
 6. **Serialization**: `StructureManager` ensures the `CommentedMap` is 
-   serialized back to clean YAML while preserving all metadata instructions.
+    serialized back to clean YAML while preserving all metadata instructions.
 
 ### Maintenance and contribution
 
@@ -503,4 +569,3 @@ When you run a command like `wildcards-gen dataset tencent`:
 - **Testing**: Run `uv run pytest tests/` to ensure contract validation.
 - **Requirements**: Python 3.10 or higher is required for the semantic linter 
   and arrangement features.
-
