@@ -1,26 +1,24 @@
 
 import logging
-print("DEBUG: Loaded tencent.py from source")
 import csv
 import functools
 from collections import defaultdict
-from typing import Dict, Any, List, Optional, Tuple
-from ruamel.yaml import CommentedMap
-import yaml
+from typing import Dict, Any, List, Optional, Tuple, Set
+from ruamel.yaml.comments import CommentedMap
+
 from .downloaders import download_tencent_hierarchy
 from ..config import config
 from ..wordnet import get_synset_gloss, ensure_nltk_data, get_synset_from_wnid
 from ..presets import DATASET_CATEGORY_OVERRIDES, DATASET_PRESET_OVERRIDES
+from ..builder import TaxonomyNode
+from ..smart import TraversalBudget
 
 logger = logging.getLogger(__name__)
 
 @functools.lru_cache(maxsize=1)
-def parse_hierarchy_file(file_path: str) -> Dict[str, Any]:
+def parse_hierarchy_file(file_path: str) -> Tuple[Dict[int, Dict], Dict[int, List[int]], List[int]]:
     """Parse the Tencent hierarchy file into parent-child map."""
-    # format: category_index, category_id, index_of_parent_category, category name
-    # header: 1st line
-    
-    categories = {}  # index -> (id, name, parent_index)
+    categories = {}  # index -> {id, name, parent}
     children_map = defaultdict(list)  # parent_index -> [child_indices]
     roots = []
     
@@ -44,521 +42,122 @@ def parse_hierarchy_file(file_path: str) -> Dict[str, Any]:
                 
     return categories, children_map, roots
 
-def build_recursive(current_idx: int, categories: Dict, children_map: Dict, depth: int, max_depth: int, with_glosses: bool) -> Any:
-    """Recursively build hierarchy dict."""
-    cat_info = categories[current_idx]
-    name = cat_info['name']
+def build_taxonomy_tree(
+    idx: int,
+    categories: Dict[int, Dict],
+    children_map: Dict[int, List[int]],
+    depth: int,
+    max_depth: int,
+    with_glosses: bool = True,
+    budget: Optional[TraversalBudget] = None
+) -> Optional[TaxonomyNode]:
+    """Pure extractor for Tencent ML-Images."""
+    if budget and not budget.consume():
+        return None
+    cat_info = categories[idx]
     
-    # Clean name (take first if comma separated)
-    clean_name = name.split(',')[0].strip()
+    # Clean name (remove synset variants)
+    name = cat_info['name'].split(',')[0].strip()
+    wnid = cat_info['id']
     
-    # Add instruction
-    instruction = ""
+    # Get instruction
+    instruction = None
     if with_glosses:
-        # Tencent IDs are WNIDs (e.g. n00002452)
-        synset = get_synset_from_wnid(cat_info['id'])
+        synset = get_synset_from_wnid(wnid)
         if synset:
             instruction = get_synset_gloss(synset)
-        else:
-            instruction = f"Items related to {clean_name}"
-            
-    # Check if leaf or max depth
-    children_indices = children_map.get(current_idx, [])
+    if not instruction:
+        instruction = f"Items related to {name}"
+        
+    children_indices = children_map.get(idx, [])
     
+    # Leaf logic
     if not children_indices or depth >= max_depth:
-        # Leaf node
-        return [clean_name]
-    
-    # Branch node
-    subtree = {}
-    
-    # Store instruction on the branch key? 
-    # StructureManager handles comments via key lookups or special handling.
-    # We'll return a dict where keys are children.
-    # WAIT: Standard format is `Parent: { Child1: [...], Child2: [...] }`
-    # We need to construct the subtree such that the caller attaches it to this node.
-    
-    # Actually, the recursive function returns the VALUE for the current node.
-    
-    child_dict = {}
-    for child_idx in children_indices:
-        child_val = build_recursive(child_idx, categories, children_map, depth + 1, max_depth, with_glosses)
-        child_name = categories[child_idx]['name'].split(',')[0].strip()
+        # Collect all leaves in this subtree
+        leaves = []
+        def collect_leaves_recursive(c_idx):
+            sub_children = children_map.get(c_idx, [])
+            if not sub_children:
+                leaves.append(categories[c_idx]['name'].split(',')[0].strip())
+            else:
+                for sub_child in sub_children:
+                    collect_leaves_recursive(sub_child)
         
-        # Add instruction to child key using parsed comments convention?
-        # StructureManager adds comments based on key matching.
-        # We can simulate this by returning a dict with keys.
-        # BUT we need to pass the instruction up so it can be attached.
+        collect_leaves_recursive(idx)
         
-        # StructureManager expects:
-        # { "child_name": content }
-        # And we set comments separately or use Ruamel manually? 
-        # StructureManager uses `recursive_comment_add` which looks up instructions from a side-channel or existing comments?
-        # No, `StructureManager` preserves existing comments. 
-        # Here we are generating NEW structure. 
-        # We should use `StructureManager`'s comment adding utility if possible, 
-        # OR format it such that we can add comments later.
-        
-        # Better approach: Return a dict structure, and a separate "instructions" map?
-        # Or just use the `# instruction:` string in the key? No, that's ugly.
-        
-        # Let's rely on StructureManager.create_structure which takes a dict.
-        # Then we post-process to add comments.
-        child_dict[child_name] = child_val
-
-    return child_dict
+        return TaxonomyNode(
+            name=name,
+            children=[],
+            items=sorted(list(set(leaves)), key=str.casefold),
+            metadata={
+                "instruction": instruction,
+                "wnid": wnid,
+                "depth": depth,
+                "is_root": (cat_info['parent'] == -1)
+            }
+        )
+    
+    # Branch Logic
+    child_nodes = []
+    for c_idx in children_indices:
+        child_node = build_taxonomy_tree(
+            c_idx, categories, children_map, 
+            depth + 1, max_depth, with_glosses, budget
+        )
+        if child_node:
+            child_nodes.append(child_node)
+            
+    return TaxonomyNode(
+        name=name,
+        children=child_nodes,
+        metadata={
+            "instruction": instruction,
+            "wnid": wnid,
+            "depth": depth,
+            "is_root": (cat_info['parent'] == -1)
+        }
+    )
 
 def generate_tencent_hierarchy(
-    max_depth: int = 5,
+    max_depth: int = 4,
     with_glosses: bool = True,
-    smart: bool = True,
-    smart_overrides: Optional[Dict] = None,
-    # Direct pass-throughs for smart logic (CLI compatibility)
-    min_significance_depth: int = 1,
-    min_hyponyms: int = 10,
-    min_leaf_size: int = 5,
-    merge_orphans: bool = True,
-    semantic_cleanup: bool = False,
-    semantic_model: str = "all-MiniLM-L12-v2",
-    semantic_threshold: float = 0.35,
-    semantic_arrangement: bool = False,
-    semantic_arrangement_threshold: float = 0.25,
-    semantic_arrangement_min_cluster: int = 3,
-    semantic_arrangement_method: str = "hdbscan",
-    debug_arrangement: bool = False,
-    skip_nodes: Optional[List[str]] = None,
-    orphans_label_template: Optional[str] = None,
-    preview_limit: int = 0,
-    umap_n_neighbors: int = 15,
-    umap_min_dist: float = 0.1,
-    hdbscan_min_samples: int = 5,
-    stats: Optional[Any] = None
-) -> CommentedMap:
+    preview_limit: Optional[int] = None,
+    **kwargs # Accept and ignore smart args
+) -> Optional[TaxonomyNode]:
+    """
+    Generate Tencent ML-Images TaxonomyNode tree.
+    """
+    ensure_nltk_data()
     file_path = download_tencent_hierarchy()
     categories, children_map, roots = parse_hierarchy_file(file_path)
     
-    if with_glosses:
-        ensure_nltk_data()
+    logger.info(f"Extracting Tencent hierarchy (roots={len(roots)}, max_depth={max_depth})")
     
-    def collect_leaves(idx: int) -> List[str]:
-        """Collect all descendant leaf names."""
-        leaves = []
-        children = children_map.get(idx, [])
-        
-        if not children:
-            name = categories[idx]['name'].split(',')[0].strip()
-            leaves.append(name)
-        else:
-            for child_idx in children:
-                leaves.extend(collect_leaves(child_idx))
-        
-        return leaves
-
-    from ruamel.yaml.comments import CommentedMap
-    from ..smart import SmartConfig, should_prune_node, handle_small_leaves, apply_semantic_cleaning, TraversalBudget
-    
-    preset_overrides = DATASET_CATEGORY_OVERRIDES.get("Tencent ML-Images", {})
-    final_overrides = preset_overrides.copy()
-    if smart_overrides:
-        final_overrides.update(smart_overrides)
-        
-    dataset_preset = DATASET_PRESET_OVERRIDES.get("Tencent ML-Images", {})
-    
-    # CLI takes precedence over preset
-    skip_nodes_list = skip_nodes if skip_nodes is not None else dataset_preset.get("SKIP_NODES", [])
-    orphans_template = orphans_label_template if orphans_label_template is not None else dataset_preset.get("orphans_label_template", "misc")
-    
-    smart_config = SmartConfig(
-        enabled=smart,
-        min_depth=min_significance_depth,
-        min_hyponyms=min_hyponyms,
-        min_leaf_size=min_leaf_size,
-        merge_orphans=merge_orphans,
-        category_overrides=final_overrides,
-        semantic_cleanup=semantic_cleanup,
-        semantic_model=semantic_model,
-        semantic_threshold=semantic_threshold,
-        semantic_arrangement=semantic_arrangement,
-        semantic_arrangement_threshold=semantic_arrangement_threshold,
-        semantic_arrangement_min_cluster=semantic_arrangement_min_cluster,
-        semantic_arrangement_method=semantic_arrangement_method,
-        debug_arrangement=debug_arrangement,
-        skip_nodes=skip_nodes_list,
-        orphans_label_template=orphans_template,
-        preview_limit=preview_limit,
-        umap_n_neighbors=umap_n_neighbors,
-        umap_min_dist=umap_min_dist,
-        hdbscan_min_samples=hdbscan_min_samples
-    )
-
-    if stats:
-        stats.set_metadata("smart_config", smart_config.to_dict())
-
-    budget = TraversalBudget(preview_limit if preview_limit and preview_limit > 0 else None)
-
-    def merge_nodes(existing: Any, new_val: Any) -> Any:
-        # Merge two hierarchy nodes (list or dict)
-        if isinstance(existing, list) and isinstance(new_val, list):
-             # Combine lists and deduplicate
-             return sorted(list(set(existing + new_val)), key=str.casefold)
-        elif isinstance(existing, dict) and isinstance(new_val, dict):
-             # Merge dicts recursively
-             for k, v in new_val.items():
-                 if k in existing:
-                     existing[k] = merge_nodes(existing[k], v)
-                 else:
-                     existing[k] = v
-             return existing
-        return existing
-    
-    
-    def build_commented(current_idx: int, current_depth: int, smart_config: SmartConfig, stats: Optional[Any] = None, budget: Optional[TraversalBudget] = None) -> Tuple[Any, List[str]]:
-        if budget and not budget.consume(1):
-            if budget.is_exhausted() and stats:
-                stats.log_event("limit_reached", message=f"Traversal limit {budget.limit} reached during build_commented", data={"limit": budget.limit})
-            return None, []
-
-        cat_info = categories[current_idx]
-        name = cat_info['name'].split(',')[0].strip()
-        wnid = cat_info['id']
-        
-        children = children_map.get(current_idx, [])
-        
-        # Base case: actual leaf
-        if not children:
-            # Leaf node acts as an item, not an empty category
-            if budget:
-                 # Refund 1 (since we consumed for node) and Consume count
-                 # OR just count node as 1? 
-                 # Better to count emitted items. 
-                 # Let's say node visit costs 1. Emitted items cost 1?
-                 # If we return items, we should consume budget?
-                 # Simplifying: Count nodes visited as proxy for effort.
-                 pass
-            return None, [name]
-            
-        # Decision logic: keep as category or flatten?
-        should_flatten = False
-        
-        if smart and smart_config.enabled:
-            synset = get_synset_from_wnid(wnid)
-            is_root = categories[current_idx]['parent'] == -1
-            
-            should_flatten = should_prune_node(
-                synset=synset, 
-                child_count=len(children), 
-                is_root=is_root, 
-                config=smart_config
-            )
-        else:
-            # Traditional depth-based pruning
-            if current_depth >= max_depth:
-                should_flatten = True
-
-        if should_flatten:
-            leaves = collect_leaves(current_idx)
-            # Filter self-matches
-            normalized_name = name.lower()
-            filtered_leaves = sorted(list(set([l for l in leaves if l.lower() != normalized_name])), key=str.casefold)
-            
-            # Semantic cleaning
-            if smart and smart_config.enabled and smart_config.semantic_cleanup:
-                filtered_leaves = apply_semantic_cleaning(filtered_leaves, smart_config)
-
-            # Min leaf size check for smart mode
-            if smart and smart_config.enabled and len(filtered_leaves) < smart_config.min_leaf_size:
-                if smart_config.merge_orphans:
-                     # Merge into parent (bubble up these leaves)
-                     return None, filtered_leaves
-                     return filtered_leaves, []
-            
-            # Smart Mode: Semantic Arrangement Re-grow
-            if smart and smart_config.enabled and smart_config.semantic_arrangement:
-                from ..smart import apply_semantic_arrangement
-                arranged_structure, leftovers, metadata = apply_semantic_arrangement(filtered_leaves, smart_config, stats=stats, context=name, return_metadata=True)
-                
-                if isinstance(arranged_structure, dict) and (arranged_structure or leftovers):
-                    mini_tree = CommentedMap()
-                    if arranged_structure:
-                        for g_name, g_terms in arranged_structure.items():
-                            mini_tree[g_name] = sorted(g_terms, key=str.casefold)
-                            
-                            # Instruction Injection for arranged groups
-                            if g_name in metadata:
-                                meta = metadata[g_name]
-                                wnid = meta.get("wnid")
-                                instr = None
-                                if wnid:
-                                    synset = get_synset_from_wnid(wnid)
-                                    if synset:
-                                        instr = get_synset_gloss(synset)
-                                if instr:
-                                    try:
-                                        mini_tree.yaml_add_eol_comment(config.instruction_template.format(gloss=instr), g_name)
-                                    except Exception as e:
-                                        logger.debug(f"Failed to add arranged group comment: {e}")
-                    
-                    if leftovers:
-                        label = smart_config.orphans_label_template.format(name) if "{}" in smart_config.orphans_label_template else smart_config.orphans_label_template
-                        mini_tree[label] = sorted(leftovers, key=str.casefold)
-                        try:
-                            mini_tree.yaml_add_eol_comment(config.instruction_template.format(gloss=f"Miscellaneous {name} items"), label)
-                        except Exception as e:
-                            logger.debug(f"Failed to add leftovers comment: {e}")
-                    
-                    return mini_tree, []
-                else:
-                    # Pure list result
-                    return (arranged_structure if arranged_structure else (leftovers if leftovers else None)), []
-
-
-            return (filtered_leaves if filtered_leaves else None), []
-
-        # Build category
-        cm = CommentedMap()
-        
-        # Structural Skipping (Node Elision)
-        # Flatten skipping wrappers by promoting their children
-        effective_children_indices = []
-        queue = list(children)
-        processed_skips = 0
-        
-        while queue:
-            c_idx = queue.pop(0)
-            c_info = categories[c_idx]
-            c_name = c_info['name'].split(',')[0].strip()
-            c_wnid = c_info['id']
-            
-            # Check skip list (by WNID or Name)
-            should_skip = False
-            if smart and smart_config.enabled and smart_config.skip_nodes:
-                 if c_wnid in smart_config.skip_nodes:
-                     should_skip = True
-                 elif c_name in smart_config.skip_nodes:
-                     should_skip = True
-            
-            if should_skip and processed_skips < 1000: # Safety break
-                 # Promote children
-                 grand_children = children_map.get(c_idx, [])
-                 if grand_children:
-                     queue.extend(grand_children)
-                 processed_skips += 1
-            else:
-                 effective_children_indices.append(c_idx)
-
-        sorted_children = sorted(effective_children_indices, key=lambda idx: categories[idx]['name'].split(',')[0].strip().casefold())
-        orphan_leaves = [] # Leaves bubbled up from children
-        
-        valid_items_added = 0
-        for child_idx in sorted_children:
-            child_name = categories[child_idx]['name'].split(',')[0].strip()
-            
-            # Calculate child smart_config
-            child_config = smart_config
-            if smart and smart_config.enabled:
-                 child_wnid = categories[child_idx]['id']
-                 child_config = smart_config.get_child_config(child_name, child_wnid)
-            
-            child_val, child_orphans = build_commented(child_idx, current_depth + 1, child_config, stats=stats, budget=budget)
-            
-            # Collect bubbled-up orphans from children
-            if child_orphans:
-                orphan_leaves.extend(child_orphans)
-
-            # Skip if child_val is None (meaning empty/flattened/aborted)
-            should_skip = child_val is None
-            
-            if not should_skip:
-                # Collision check
-                if child_name in cm:
-                    cm[child_name] = merge_nodes(cm[child_name], child_val)
-                else:
-                    if child_val is None:
-                        child_val = []
-                    cm[child_name] = child_val
-                    valid_items_added += 1
-                
-                # Add comment (only if we just added it, roughly)
-                if with_glosses and child_name not in cm: # Wait, logic tricky.
-                   pass # Comment logic removed for brevity/stability in this edit block
-                if with_glosses:
-                     child_wnid = categories[child_idx]['id']
-                     synset = get_synset_from_wnid(child_wnid)
-                     instr = get_synset_gloss(synset) if synset else f"Items related to {child_name}"
-                     try:
-                         # Force add/update?
-                         cm.yaml_add_eol_comment(config.instruction_template.format(gloss=instr), child_name)
-                     except Exception:
-                         pass
-        
-        # Handle orphan leaves at this level
-        if orphan_leaves:
-            # Deduplicate orphans
-            orphan_leaves = sorted(list(set(orphan_leaves)), key=str.casefold)
-            
-            # Semantic clean orphans too?
-            # They came from children, maybe cleaned there? 
-            # If they bubble up, they join a new group (misc), so maybe clean again?
-            # Or just clean once at source?
-            # If we merge orphans, they end up in 'misc'. We probably want 'misc' to be clean too.
-            if smart and smart_config.enabled and smart_config.semantic_cleanup:
-                 orphan_leaves = apply_semantic_cleaning(orphan_leaves, smart_config)
-
-            # Semantic Arrangement for Orphans
-            if smart and smart_config.enabled and smart_config.semantic_arrangement:
-                from ..smart import apply_semantic_arrangement
-                arranged_orphans, leftovers, metadata = apply_semantic_arrangement(orphan_leaves, smart_config, stats=stats, context=f"orphans of {name}", return_metadata=True)
-                
-                if isinstance(arranged_orphans, dict) and arranged_orphans:
-                    # Merge groups into CM (as siblings)
-                    # merge_nodes handles dict merging
-                    for k, v in arranged_orphans.items():
-                         if k in cm:
-                             cm[k] = merge_nodes(cm[k], v)
-                         else:
-                             cm[k] = v
-                             valid_items_added += 1
-                    
-                    # We consumed orphans into groups, leftovers become the new orphan list
-                    orphan_leaves = leftovers 
-                else:
-                    # Flat list (failed to cluster)
-                    orphan_leaves = arranged_orphans
-
-
-            # Determine target label for orphans
-            orphan_label = smart_config.orphans_label_template
-            if "{}" in orphan_label:
-                orphan_label = orphan_label.format(name)
-
-            if orphan_leaves:
-                cm[orphan_label] = orphan_leaves
-                # Add instruction to misc
-                try:
-                    cm.yaml_add_eol_comment(config.instruction_template.format(gloss=f"Miscellaneous {name} items"), orphan_label)
-                except: pass
-            
-            # Check if we should flatten
-            # We flatten if we have no valid children AND (cm is empty OR cm only contains unarranged orphans)
-            should_flatten = False
-            if valid_items_added == 0:
-                 if not cm:
-                     should_flatten = True
-                 elif len(cm) == 1 and orphan_label in cm:
-                     # Only orphans, so flatten
-                     should_flatten = True
-        
-        if should_flatten:
-            # If all children were pruned/merged, flatten itself
-            if smart and smart_config.enabled:
-                # In smart mode, we trust our traversal (orphan_leaves) and do not grab everything
-                leaves = []
-            else:
-                leaves = collect_leaves(current_idx)
-            # Also include any orphans that bubbled up to us?
-            # Yes, if we flatten, we become a list, so we can just include them.
-            if orphan_leaves:
-                leaves.extend(orphan_leaves)
-            
-            normalized_name = name.lower()
-            filtered_leaves = sorted(list(set([l for l in leaves if isinstance(l, str) and l.lower() != normalized_name])), key=str.casefold)
-            
-            # Semantic cleaning
-            if smart and smart_config.enabled and smart_config.semantic_cleanup:
-                filtered_leaves = apply_semantic_cleaning(filtered_leaves, smart_config)
-
-            # Check min leaf size again?
-            if smart and smart_config.enabled and len(filtered_leaves) < smart_config.min_leaf_size:
-                 return None, filtered_leaves # Bubble further up
-            
-            # Semantic Arrangement (Re-grow)
-            if smart and smart_config.enabled and smart_config.semantic_arrangement:
-                 from ..smart import apply_semantic_arrangement
-                 named_groups, leftovers, metadata = apply_semantic_arrangement(filtered_leaves, smart_config, stats=stats, context=name, return_metadata=True)
-                 
-                 if isinstance(named_groups, dict) and (named_groups or leftovers):
-                     mini_tree = CommentedMap()
-                     if named_groups:
-                         for g_name, g_terms in named_groups.items():
-                             mini_tree[g_name] = sorted(g_terms, key=str.casefold)
-                             # Instruction Injection
-                             if g_name in metadata:
-                                  meta = metadata[g_name]
-                                  wnid = meta.get("wnid")
-                                  instr = None
-                                  if wnid:
-                                      synset = get_synset_from_wnid(wnid)
-                                      if synset:
-                                          instr = get_synset_gloss(synset)
-                                  if instr:
-                                      try:
-                                          mini_tree.yaml_add_eol_comment(config.instruction_template.format(gloss=instr), g_name)
-                                      except: pass
-                     
-                     if leftovers:
-                         label = smart_config.orphans_label_template.format(name) if "{}" in smart_config.orphans_label_template else smart_config.orphans_label_template
-                         mini_tree[label] = sorted(leftovers, key=str.casefold)
-                         try:
-                              mini_tree.yaml_add_eol_comment(config.instruction_template.format(gloss=f"Miscellaneous {name} items"), label)
-                         except: pass
-                     
-                     return mini_tree, []
-                 
-                 # Flat list result
-                 res = named_groups if isinstance(named_groups, list) else leftovers
-                 return res if res else None, []
-
-            return (filtered_leaves if filtered_leaves else None), []
-        
-        return cm, []
-
-    # Root level
-    final_map = CommentedMap()
+    root_nodes = []
+    # Sort roots by name for stability
     sorted_roots = sorted(roots, key=lambda idx: categories[idx]['name'].split(',')[0].strip().casefold())
     
+    budget = TraversalBudget(preview_limit)
+    
     for root_idx in sorted_roots:
-        root_name = categories[root_idx]['name'].split(',')[0].strip()
-        root_val, root_orphans = build_commented(root_idx, 1, smart_config, stats=stats, budget=budget)
-        
-        # If root produced orphans, what to do? Add them to 'misc'?
-        # Roots are usually dicts, so we check root_val type.
-        if isinstance(root_val, dict):
-            if root_orphans:
-                 # Add orphans to root's 'misc'
-                 label = smart_config.orphans_label_template if smart_config.orphans_label_template else "misc"
-                 root_val[label] = sorted(list(set(root_orphans)), key=str.casefold)
-                 try:
-                     root_val.yaml_add_eol_comment(config.instruction_template.format(gloss=f"Miscellaneous {root_name} items"), label)
-                 except: pass
-            final_map[root_name] = root_val
-        elif isinstance(root_val, list):
-            # Root itself became a list?
-            if root_orphans:
-                root_val.extend(root_orphans)
-            final_map[root_name] = sorted(list(set(root_val)), key=str.casefold)
-        elif root_val is None and root_orphans:
-             # Root disappeared but left orphans
-             final_map[root_name] = sorted(list(set(root_orphans)), key=str.casefold)
-        
-        if with_glosses and root_name in final_map:
-            wnid = categories[root_idx]['id']
-            synset = get_synset_from_wnid(wnid)
-            instr = get_synset_gloss(synset) if synset else f"Items related to {root_name}"
-            try:
-                final_map.yaml_add_eol_comment(config.instruction_template.format(gloss=instr), root_name)
-            except Exception:
-                pass
+        node = build_taxonomy_tree(
+            root_idx, categories, children_map,
+            depth=0, max_depth=max_depth,
+            with_glosses=with_glosses,
+            budget=budget
+        )
+        if node:
+            root_nodes.append(node)
             
-    # Post-process with ConstraintShaper
-    if smart and smart_config.enabled and (min_leaf_size > 0 or merge_orphans):
-         from ..shaper import ConstraintShaper
-         shaper = ConstraintShaper(final_map)
-         final_map = shaper.shape(
-             min_leaf_size=min_leaf_size, 
-             flatten_singles=True, 
-             preserve_roots=True,
-             orphans_label_template=smart_config.orphans_label_template
-         )
-            
-    return final_map
-
+    if not root_nodes:
+        return None
+        
+    if len(root_nodes) == 1:
+        return root_nodes[0]
+        
+    # Virtual root for multiple real roots
+    return TaxonomyNode(
+        name="Tencent ML-Images",
+        children=root_nodes,
+        metadata={"is_root": True, "depth": -1}
+    )

@@ -26,7 +26,7 @@ class TestTencentDataLoss(unittest.TestCase):
         with patch('wildcards_gen.core.datasets.tencent.parse_hierarchy_file') as mock_parse, \
              patch('wildcards_gen.core.datasets.tencent.download_tencent_hierarchy') as mock_dl, \
              patch('wildcards_gen.core.datasets.tencent.ensure_nltk_data'), \
-             patch('wildcards_gen.core.smart.apply_semantic_arrangement') as mock_arrange:
+             patch('wildcards_gen.core.builder.apply_semantic_arrangement') as mock_arrange:
             
             mock_parse.return_value = (categories, children_map, roots)
             
@@ -42,13 +42,21 @@ class TestTencentDataLoss(unittest.TestCase):
             mock_arrange.side_effect = side_effect
             
             # Run with semantic_arrangement=True
-            hierarchy = tencent.generate_tencent_hierarchy(
-                smart=True,
-                min_leaf_size=5, # Force dissolve
+            # 1. Extract TaxonomyNode
+            node = tencent.generate_tencent_hierarchy()
+            
+            # 2. Build via HierarchyBuilder
+            from wildcards_gen.core.builder import HierarchyBuilder
+            from wildcards_gen.core.smart import SmartConfig
+            config_obj = SmartConfig(
+                enabled=True,
+                min_leaf_size=5,
                 merge_orphans=True,
                 semantic_arrangement=True,
                 semantic_arrangement_threshold=0.1
             )
+            builder = HierarchyBuilder(config_obj)
+            hierarchy = builder.build(node)
             
             print("\nResult Hierarchy:")
             print(hierarchy)

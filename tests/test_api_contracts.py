@@ -43,9 +43,3 @@ def test_tencent_accepts_gui_smart_kwargs():
     """Contract: Tencent generator must accept all GUI smart tuning kwargs."""
     _assert_accepts_kwargs(tencent.generate_tencent_hierarchy, _gui_smart_kwargs())
 
-def test_openimages_has_apply_semantic_arrangement_symbol():
-    """Contract: OpenImages must import apply_semantic_arrangement if it uses it."""
-    # This checks if the symbol is available in the module namespace, 
-    # preventing NameError at runtime.
-    assert "apply_semantic_arrangement" in openimages.__dict__, \
-        "openimages.py likely calls apply_semantic_arrangement but does not import it"

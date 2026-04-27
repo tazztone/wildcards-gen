@@ -42,12 +42,20 @@ class TestTencentDuplication(unittest.TestCase):
             #    If valid_items_added == 0, Root flattens.
             #    Logic: "If all children were pruned/merged, flatten itself"
             
-            hierarchy = tencent.generate_tencent_hierarchy(
-                smart=True,
-                min_leaf_size=5, # Apple (1) < 5 -> Dissolve
-                merge_orphans=True, # Allow bubbling
-                semantic_arrangement=False # Keep it simple
+            # 1. Extract
+            node = tencent.generate_tencent_hierarchy()
+            
+            # 2. Build
+            from wildcards_gen.core.builder import HierarchyBuilder
+            from wildcards_gen.core.smart import SmartConfig
+            config_obj = SmartConfig(
+                enabled=True,
+                min_leaf_size=5,
+                merge_orphans=True,
+                semantic_arrangement=False
             )
+            builder = HierarchyBuilder(config_obj)
+            hierarchy = builder.build(node)
             
             # Expected: {'Root': ['Apple']} or ['Apple'] depending on if Root is preserved.
             # Bug Expectation: ['Apple', 'Apple']

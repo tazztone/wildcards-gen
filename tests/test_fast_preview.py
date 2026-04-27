@@ -30,17 +30,12 @@ def test_imagenet_limit(mock_wn, sample_hierarchy):
             with_glosses=False
         )
 
-        assert "Vehicle" in result
-        content = result["Vehicle"]
-
-        # Depending on how the budget works (depth vs breadth),
-        # with 15 children and limit 5, we should see fewer than 15 items.
-        # If result is a list (flattened), check length.
-        if isinstance(content, list):
-            assert len(content) < 15
-            assert len(content) <= preview_limit + 2 # +2 for potential extra containers/overhead
-        elif isinstance(content, dict):
-             assert len(content) < 15
+        assert result.name == "vehicle" # Sample hierarchy uses 'vehicle'
+        
+        # Budget is 5. Root consumes 1. 4 children should be allowed.
+        # Original had 15 children.
+        assert len(result.children) < 15
+        assert len(result.children) <= 4
 
 @patch('wildcards_gen.core.datasets.openimages.ensure_openimages_data')
 @patch('wildcards_gen.core.datasets.openimages.load_openimages_data')
@@ -67,12 +62,9 @@ def test_openimages_limit(mock_load, mock_ensure):
         with_glosses=False
     )
     
-    # Root + 3 children? Root takes 1, leaving 2 children.
-    # The result structure should reflect this.
-    root_content = result.get('Root')
-    assert root_content is not None
-    # Depending on implementation, it might have fewer than 10 children
-    assert len(root_content) < 10
+    # Root takes 1. Limit 10 -> 9 children allowed.
+    assert result.name == 'Root'
+    assert len(result.children) <= 9
 
 @patch('wildcards_gen.core.datasets.tencent.download_tencent_hierarchy')
 @patch('wildcards_gen.core.datasets.tencent.parse_hierarchy_file')
@@ -96,11 +88,6 @@ def test_tencent_limit(mock_get_synset, mock_parse, mock_dl):
         with_glosses=False
     )
     
-    # Check output size
-    # Root should have fewer than 10 children if limit worked
-    root_content = result.get('Root')
-    # If the fix works, root_content should be smaller or None if budget exhausted immediately (unlikely with 3)
-    if root_content:
-        assert len(root_content) < 10
-    else:
-        pass # empty is also < 10 basically
+    # Root takes 1. Limit 10 -> 9 children allowed.
+    assert result.name == 'Root'
+    assert len(result.children) <= 9

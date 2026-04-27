@@ -24,6 +24,8 @@ from ..wordnet import (
     get_synset_name, get_synset_gloss, get_synset_wnid,
     is_in_valid_set, get_all_descendants, is_abstract_category
 )
+from ..builder import TaxonomyNode
+from ..smart import TraversalBudget
 from ..presets import DATASET_CATEGORY_OVERRIDES
 from .downloaders import ensure_imagenet_1k_data, ensure_imagenet_21k_data
 
@@ -70,252 +72,104 @@ def load_imagenet_21k_wnids() -> Set[str]:
     return wnids
 
 
-def build_tree_recursive(
+
+def build_taxonomy_tree(
     synset,
-    structure_mgr: StructureManager,
-    parent: CommentedMap,
     valid_wnids: Optional[Set[str]],
     depth: int,
     max_depth: int,
     with_glosses: bool = True,
     strict_filter: bool = True,
     blacklist_abstract: bool = False,
-    smart_config: Any = None,
     regex_list: List[Any] = None,
     excluded_synsets: Set[Any] = None,
-    stats: Optional[Any] = None,
-    budget: Optional = None
-) -> tuple:
-    """
-    Recursively build hierarchy tree from a synset.
-    
-    Returns:
-        Tuple[bool, List[str]]: (success, orphans_to_bubble_up)
-    """
-    if budget and not budget.consume(1):
-        if budget.is_exhausted() and stats:
-            stats.log_event("limit_reached", message=f"Traversal limit {budget.limit} reached during build_tree_recursive", data={"limit": budget.limit})
-        return (False, [])
-
+    budget: Optional[TraversalBudget] = None
+) -> Optional[TaxonomyNode]:
+    """Pure extractor. No SmartConfig, no pruning, no shaping."""
+    if budget and not budget.consume():
+        return None
     name = get_synset_name(synset)
     
     # 1. Subtree Exclusion Check
     if excluded_synsets and synset in excluded_synsets:
-        return (False, [])
+        return None
         
     # 2. Regex Exclusion Check
     if regex_list:
         for pattern in regex_list:
             if pattern.search(name):
-                return (False, [])
+                return None
     
     # Blacklist check
     if blacklist_abstract and is_abstract_category(synset):
-        return (False, [])
+        return None
     
     # Strict primary synset check
     if strict_filter:
         primary = get_primary_synset(name)
         if primary and primary != synset:
-            return (False, [])
+            return None
             
-    # Get instruction from gloss
     instruction = get_synset_gloss(synset) if with_glosses else None
-    
     children = synset.hyponyms()
     
-    # Determine if we should prune (flatten) at this level
-    should_flatten = False
-    
-    if smart_config and smart_config.enabled:
-        from ..smart import should_prune_node
-        # ImageNet root is depth 0
-        is_root = (depth == 0)
-        should_flatten = should_prune_node(
-            synset=synset,
-            child_count=len(children),
-            is_root=is_root,
-            config=smart_config
-        )
-    else:
-        # Traditional depth limit
-        if depth >= max_depth:
-            should_flatten = True
-
-    # Flatten logic
-    if should_flatten:
+    # Leaf logic (at max_depth or no children)
+    if depth >= max_depth or not children:
         descendants = get_all_descendants(synset, valid_wnids)
-        if descendants:
-            # Smart Mode: Semantic Cleaning
-            if smart_config and smart_config.enabled and smart_config.semantic_cleanup:
-                from ..smart import apply_semantic_cleaning
-                descendants = apply_semantic_cleaning(descendants, smart_config)
-
-            # Smart Mode: Semantic Arrangement (Re-grow)
-            # If we flattened a potentially large list, try to re-group meaningful parts
-            if smart_config and smart_config.enabled and smart_config.semantic_arrangement:
-                from ..smart import apply_semantic_arrangement
-                arranged_structure, _ = apply_semantic_arrangement(descendants, smart_config, stats=stats, context=name)
-                
-                # Merge the arranged structure into the parent
-                # The arranged_structure is a dict (sub-categories) or list (if no structure found).
-                
-                if isinstance(arranged_structure, list):
-                    # It returned a flat list (failed to cluster or just small)
-                    descendants = arranged_structure
-                else:
-                    # It's a dict. We need to add these as valid children of 'parent'.
-                    # This effectively replaces the 'descendants' list with a subtree.
-                    # We can use structure_mgr to merge it, OR just add it carefully.
-                    
-                    # Logic: We are in 'should_flatten=True' block.
-                    # Originally we would add_leaf_list(parent, name, descendants...).
-                    # Now we have a subtree for "name".
-                    # So parent[name] should be this subtree?
-                    # But we usually return 'success' or not.
-                    
-                    # If we have a subtree, we attach it to parent[name].
-                    # BUT, usually 'flatten' means "make it a leaf list".
-                    # Here we are "un-flattening" partially.
-                    
-                    # We need to convert the generic dict from arrange_hierarchy 
-                    # into CommentedMap structure with proper comments via Manager?
-                    # structure_mgr.merge_categorized_data works on existing structure.
-                    
-                    # Let's create a temporary root for merge?
-                    # result of arrange is { "Category": [items], "Other": [items] }
-                    
-                    # We want parent[name] to contain this.
-                    # Let's manually reconstruct to ensure we use StructureManager methods?
-                    # Or reuse merge_categorized_data?
-                    
-                    # Problem: StructureManager.merge_categorized_data expects {Key: Val}.
-                    # Here 'arranged_structure' IS the content of 'name'.
-                    # So we want parent[name] = arranged_structure (converted).
-                    
-                    # Helper to recurse and add using Manager?
-                    # Or just direct assignment if we convert to CommentedMap?
-                    
-                    # Let's try direct insertion via merge_categorized_data onto a temp node, then assign.
-                    temp_node = structure_mgr.create_empty_structure()
-                    structure_mgr.merge_categorized_data(temp_node, arranged_structure)
-                    
-                    parent[name] = temp_node
-                    if instruction:
-                         try:
-                             parent.yaml_add_eol_comment(config.instruction_template.format(gloss=instruction), name)
-                         except: pass
-                         
-                    return (True, [])
-
-
-            # Smart Mode: Min leaf size check with orphan bubbling
-            if smart_config and smart_config.enabled:
-                if len(descendants) < smart_config.min_leaf_size:
-                    if smart_config.merge_orphans:
-                        # Bubble up as orphans
-                        return (False, descendants)
-                    # Otherwise, keep as small list (100% retention)
-            
-            if descendants:
-                structure_mgr.add_leaf_list(parent, name, descendants, instruction)
-            return (True, [])
-        elif valid_wnids is None or is_in_valid_set(synset, valid_wnids):
-            structure_mgr.add_leaf_list(parent, name, [name], instruction)
-            return (True, [])
-        return (False, [])
-    
-    # Branch Logic (Not Flattened)
-    if not children:
-        # Leaf node
-        if valid_wnids is None or is_in_valid_set(synset, valid_wnids):
-            structure_mgr.add_leaf_list(parent, name, [name], instruction)
-            return (True, [])
-        return (False, [])
-    
-    # Create category for this node
-    child_map = CommentedMap()
-    has_valid_children = False
-    collected_orphans = []
-    
-    for child in children:
-        # Determine child-specific config
-        child_config = smart_config
-        if smart_config and smart_config.enabled:
-             child_name_simple = get_synset_name(child)
-             child_wnid = get_synset_wnid(child)
-             child_config = smart_config.get_child_config(child_name_simple, child_wnid)
-
-        success, orphans = build_tree_recursive(
-            child, structure_mgr, child_map, valid_wnids,
-            depth + 1, max_depth, with_glosses, strict_filter, blacklist_abstract,
-            child_config, regex_list, excluded_synsets, stats=stats, budget=budget
-        )
-        if success:
-            has_valid_children = True
-        if orphans:
-            collected_orphans.extend(orphans)
-    
-    # Handle collected orphans - add to misc key
-    if collected_orphans and smart_config and smart_config.merge_orphans:
-        collected_orphans = sorted(list(set(collected_orphans)))
+        if not descendants and (valid_wnids is None or is_in_valid_set(synset, valid_wnids)):
+            descendants = [name]
         
-        # Semantic Cleaning for Orphans
-        if smart_config.semantic_cleanup:
-            from ..smart import apply_semantic_cleaning
-            collected_orphans = apply_semantic_cleaning(collected_orphans, smart_config)
-
-        # Semantic Arrangement for Orphans (Misc)
-        if smart_config.semantic_arrangement:
-            from ..smart import apply_semantic_arrangement
-            arranged_orphans, _ = apply_semantic_arrangement(collected_orphans, smart_config, stats=stats, context=f"orphans of {name}")
+        return TaxonomyNode(
+            name=name,
+            children=[],
+            items=descendants or [],
+            metadata={
+                "instruction": instruction,
+                "synset": synset,
+                "wnid": get_synset_wnid(synset),
+                "depth": depth,
+                "is_root": (depth == 0)
+            }
+        )
+    
+    # Branch Logic
+    child_nodes = []
+    for child in children:
+        child_node = build_taxonomy_tree(
+            child, valid_wnids, depth + 1, max_depth, 
+            with_glosses, strict_filter, blacklist_abstract, 
+            regex_list, excluded_synsets, budget
+        )
+        if child_node:
+            child_nodes.append(child_node)
             
-            if isinstance(arranged_orphans, dict):
-                 # Merge these groups into the child_map (which holds siblings)
-                 # Wait, these are orphans. They usually go to 'misc'.
-                 # If we arranged them, we have specific groups!
-                 # e.g. "Spotted", "Striped".
-                 # We should add them as valid children of 'name' (i.e. into child_map).
-                 structure_mgr.merge_categorized_data(child_map, arranged_orphans)
-                 
-                 # What about leftovers?
-                 # arranged_orphans from arrange_hierarchy puts leftovers in "Other" key if significant,
-                 # or if it returns a list, it's all leftovers.
-                 # If it returned a dict, did it include 'Other'?
-                 # arrange_hierarchy adds 'Other' logic internally.
-                 # So we rely on that.
-                 
-                 # If we merged everything, we are good.
-                 # But we need to ensure we don't double-add if we handle 'misc' below.
-                 collected_orphans = [] # Handled.
-            else:
-                 # It's a list. Just flat orphans.
-                 collected_orphans = arranged_orphans
+    if not child_nodes:
+        # If no valid children, treat as leaf if it matches filter
+        if valid_wnids is None or is_in_valid_set(synset, valid_wnids):
+            return TaxonomyNode(
+                name=name,
+                items=[name],
+                metadata={
+                    "instruction": instruction,
+                    "synset": synset,
+                    "wnid": get_synset_wnid(synset),
+                    "depth": depth,
+                    "is_root": (depth == 0)
+                }
+            )
+        return None
 
-
-        if collected_orphans: # Only add misc if there are still items
-            if 'misc' in child_map:
-                # Merge with existing misc
-                existing = list(child_map['misc']) if child_map['misc'] else []
-                child_map['misc'] = sorted(list(set(existing + collected_orphans)))
-            else:
-                child_map['misc'] = collected_orphans
-        has_valid_children = True
-    
-    if has_valid_children:
-        parent[name] = child_map
-        if instruction:
-            try:
-                parent.yaml_add_eol_comment(config.instruction_template.format(gloss=instruction), name)
-            except Exception:
-                pass
-        return (True, [])
-    elif valid_wnids is None or is_in_valid_set(synset, valid_wnids):
-        structure_mgr.add_leaf_list(parent, name, [name], instruction)
-        return (True, [])
-    
-    return (False, [])
-
+    return TaxonomyNode(
+        name=name,
+        children=child_nodes,
+        metadata={
+            "instruction": instruction,
+            "synset": synset,
+            "wnid": get_synset_wnid(synset),
+            "depth": depth,
+            "is_root": (depth == 0)
+        }
+    )
 
 def generate_imagenet_tree(
     root_synset_str: str = "entity.n.01",
@@ -324,90 +178,15 @@ def generate_imagenet_tree(
     with_glosses: bool = True,
     strict_filter: bool = True,
     blacklist_abstract: bool = False,
-    smart: bool = False,
-    min_significance_depth: int = 6,
-    min_hyponyms: int = 10,
-    min_leaf_size: int = 3,
-    merge_orphans: bool = False,
     exclude_regex: Optional[List[str]] = None,
     exclude_subtree: Optional[List[str]] = None,
-    smart_overrides: Optional[Dict] = None,
-    semantic_cleanup: bool = False,
-    semantic_model: str = "minilm",
-    semantic_threshold: float = 0.1,
-    semantic_arrangement: bool = False,
-    semantic_arrangement_threshold: float = 0.1,
-    semantic_arrangement_min_cluster: int = 5,
-    semantic_arrangement_method: str = "eom",
-    debug_arrangement: bool = False,
-    skip_nodes: Optional[List[str]] = None,
-    orphans_label_template: Optional[str] = None,
-    stats: Optional[Any] = None,
     preview_limit: Optional[int] = None,
-    umap_n_neighbors: int = 15,
-    umap_min_dist: float = 0.1,
-    hdbscan_min_samples: Optional[int] = None
-) -> CommentedMap:
+    **kwargs # Accept and ignore smart args for now
+) -> Optional[TaxonomyNode]:
     """
-    Generate ImageNet hierarchy tree from a root synset.
-    
-    Args:
-        root_synset_str: Root synset (e.g., 'entity.n.01', 'animal.n.01')
-        max_depth: Maximum depth before flattening
-        filter_set: '1k', '21k', or None for all
-        with_glosses: Add WordNet glosses as instructions
-        strict_filter: Only include primary synset meanings
-        blacklist_abstract: Skip abstract categories
-        smart: Use semantic significance pruning
-        merge_orphans: Merge small pruned lists into parent
-        exclude_regex: Regex patterns to exclude by name
-        exclude_subtree: Synset names/WNIDs to prune entire subtrees
-        smart_overrides: Dictionary of per-category smart config overrides
-        semantic_cleanup: Enable semantic outlier detection
-        semantic_model: Model to use for cleaning/arrangement
-        semantic_threshold: Threshold for cleaning
-        semantic_arrangement: Enable semantic clustering
-        semantic_arrangement_threshold: Threshold for clustering
-        semantic_arrangement_min_cluster: Min cluster size
-        semantic_arrangement_method: Method 'eom' or 'leaf'
-        debug_arrangement: Return arrangement stats
+    Generate ImageNet TaxonomyNode tree from a root synset.
     """
     ensure_nltk_data()
-    
-    # Determine overrides (CLI/Args > Preset)
-    preset_overrides = DATASET_CATEGORY_OVERRIDES.get("ImageNet", {})
-    final_overrides = preset_overrides.copy()
-    if smart_overrides:
-        final_overrides.update(smart_overrides)
-
-    from ..smart import SmartConfig, TraversalBudget
-    smart_config = SmartConfig(
-        enabled=smart,
-        min_depth=min_significance_depth,
-        min_hyponyms=min_hyponyms,
-        min_leaf_size=min_leaf_size,
-        merge_orphans=merge_orphans,
-        category_overrides=final_overrides,
-        semantic_cleanup=semantic_cleanup,
-        semantic_model=semantic_model,
-        semantic_threshold=semantic_threshold,
-        semantic_arrangement=semantic_arrangement,
-        semantic_arrangement_threshold=semantic_arrangement_threshold,
-        semantic_arrangement_min_cluster=semantic_arrangement_min_cluster,
-        semantic_arrangement_method=semantic_arrangement_method,
-        debug_arrangement=debug_arrangement,
-        skip_nodes=skip_nodes,
-        orphans_label_template=orphans_label_template,
-        preview_limit=preview_limit,
-        umap_n_neighbors=umap_n_neighbors,
-        umap_min_dist=umap_min_dist,
-        hdbscan_min_samples=hdbscan_min_samples
-    )
-    
-    if stats:
-        stats.set_metadata("smart_config", smart_config.to_dict())
-
-    budget = TraversalBudget(preview_limit)
     
     # Load filter set
     valid_wnids = None
@@ -421,7 +200,7 @@ def generate_imagenet_tree(
         root_synset = wn.synset(root_synset_str)
     except Exception:
         logger.error(f"Could not find root synset: {root_synset_str}")
-        return CommentedMap()
+        return None
         
     # Prepare exclusions
     import re
@@ -431,61 +210,30 @@ def generate_imagenet_tree(
     if exclude_subtree:
         for s_str in exclude_subtree:
             try:
-                # Try as WNID first
                 if s_str.startswith('n') and len(s_str) > 5 and s_str[1:].isdigit():
                     s = get_synset_from_wnid(s_str)
                 else:
                     s = wn.synset(s_str)
-                
                 if s:
                     excluded_synsets.add(s)
-                else:
-                    logger.warning(f"Could not resolve excluded subtree: {s_str}")
             except Exception:
                 logger.warning(f"Could not resolve excluded subtree: {s_str}")
     
-    logger.info(
-        f"Building hierarchy from {root_synset_str} "
-        f"(depth={max_depth}, filter={filter_set or 'none'})"
-    )
+    logger.info(f"Extracting raw hierarchy from {root_synset_str} (max_depth={max_depth})")
     
-    structure_mgr = StructureManager()
-    result = CommentedMap()
+    budget = TraversalBudget(preview_limit)
     
-    # We pass exclusions to build_tree_recursive via a context object or added args
-    # For now, let's update build_tree_recursive signature first or wrap it
-    
-    build_tree_recursive(
-        root_synset, structure_mgr, result, valid_wnids,
+    return build_taxonomy_tree(
+        root_synset, valid_wnids,
         depth=0, max_depth=max_depth,
         with_glosses=with_glosses,
         strict_filter=strict_filter,
         blacklist_abstract=blacklist_abstract,
-        smart_config=smart_config,
         regex_list=regex_list,
         excluded_synsets=excluded_synsets,
-        stats=stats,
         budget=budget
     )
-    
-    # Post-process with ConstraintShaper
-    if smart and (min_leaf_size > 0 or merge_orphans):
-        from ..shaper import ConstraintShaper
-        logger.info("Shaping hierarchy (merging orphans, flattening)...")
-        shaper = ConstraintShaper(result)
-        # result is modified in-place? No, shaper returns new structure.
-        # But we want to preserve comments on 'result' root?
-        # 'result' is the map.
-        result = shaper.shape(
-            min_leaf_size=min_leaf_size, 
-            flatten_singles=True,
-            orphans_label_template=smart_config.orphans_label_template
-        ) # Flatten singles true?
-        # Maybe expose flatten_singles to CLI? It wasn't in original args.
-        # Let's default to True as per research.
 
-    
-    return result
 
 
 def generate_imagenet_from_wnids(

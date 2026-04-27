@@ -341,31 +341,6 @@ def should_prune_node(
     return True
 
 
-def handle_small_leaves(
-    leaves: list,
-    config: SmartConfig
-) -> tuple:
-    """
-    Handle a leaf list that may be too small per min_leaf_size.
-    
-    Returns:
-        (value_to_add, orphans_to_bubble_up)
-        
-    If merge_orphans is True and list is small: (None, leaves)
-    Otherwise: (leaves, [])
-    """
-    if not config.enabled:
-        return (leaves if leaves else [], [])
-    
-    if len(leaves) < config.min_leaf_size:
-        if config.merge_orphans:
-            # Bubble up to parent
-            return (None, leaves)
-        else:
-            # Keep as small list (100% retention)
-            return (leaves if leaves else [], [])
-    
-    return (leaves if leaves else [], [])
 
 def apply_semantic_cleaning(items: List[str], config: SmartConfig) -> List[str]:
     """

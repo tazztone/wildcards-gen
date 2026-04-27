@@ -56,17 +56,12 @@ def test_flatten_singles():
     shaper = ConstraintShaper(tree)
     result = shaper.shape(flatten_singles=True, min_leaf_size=0, preserve_roots=False)
     
-    # Expectation: Level1 -> Level2 (dict) -> promotes Level2?
-    # Result should be just {Level3: ...} ??
-    # Wait, flatten_singles returns the VALUE.
-    # Level2 returns {Level3: ...}
-    # Level1 returns {Level3: ...}
-    
-    assert "Level3" in result
-    assert isinstance(result["Level3"], list)
-    assert "items" in result["Level3"]
-    assert "Level1" not in result
-    assert "Level2" not in result
+    # Expectation: Level1 -> Level2 -> Level3 stays intact because they are uniquely named.
+    # The new design preserves named hierarchy to avoid losing context.
+    assert "Level1" in result
+    assert "Level2" in result["Level1"]
+    assert "Level3" in result["Level1"]["Level2"]
+    assert result["Level1"]["Level2"]["Level3"] == ["items"]
 
 def test_flatten_singles_leaf_protection():
     """Ensure {Category: [list]} is NOT flattened to [list]."""
@@ -121,7 +116,8 @@ def test_contextual_other(mocker):
     
     shaper = ConstraintShaper(tree)
     # min_leaf_size=5 -> Apple and Banana (size 1) should merge
-    result = shaper.shape(min_leaf_size=5, flatten_singles=False)
+    # semantic_arrangement_min_cluster=1 -> triggers the arrangement mock
+    result = shaper.shape(min_leaf_size=5, flatten_singles=False, semantic_arrangement_min_cluster=1)
     
     assert "Meat" in result
     assert result["Other (Fruit)"] == ["cavendish", "granny smith"]

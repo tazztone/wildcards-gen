@@ -47,8 +47,8 @@ def test_openimages_smoke_execution_smart_flatten():
          patch("wildcards_gen.core.datasets.openimages.ensure_nltk_data"), \
          patch("wildcards_gen.core.datasets.openimages.get_primary_synset", return_value=mock_synset), \
          patch("wildcards_gen.core.datasets.openimages.get_synset_gloss", return_value="Dummy gloss"), \
-         patch("wildcards_gen.core.datasets.openimages.should_prune_node", return_value=True), \
-         patch("wildcards_gen.core.datasets.openimages.apply_semantic_arrangement") as mock_arrange:
+         patch("wildcards_gen.core.builder.should_prune_node", return_value=True), \
+         patch("wildcards_gen.core.builder.apply_semantic_arrangement") as mock_arrange:
         
         # Clear cache to avoid pollution from other tests
         from wildcards_gen.core.datasets import openimages
@@ -59,13 +59,19 @@ def test_openimages_smoke_execution_smart_flatten():
         mock_arrange.return_value = ({"Cluster1": ["Object2", "Object2b"], "Cluster2": ["Object3", "Object3b"]}, [])
         
         from wildcards_gen.core.datasets.openimages import generate_openimages_hierarchy
+        from wildcards_gen.core.builder import HierarchyBuilder
+        from wildcards_gen.core.smart import SmartConfig
         
-        result = generate_openimages_hierarchy(
-            smart=True,
+        node = generate_openimages_hierarchy()
+        
+        config_obj = SmartConfig(
+            enabled=True,
             semantic_arrangement=True,
             semantic_arrangement_min_cluster=1,
-            min_leaf_size=0 # Disable shaper to verify raw structure
+            min_leaf_size=0
         )
+        builder = HierarchyBuilder(config_obj)
+        result = builder.build(node)
         
         # Verify execution reached arrangement
         assert mock_arrange.called, "Arrangement should have been called"
@@ -106,14 +112,19 @@ def test_openimages_smoke_empty_arrangement():
          patch("wildcards_gen.core.datasets.openimages.ensure_nltk_data"), \
          patch("wildcards_gen.core.datasets.openimages.get_primary_synset", return_value=mock_synset), \
          patch("wildcards_gen.core.datasets.openimages.get_synset_gloss", return_value=""), \
-         patch("wildcards_gen.core.datasets.openimages.should_prune_node", return_value=True), \
-         patch("wildcards_gen.core.datasets.openimages.apply_semantic_arrangement") as mock_arrange:
+         patch("wildcards_gen.core.builder.should_prune_node", return_value=True), \
+         patch("wildcards_gen.core.builder.apply_semantic_arrangement") as mock_arrange:
          
         # Return empty groups, all items as leftovers
         mock_arrange.return_value = ({}, ["Leaf"])
         
         from wildcards_gen.core.datasets.openimages import generate_openimages_hierarchy
-        result = generate_openimages_hierarchy(smart=True, semantic_arrangement=True)
+        from wildcards_gen.core.builder import HierarchyBuilder
+        from wildcards_gen.core.smart import SmartConfig
+        
+        node = generate_openimages_hierarchy()
+        builder = HierarchyBuilder(SmartConfig(enabled=True, semantic_arrangement=True))
+        result = builder.build(node)
         
         # Should not crash, and "Leaf" should be visible (likely in a flat list or 'misc' depending on implementation)
         assert result is not None
@@ -145,18 +156,18 @@ def test_tencent_smoke_execution_smart_flatten():
          patch("wildcards_gen.core.datasets.tencent.ensure_nltk_data"), \
          patch("wildcards_gen.core.datasets.tencent.get_synset_from_wnid", return_value=MagicMock()), \
          patch("wildcards_gen.core.datasets.tencent.get_synset_gloss", return_value="Dummy gloss"), \
-         patch("wildcards_gen.core.smart.should_prune_node", return_value=True), \
-         patch("wildcards_gen.core.smart.apply_semantic_arrangement") as mock_arrange:
+         patch("wildcards_gen.core.builder.should_prune_node", return_value=True), \
+         patch("wildcards_gen.core.builder.apply_semantic_arrangement") as mock_arrange:
          
-        mock_arrange.return_value = ({"GroupX": ["Grandchild", "G2"], "GroupY": ["Sibling", "S2"]}, [], {})
+        mock_arrange.return_value = ({"GroupX": ["Grandchild", "G2"], "GroupY": ["Sibling", "S2"]}, [])
         
         from wildcards_gen.core.datasets.tencent import generate_tencent_hierarchy
+        from wildcards_gen.core.builder import HierarchyBuilder
+        from wildcards_gen.core.smart import SmartConfig
         
-        result = generate_tencent_hierarchy(
-            smart=True,
-            semantic_arrangement=True,
-            min_leaf_size=0 # Disable shaper
-        )
+        node = generate_tencent_hierarchy()
+        builder = HierarchyBuilder(SmartConfig(enabled=True, semantic_arrangement=True, min_leaf_size=0))
+        result = builder.build(node)
         
         assert mock_arrange.called
         assert result is not None

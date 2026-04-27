@@ -15,12 +15,12 @@ class ConstraintShaper:
     def __init__(self, tree: Dict[str, Any]):
         self.tree = tree
 
-    def shape(self, min_leaf_size: int = 10, flatten_singles: bool = True, preserve_roots: bool = True, orphans_label_template: Optional[str] = None) -> Dict[str, Any]:
+    def shape(self, min_leaf_size: int = 10, flatten_singles: bool = True, preserve_roots: bool = True, orphans_label_template: Optional[str] = None, semantic_arrangement_min_cluster: int = 5, node_name: Optional[str] = None) -> Dict[str, Any]:
         """
         Run all shaping passes.
         preserve_roots: if True, do not flatten the top-level dictionary even if it has 1 key.
         """
-        processed = self._merge_orphans(self.tree, min_leaf_size, orphans_label_template)
+        processed = self._merge_orphans(self.tree, min_leaf_size, orphans_label_template, semantic_arrangement_min_cluster, node_name)
 
         # 2. Prune Tautologies (A -> A -> B)
         processed = self._prune_tautologies(processed)
@@ -137,7 +137,7 @@ class ConstraintShaper:
             
         return new_node
 
-    def _merge_orphans(self, node: Any, min_size: int, orphans_label_template: Optional[str] = None) -> Any:
+    def _merge_orphans(self, node: Any, min_size: int, orphans_label_template: Optional[str] = None, min_cluster: int = 5, node_name: Optional[str] = None) -> Any:
         """
         Recursively merge small sibling groups into 'Other'.
         """
@@ -150,7 +150,7 @@ class ConstraintShaper:
         # 1. Recurse down first
         processed_node = type(node)() if isinstance(node, dict) else {}
         for k, v in node.items():
-            processed_node[k] = self._merge_orphans(v, min_size, orphans_label_template)
+            processed_node[k] = self._merge_orphans(v, min_size, orphans_label_template, min_cluster, node_name=k)
             # Preserve comment for this key
             if isinstance(node, CommentedMap) and k in node.ca.items:
                  processed_node.ca.items[k] = node.ca.items[k]
@@ -183,12 +183,18 @@ class ConstraintShaper:
             
         # Determine Label
         other_label = target_label_base
+        if other_label and "{}" in other_label:
+            if node_name:
+                other_label = other_label.format(node_name)
+            else:
+                # Root level or unknown name
+                other_label = "Other"
         
         # Use contextual naming if possible (only if it's the generic "Other" or "misc")
         # We check both to catch different default conventions
         is_generic = other_label.lower() in ["other", "misc"]
         
-        if is_generic:
+        if is_generic and len(orphan_items) >= min_cluster:
             try:
                 from .arranger import generate_contextual_label
                 other_label = generate_contextual_label(orphan_items, context_items, fallback=other_label)

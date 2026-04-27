@@ -46,7 +46,9 @@ def get_api_key() -> Optional[str]:
     if config.api_key:
         return config.api_key
     return os.environ.get('OPENROUTER_API_KEY')
-from .core.presets import SMART_PRESETS, DATASET_PRESET_OVERRIDES
+from .core.presets import SMART_PRESETS, DATASET_PRESET_OVERRIDES, DATASET_CATEGORY_OVERRIDES
+from .core.smart import SmartConfig
+from .core.builder import HierarchyBuilder
 
 def resolve_output_path(path: str) -> str:
     """Ensure path is in output_dir if no directory is specified."""
@@ -116,50 +118,24 @@ def load_smart_overrides(config_path: Optional[str]) -> dict:
         return {}
 
 
-def cmd_dataset_imagenet(args):
-    """Handle imagenet subcommand."""
+def get_smart_config(args, dataset_name: Optional[str] = None) -> SmartConfig:
+    """Helper to build SmartConfig from CLI args."""
     apply_smart_preset(args)
     overrides = load_smart_overrides(args.smart_config)
     
-    # Analysis mode override
-    if getattr(args, 'analyze', False):
-        print("🔍 Analyzing ImageNet hierarchy... (this may take a moment)")
-        # Force non-smart to see full structure, ensure reasonable depth
-        hierarchy = generate_imagenet_tree(
-            root_synset_str=args.root,
-            max_depth=max(args.depth, 10), # Analyze deep by default
-            filter_set=args.filter if args.filter != 'none' else None,
-            with_glosses=False, # Speed up
-            strict_filter=not args.no_strict,
-            blacklist_abstract=args.blacklist,
-            smart=False # Raw tree
-        )
-        from .core import analyze
-        stats_data = analyze.compute_dataset_stats(hierarchy)
-        suggestions = analyze.suggest_thresholds(stats_data)
-        analyze.print_analysis_report(stats_data, suggestions)
-        return
-
-    # Initialize stats
-    stats = StatsCollector()
-    stats.set_metadata("dataset", "imagenet")
-    stats.set_metadata("output", args.output)
-
-    hierarchy = generate_imagenet_tree(
-        root_synset_str=args.root,
-        max_depth=args.depth,
-        filter_set=args.filter if args.filter != 'none' else None,
-        with_glosses=not args.no_glosses,
-        strict_filter=not args.no_strict,
-        blacklist_abstract=args.blacklist,
-        smart=args.smart,
-        min_significance_depth=args.min_depth,
+    # Merge with dataset-specific presets if available
+    preset_overrides = DATASET_CATEGORY_OVERRIDES.get(dataset_name, {}) if dataset_name else {}
+    final_overrides = preset_overrides.copy()
+    if overrides:
+        final_overrides.update(overrides)
+        
+    return SmartConfig(
+        enabled=args.smart,
+        min_depth=args.min_depth,
         min_hyponyms=args.min_hyponyms,
         min_leaf_size=args.min_leaf,
         merge_orphans=getattr(args, 'merge_orphans', False),
-        exclude_regex=args.exclude_regex,
-        exclude_subtree=args.exclude_subtree,
-        smart_overrides=overrides,
+        category_overrides=final_overrides,
         semantic_cleanup=args.semantic_clean,
         semantic_model=args.semantic_model,
         semantic_threshold=args.semantic_threshold,
@@ -169,21 +145,84 @@ def cmd_dataset_imagenet(args):
         semantic_arrangement_method=args.semantic_arrange_method,
         debug_arrangement=args.debug_arrangement,
         skip_nodes=args.skip_nodes,
-        orphans_label_template=args.orphans_label_template,
-        stats=stats
+        orphans_label_template=args.orphans_label_template
     )
+
+
+def cmd_dataset_imagenet(args):
+    """Handle imagenet subcommand."""
+    # Analysis mode override
+    if getattr(args, 'analyze', False):
+        print("🔍 Analyzing ImageNet hierarchy... (this may take a moment)")
+        tree = generate_imagenet_tree(
+            root_synset_str=args.root,
+            max_depth=max(args.depth, 10),
+            filter_set=args.filter if args.filter != 'none' else None,
+            with_glosses=False,
+            strict_filter=not args.no_strict,
+            blacklist_abstract=args.blacklist
+        )
+        if not tree: return
+        
+        # Temporary conversion to CommentedMap for analyzer
+        builder = HierarchyBuilder(SmartConfig(enabled=False))
+        hierarchy = builder._to_commented_map(tree)
+        
+        from .core import analyze
+        stats_data = analyze.compute_dataset_stats(hierarchy)
+        suggestions = analyze.suggest_thresholds(stats_data)
+        analyze.print_analysis_report(stats_data, suggestions)
+        return
+
+    smart_config = get_smart_config(args, "ImageNet")
+    
+    # Initialize stats
+    stats = StatsCollector()
+    stats.set_metadata("dataset", "imagenet")
+    stats.set_metadata("output", args.output)
+    stats.set_metadata("smart_config", smart_config.to_dict())
+
+    # 1. Extraction (Raw Tree)
+    tree = generate_imagenet_tree(
+        root_synset_str=args.root,
+        max_depth=args.depth,
+        filter_set=args.filter if args.filter != 'none' else None,
+        with_glosses=not args.no_glosses,
+        strict_filter=not args.no_strict,
+        blacklist_abstract=args.blacklist,
+        exclude_regex=args.exclude_regex,
+        exclude_subtree=args.exclude_subtree
+    )
+    
+    if not tree:
+        print("Error: Failed to extract ImageNet tree")
+        return
+
+    # 2. Build (Smart Processing)
+    if smart_config.enabled:
+        builder = HierarchyBuilder(smart_config, stats=stats)
+        hierarchy = builder.build(tree)
+    else:
+        # Simple depth-based conversion
+        builder = HierarchyBuilder(smart_config)
+        hierarchy = builder._to_commented_map(tree)
+        # Ensure it's wrapped in root name if not already
+        if tree.name not in hierarchy:
+            from ruamel.yaml.comments import CommentedMap
+            res = CommentedMap()
+            res[tree.name] = hierarchy
+            hierarchy = res
     
     output_path = resolve_output_path(args.output)
     mgr = StructureManager()
     mgr.save_structure(hierarchy, output_path, format=args.format)
+    
     # Save stats
     if config.get("generation.save_stats"):
-        # Always save stats to the configured output directory
         filename = os.path.basename(output_path)
         stem = os.path.splitext(filename)[0]
         base_path = os.path.join(config.output_dir, stem)
         os.makedirs(config.output_dir, exist_ok=True)
-        
         stats.save_to_json(f"{base_path}.stats.json")
         stats.save_summary_log(f"{base_path}.log")
         print(f"✓ Saved generation logs to {base_path}.log")
@@ -203,69 +242,65 @@ def cmd_dataset_coco(args):
 
 def cmd_dataset_openimages(args):
     """Handle openimages subcommand."""
-    apply_smart_preset(args)
-    # OpenImages doesn't support fine-grained overrides yet in this PR, 
-    # but we should handle the arg gracefully or ignore it.
-    
     # Analysis mode override
     if getattr(args, 'analyze', False):
         print("🔍 Analyzing Open Images hierarchy...")
-        # For OpenImages, smart=False is just a flat list. 
-        # To analyze the potential hierarchy, we must use smart=True 
-        # but with parameters that preserve everything (no pruning).
-        hierarchy = generate_openimages_hierarchy(
+        tree = generate_openimages_hierarchy(
             max_depth=max(args.depth, 10),
             with_glosses=False,
-            smart=True, 
-            min_significance_depth=20, # Make everything deep significant
-            min_hyponyms=0,            # Keep every branch
-            min_leaf_size=0,           # Never merge leaves
             bbox_only=args.bbox_only
         )
+        if not tree: return
+        builder = HierarchyBuilder(SmartConfig(enabled=False))
+        hierarchy = builder._to_commented_map(tree)
         from .core import analyze
         stats = analyze.compute_dataset_stats(hierarchy)
         suggestions = analyze.suggest_thresholds(stats)
         analyze.print_analysis_report(stats, suggestions)
         return
 
+    smart_config = get_smart_config(args, "Open Images")
+    
     # Initialize stats
     stats = StatsCollector()
     stats.set_metadata("dataset", "openimages")
     stats.set_metadata("output", args.output)
+    stats.set_metadata("smart_config", smart_config.to_dict())
 
-    hierarchy = generate_openimages_hierarchy(
+    # 1. Extraction
+    tree = generate_openimages_hierarchy(
         max_depth=args.depth,
         with_glosses=not args.no_glosses,
-        smart=args.smart,
-        min_significance_depth=args.min_depth,
-        min_hyponyms=args.min_hyponyms,
-        min_leaf_size=args.min_leaf,
-        merge_orphans=getattr(args, 'merge_orphans', False),
-        bbox_only=args.bbox_only,
-        semantic_cleanup=args.semantic_clean,
-        semantic_model=args.semantic_model,
-        semantic_threshold=args.semantic_threshold,
-        semantic_arrangement=args.semantic_arrange,
-        semantic_arrangement_threshold=args.semantic_arrange_threshold,
-        semantic_arrangement_min_cluster=args.semantic_arrange_min_cluster,
-        semantic_arrangement_method=args.semantic_arrange_method,
-        debug_arrangement=args.debug_arrangement,
-        skip_nodes=args.skip_nodes,
-        orphans_label_template=args.orphans_label_template,
-        stats=stats
+        bbox_only=args.bbox_only
     )
+    
+    if not tree:
+        print("Error: Failed to extract Open Images tree")
+        return
+
+    # 2. Build
+    if smart_config.enabled:
+        builder = HierarchyBuilder(smart_config, stats=stats)
+        hierarchy = builder.build(tree)
+    else:
+        builder = HierarchyBuilder(smart_config)
+        hierarchy = builder._to_commented_map(tree)
+        if tree.name not in hierarchy:
+            from ruamel.yaml.comments import CommentedMap
+            res = CommentedMap()
+            res[tree.name] = hierarchy
+            hierarchy = res
     
     output_path = resolve_output_path(args.output)
     mgr = StructureManager()
     mgr.save_structure(hierarchy, output_path, format=args.format)
+    
     # Save stats
     if config.get("generation.save_stats"):
-        # Always save stats to the configured output directory
         filename = os.path.basename(output_path)
         stem = os.path.splitext(filename)[0]
         base_path = os.path.join(config.output_dir, stem)
         os.makedirs(config.output_dir, exist_ok=True)
-        
         stats.save_to_json(f"{base_path}.stats.json")
         stats.save_summary_log(f"{base_path}.log")
         print(f"✓ Saved generation logs to {base_path}.log")
@@ -273,49 +308,52 @@ def cmd_dataset_openimages(args):
 
 def cmd_dataset_tencent(args):
     """Handle tencent subcommand."""
-    apply_smart_preset(args)
-    overrides = load_smart_overrides(args.smart_config)
-    
     # Analysis mode override
     if getattr(args, 'analyze', False):
         print("🔍 Analyzing Tencent ML-Images hierarchy...")
-        hierarchy = generate_tencent_hierarchy(
+        tree = generate_tencent_hierarchy(
             max_depth=max(args.depth, 10),
-            with_glosses=False,
-            smart=False # Raw tree
+            with_glosses=False
         )
+        if not tree: return
+        builder = HierarchyBuilder(SmartConfig(enabled=False))
+        hierarchy = builder._to_commented_map(tree)
         from .core import analyze
         stats_data = analyze.compute_dataset_stats(hierarchy)
         suggestions = analyze.suggest_thresholds(stats_data)
         analyze.print_analysis_report(stats_data, suggestions)
         return
 
+    smart_config = get_smart_config(args, "Tencent ML-Images")
+    
     # Initialize stats
     stats = StatsCollector()
     stats.set_metadata("dataset", "tencent")
     stats.set_metadata("output", args.output)
+    stats.set_metadata("smart_config", smart_config.to_dict())
 
-    hierarchy = generate_tencent_hierarchy(
+    # 1. Extraction
+    tree = generate_tencent_hierarchy(
         max_depth=args.depth,
-        with_glosses=not args.no_glosses,
-        smart=args.smart,
-        min_significance_depth=args.min_depth,
-        min_hyponyms=args.min_hyponyms,
-        min_leaf_size=args.min_leaf,
-        merge_orphans=getattr(args, 'merge_orphans', False),
-        smart_overrides=overrides,
-        semantic_cleanup=args.semantic_clean,
-        semantic_model=args.semantic_model,
-        semantic_threshold=args.semantic_threshold,
-        semantic_arrangement=args.semantic_arrange,
-        semantic_arrangement_threshold=args.semantic_arrange_threshold,
-        semantic_arrangement_min_cluster=args.semantic_arrange_min_cluster,
-        semantic_arrangement_method=args.semantic_arrange_method,
-        debug_arrangement=args.debug_arrangement,
-        skip_nodes=args.skip_nodes,
-        orphans_label_template=args.orphans_label_template,
-        stats=stats
+        with_glosses=not args.no_glosses
     )
+    
+    if not tree:
+        print("Error: Failed to extract Tencent tree")
+        return
+
+    # 2. Build
+    if smart_config.enabled:
+        builder = HierarchyBuilder(smart_config, stats=stats)
+        hierarchy = builder.build(tree)
+    else:
+        builder = HierarchyBuilder(smart_config)
+        hierarchy = builder._to_commented_map(tree)
+        if tree.name not in hierarchy:
+            from ruamel.yaml.comments import CommentedMap
+            res = CommentedMap()
+            res[tree.name] = hierarchy
+            hierarchy = res
     
     output_path = resolve_output_path(args.output)
     mgr = StructureManager()
@@ -324,12 +362,10 @@ def cmd_dataset_tencent(args):
 
     # Save stats
     if config.get("generation.save_stats"):
-        # Always save stats to the configured output directory
         filename = os.path.basename(output_path)
         stem = os.path.splitext(filename)[0]
         base_path = os.path.join(config.output_dir, stem)
         os.makedirs(config.output_dir, exist_ok=True)
-        
         stats.save_to_json(f"{base_path}.stats.json")
         stats.save_summary_log(f"{base_path}.log")
         print(f"✓ Saved generation logs to {base_path}.log")

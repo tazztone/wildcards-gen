@@ -11,6 +11,7 @@ from wildcards_gen.core.structure import StructureManager
 from wildcards_gen.core.config import config
 from wildcards_gen.core.llm import LLMEngine
 from wildcards_gen.core.stats import StatsCollector
+from wildcards_gen.core.builder import TaxonomyNode
 from .core.presets import SMART_PRESETS, DATASET_PRESET_OVERRIDES
 
 # =============================================================================
@@ -306,6 +307,36 @@ def generate_dataset_handler(
                 kwargs.update(smart_kwargs)
                 
             data = tencent.generate_tencent_hierarchy(**kwargs)
+
+        # 3. Process via HierarchyBuilder (converts TaxonomyNode -> CommentedMap)
+        if data is not None and isinstance(data, TaxonomyNode):
+            from wildcards_gen.core.builder import HierarchyBuilder
+            from wildcards_gen.core.smart import SmartConfig
+            
+            # Reconstruct SmartConfig from parameters
+            config_obj = SmartConfig(
+                enabled=is_smart,
+                min_depth=int(min_depth),
+                min_hyponyms=int(min_hyponyms),
+                min_leaf_size=int(min_leaf),
+                merge_orphans=merge_orphans,
+                semantic_cleanup=semantic_clean,
+                semantic_model=semantic_model,
+                semantic_threshold=float(semantic_threshold),
+                semantic_arrangement=semantic_arrange,
+                semantic_arrangement_threshold=float(semantic_arrange_threshold),
+                semantic_arrangement_min_cluster=int(semantic_arrange_min_cluster),
+                semantic_arrangement_method=semantic_arrange_method,
+                debug_arrangement=debug_arrangement,
+                orphans_label_template=orphans_template
+            )
+            
+            builder = HierarchyBuilder(config_obj, stats=stats)
+            if is_smart:
+                data = builder.build(data)
+            else:
+                data = builder._to_commented_map(data)
+
         output_path, preview = save_and_preview(data, output_name)
         
         # Save Stats
@@ -391,6 +422,13 @@ def analyze_handler(
         else:
             return 'Analysis not supported for this dataset.', 4, 50, 5, history, gr.update(visible=False)
             
+        # Convert TaxonomyNode to dict for analysis if needed
+        if data is not None and isinstance(data, TaxonomyNode):
+            from wildcards_gen.core.builder import HierarchyBuilder
+            from wildcards_gen.core.smart import SmartConfig
+            builder = HierarchyBuilder(SmartConfig(enabled=False))
+            data = builder._to_commented_map(data)
+
         from wildcards_gen.core import analyze
         stats = analyze.compute_dataset_stats(data)
         tuned = analyze.suggest_thresholds(stats)
