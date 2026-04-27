@@ -209,7 +209,13 @@ __marimo__/
 # ----------
 
 output/
-experiments/experiments/*/*.json
-experiments/experiments/*/*.yaml
+experiments/
+config_output/
+output_test/
+plans/
+.Jules/
+*.jsonl
+test_*.yaml
+*.log
 *.db
 embeddings.db
