@@ -84,6 +84,8 @@ manage all your taxonomy needs in one place.
 
 ### Robust and verified
 
+- **Type Safety**: 100% Mypy coverage for core engines (`arranger`, `builder`, `shaper`).
+- **Modern Linting**: Powered by Ruff for high-performance formatting and static analysis.
 - **Structure preservation**: Built on `ruamel.yaml` to ensure instructions are 
   never lost. You must not use standard `PyYAML` on these files.
 - **Smart pruning**: 
@@ -269,7 +271,12 @@ If you prefer manual installation:
    ```bash
    uv venv .venv
    source .venv/bin/activate
+   # Basic installation
    uv pip install -e .
+   # With semantic features (clustering, UMAP, etc.)
+   uv pip install -e ".[analysis]"
+   # Developer setup (linting, testing)
+   uv pip install -e ".[dev,analysis]"
    ```
 
 ---
@@ -380,16 +387,23 @@ better context for AI expansion.
 
 ---
 
-## Quality and verification
+### Quality and verification
 
-The project includes a suite of automated tests to ensure stability:
+The project includes a comprehensive suite of automated tests and quality checks:
 
+- **Type Safety (Mypy)**: Verified static types for all core modules.
+- **Code Style (Ruff)**: Automated formatting and linting for consistency.
 - **Interface synchronization**: Validates that GUI settings and CLI arguments 
   remain in sync.
 - **Tooltip verification**: Programmatically checks that all UI elements have 
   descriptive help text.
 - **Deep integration tests**: Full-stack end-to-end tests for dataset 
   generation.
+
+To run the local verification suite:
+```bash
+bash scripts/linux/lint.sh
+```
 
 ---
 
@@ -406,10 +420,8 @@ Generator SPA](https://github.com/tazztone/wildcards-generator).
 - [x] LLM-powered taxonomy creation and enrichment
 - [x] Gradio web GUI with dataset-aware UI
 - [x] Comment-preserving YAML handling via `ruamel.yaml`
-- [x] **Semantic linter**: Analyze skeletons to detect semantically 
-  inconsistent items using embedding models
-- [x] **Robustness testing suite**: Static and dynamic analysis to prevent 
-  regressions
+- [x] **Semantic linter**: Analyze skeletons to detect outliers
+- [x] **Developer Hardening**: Integrated Ruff/Mypy with CI enforcement
 
 ### Planned
 
