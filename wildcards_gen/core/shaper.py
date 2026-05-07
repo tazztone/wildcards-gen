@@ -126,7 +126,17 @@ class ConstraintShaper:
                          # This IS what they had. They want to avoid the double 'Wine'.
                          
                          # Best fix: Rename the sub-'Wine' to 'General' or 'Base'
-                         v[f"General {k}"] = v.pop(match_key)
+                         new_key = "General"
+                         if new_key in v:
+                              new_key = "Base"
+                         if new_key in v:
+                              new_key = f"General {k}"
+
+                         # Preserve comment for the renamed child (must be done BEFORE popping)
+                         if isinstance(v, CommentedMap) and match_key in v.ca.items:
+                              v.ca.items[new_key] = v.ca.items[match_key]
+
+                         v[new_key] = v.pop(match_key)
                          new_node[k] = v
                     continue
 
