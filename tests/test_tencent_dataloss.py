@@ -38,8 +38,8 @@ class TestTencentDataLoss(unittest.TestCase):
                 # If we are arranging orphans (context starts with "orphans of")
                 if context and "orphans of" in context:
                     print(f"Arranging Orphans: {items}")
-                    return ({"Group A": items}, [], {}) if return_metadata else ({"Group A": items}, [])
-                return (items, [], {}) if return_metadata else (items, [])
+                    return ({"Group A": items}, [], None) if return_metadata else ({"Group A": items}, [], None)
+                return (items, [], None) if return_metadata else (items, [], None)
 
             mock_arrange.side_effect = side_effect
 
