@@ -50,6 +50,23 @@ class TraversalBudget:
             return False
         return self._exhausted
 
+<<<<<<< Updated upstream
+=======
+    def truncate_to_budget(self, items: List[Any]) -> List[Any]:
+        """
+        Consumes budget for each item in the list and returns truncated list.
+        """
+        if self.limit is None:
+            return items
+
+        truncated = []
+        for item in items:
+            if self.consume(1):
+                truncated.append(item)
+            else:
+                break
+        return truncated
+>>>>>>> Stashed changes
 
 class SmartConfig:
     """Configuration for smart pruning."""
