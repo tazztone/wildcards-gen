@@ -92,6 +92,7 @@ def get_primary_synset(word: str) -> Optional[Any]:
     return None
 
 
+@functools.lru_cache(maxsize=4096)
 def get_synset_name(synset) -> str:
     """Get clean name from synset (e.g., 'dog' from 'dog.n.01')."""
     return synset.lemmas()[0].name().replace('_', ' ')
