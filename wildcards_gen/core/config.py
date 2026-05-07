@@ -5,7 +5,7 @@ Configuration management.
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Dict, Set
 
 # Base Paths
 BASE_DIR = Path(__file__).parent.parent.parent
