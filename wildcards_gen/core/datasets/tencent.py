@@ -140,19 +140,15 @@ def generate_tencent_hierarchy(
     if with_glosses:
         ensure_nltk_data()
     
-    def collect_leaves(idx: int) -> List[str]:
+    def collect_leaves(idx: int):
         """Collect all descendant leaf names."""
-        leaves = []
         children = children_map.get(idx, [])
         
         if not children:
-            name = categories[idx]['name'].split(',')[0].strip()
-            leaves.append(name)
+            yield categories[idx]['name'].split(',')[0].strip()
         else:
             for child_idx in children:
-                leaves.extend(collect_leaves(child_idx))
-        
-        return leaves
+                yield from collect_leaves(child_idx)
 
     from ruamel.yaml.comments import CommentedMap
     from ..smart import SmartConfig, should_prune_node, handle_small_leaves, apply_semantic_cleaning, TraversalBudget
@@ -256,7 +252,7 @@ def generate_tencent_hierarchy(
                 should_flatten = True
 
         if should_flatten:
-            leaves = collect_leaves(current_idx)
+            leaves = list(collect_leaves(current_idx))
             # Filter self-matches
             normalized_name = name.lower()
             filtered_leaves = sorted(list(set([l for l in leaves if l.lower() != normalized_name])), key=str.casefold)
@@ -454,7 +450,7 @@ def generate_tencent_hierarchy(
                 # In smart mode, we trust our traversal (orphan_leaves) and do not grab everything
                 leaves = []
             else:
-                leaves = collect_leaves(current_idx)
+                leaves = list(collect_leaves(current_idx))
             # Also include any orphans that bubbled up to us?
             # Yes, if we flatten, we become a list, so we can just include them.
             if orphan_leaves:
