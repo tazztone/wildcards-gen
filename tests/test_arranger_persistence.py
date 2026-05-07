@@ -42,7 +42,7 @@ class TestArrangerPersistence(unittest.TestCase):
     @patch("wildcards_gen.core.arranger.compute_list_embeddings")
     def test_caching_logic(self, mock_compute):
         """Verify computation happens once and is then cached (Memory & DB)."""
-        mock_compute.return_value = np.array([[0.1, 0.2]])
+        mock_compute.return_value = np.array([[0.1, 0.2], [0.3, 0.4]])
         terms = ["apple", "banana"]
 
         # First call: Should compute
@@ -103,11 +103,11 @@ class TestArrangerPersistence(unittest.TestCase):
                     except Exception as e:
                         self.fail(f"Concurrency failure: {e}")
 
-        # Verify DB size (50 workers * 1 row per list = 50 rows)
+        # Verify DB size (50 workers * 10 unique terms per worker = 500 rows)
         conn = sqlite3.connect(self.db_path)
         count = conn.execute("SELECT count(*) FROM embeddings").fetchone()[0]
         conn.close()
-        self.assertEqual(count, 50)
+        self.assertEqual(count, 500)
 
 
 if __name__ == "__main__":

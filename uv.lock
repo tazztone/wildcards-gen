@@ -2656,6 +2656,7 @@ source = { editable = "." }
 dependencies = [
     { name = "gradio" },
     { name = "nltk" },
+    { name = "pytest" },
     { name = "requests" },
     { name = "ruamel-yaml" },
     { name = "tqdm" },
@@ -2685,6 +2686,7 @@ requires-dist = [
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.0.0" },
     { name = "nltk", specifier = ">=3.8.0" },
     { name = "numpy", marker = "extra == 'analysis'", specifier = ">=1.24.0,<2.4" },
+    { name = "pytest", specifier = ">=9.0.2" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.0.0" },
     { name = "pytest-mock", marker = "extra == 'dev'", specifier = ">=3.10.0" },
     { name = "requests", specifier = ">=2.28.0" },

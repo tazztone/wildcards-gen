@@ -56,45 +56,79 @@ def _init_db():
 
 def get_cached_embeddings(model, terms: List[str]):
     """Get embeddings with persistent SQLite caching + memory fallback."""
-    # Create valid hashable key
-    key_str = "|".join(sorted(terms))
-    key_hash = hashlib.md5(key_str.encode("utf-8")).hexdigest()
+    if not terms:
+        return np.array([])
+
+    term_hashes = [hashlib.md5(t.encode("utf-8")).hexdigest() for t in terms]
+    embeddings = [None] * len(terms)
+    missing_indices = []
 
     # 1. Memory Hit
-    if key_hash in _MEM_CACHE:
-        return _MEM_CACHE[key_hash]
+    for i, term_hash in enumerate(term_hashes):
+        if term_hash in _MEM_CACHE:
+            embeddings[i] = _MEM_CACHE[term_hash]
+        else:
+            missing_indices.append(i)
+
+    if not missing_indices:
+        return np.array(embeddings)
 
     # 2. DB Hit
-    embeddings = None
+    missing_hashes = [term_hashes[i] for i in missing_indices]
+
     try:
         with sqlite3.connect(DB_PATH, timeout=10) as conn:
-            cursor = conn.cursor()
-            cursor.execute("SELECT vector FROM embeddings WHERE hash = ?", (key_hash,))
-            row = cursor.fetchone()
-            if row:
-                embeddings = pickle.loads(row[0])
+            # SQLite IN clause limit is usually 999, we use 900 to be safe
+            batch_size = 900
+            for i in range(0, len(missing_hashes), batch_size):
+                batch_hashes = missing_hashes[i : i + batch_size]
+                placeholders = ",".join("?" * len(batch_hashes))
+                query = f"SELECT hash, vector FROM embeddings WHERE hash IN ({placeholders})"
+
+                cursor = conn.cursor()
+                cursor.execute(query, batch_hashes)
+
+                for row in cursor.fetchall():
+                    h, v = row
+                    emb = pickle.loads(v)
+                    _MEM_CACHE[h] = emb
+                    # Fill all occurrences of this hash
+                    for j, orig_h in enumerate(term_hashes):
+                        if orig_h == h and embeddings[j] is None:
+                            embeddings[j] = emb
     except Exception as e:
         logger.debug(f"DB Read failed: {e}")
 
-    if embeddings is not None:
-        _MEM_CACHE[key_hash] = embeddings
-        return embeddings
+    # Recalculate missing indices
+    still_missing_indices = [i for i, emb in enumerate(embeddings) if emb is None]
+
+    if not still_missing_indices:
+        return np.array(embeddings)
 
     # 3. Compute
-    embeddings = compute_list_embeddings(model, terms)
+    missing_terms = [terms[i] for i in still_missing_indices]
+    new_embeddings = compute_list_embeddings(model, missing_terms)
 
     # 4. Store
-    _MEM_CACHE[key_hash] = embeddings
+    db_inserts = []
+    for i, missing_idx in enumerate(still_missing_indices):
+        term_hash = term_hashes[missing_idx]
+        emb = new_embeddings[i]
+
+        embeddings[missing_idx] = emb
+        _MEM_CACHE[term_hash] = emb
+        db_inserts.append((term_hash, pickle.dumps(emb)))
+
     try:
         with sqlite3.connect(DB_PATH, timeout=10) as conn:
-            conn.execute(
+            conn.executemany(
                 "INSERT OR IGNORE INTO embeddings (hash, vector) VALUES (?, ?)",
-                (key_hash, pickle.dumps(embeddings)),
+                db_inserts,
             )
     except Exception as e:
         logger.warning(f"DB Write failed: {e}")
 
-    return embeddings
+    return np.array(embeddings)
 
 
 # Initialize DB on import (safe for concurrency as it's just CREATE TABLE IF NOT EXISTS)

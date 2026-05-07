@@ -44,7 +44,7 @@ def test_arrange_hierarchy_recursion_depth(mock_arranger_deps):
         # Side effect: always return 2 groups so we keep splitting if allowed
         def side_effect(t, **kwargs):
             mid = len(t) // 2
-            return {"g1": t[:mid], "g2": t[mid:]}, []
+            return {"g1": t[:mid], "g2": t[mid:]}, [], None, None
 
         mock_arrange.side_effect = side_effect
 
