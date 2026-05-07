@@ -209,9 +209,6 @@ class SmartConfig:
         }
 
 
-# ... (skipping unchanged functions) ...
-
-
 def apply_semantic_arrangement(
     items: List[str],
     config: SmartConfig,
@@ -221,7 +218,7 @@ def apply_semantic_arrangement(
 ) -> Tuple[Dict[str, Any], List[str], Dict[str, Any]]:
     """
     Arrange a list of items into semantic sub-groups.
-    Returns the nested structure (dict or list).
+    Returns (groups, leftovers, metadata).
     """
     if not config.enabled or not config.semantic_arrangement or not items:
         return {}, items, {}
@@ -231,34 +228,48 @@ def apply_semantic_arrangement(
     if not check_dependencies():
         return {}, items, {}
 
-    from .arranger import arrange_hierarchy
+    if return_metadata:
+        from .arranger import arrange_list
 
-    # Use recursive arrangement
-    result = arrange_hierarchy(
-        items,
-        max_depth=2,  # Configurable?
-        max_leaf_size=config.semantic_arrangement_min_cluster,  # reuse min cluster?
-        # Pass other params via kwargs to arrange_hierarchy if needed?
-        model_name=config.semantic_model,
-        threshold=config.semantic_arrangement_threshold,
-        min_cluster_size=config.semantic_arrangement_min_cluster,
-        method=config.semantic_arrangement_method,
-        return_metadata=return_metadata,
-        # Advanced Tuning
-        umap_n_neighbors=config.umap_n_neighbors,
-        umap_min_dist=config.umap_min_dist,
-        umap_n_components=config.umap_n_components,
-        min_samples=config.hdbscan_min_samples,
-    )
+        groups, leftovers, metadata = arrange_list(
+            items,
+            model_name=config.semantic_model,
+            threshold=config.semantic_arrangement_threshold,
+            min_cluster_size=config.semantic_arrangement_min_cluster,
+            cluster_selection_method=config.semantic_arrangement_method,
+            return_metadata=True,
+            context=context,
+            umap_n_neighbors=config.umap_n_neighbors,
+            umap_min_dist=config.umap_min_dist,
+            umap_n_components=config.umap_n_components,
+            min_samples=config.hdbscan_min_samples,
+        )
+        return groups, leftovers, metadata
+    else:
+        from .arranger import arrange_hierarchy
 
-    leftovers: List[str] = []
-    metadata: Dict[str, Any] = {}
+        # Use recursive arrangement
+        result = arrange_hierarchy(
+            items,
+            max_depth=2,
+            max_leaf_size=config.semantic_arrangement_min_cluster,
+            model_name=config.semantic_model,
+            threshold=config.semantic_arrangement_threshold,
+            min_cluster_size=config.semantic_arrangement_min_cluster,
+            cluster_selection_method=config.semantic_arrangement_method,
+            context=context,
+            umap_n_neighbors=config.umap_n_neighbors,
+            umap_min_dist=config.umap_min_dist,
+            umap_n_components=config.umap_n_components,
+            min_samples=config.hdbscan_min_samples,
+        )
 
-    # Normalize result
-    if isinstance(result, list):
-        return {}, result, metadata
+        leftovers = []
+        if isinstance(result, list):
+            leftovers = result
+            result = {}
 
-    return result, leftovers, metadata
+        return result, leftovers, {}
 
 
 def is_synset_significant(synset: Any, config: SmartConfig) -> bool:
@@ -285,7 +296,8 @@ def is_synset_significant(synset: Any, config: SmartConfig) -> bool:
     try:
         # closure is robust but slow-ish; acceptable for offline gen
         hyponyms = list(synset.closure(lambda s: s.hyponyms()))
-        if len(hyponyms) >= config.min_hyponyms:
+         hyponym_count = len(hyponyms)
+        if hyponym_count >= config.min_hyponyms:
             return True
     except AttributeError:
         pass
@@ -308,11 +320,6 @@ def should_prune_node(synset: Any, child_count: int, is_root: bool, config: Smar
 
     # 0. Skip List / Force Prune Check
     if config.skip_nodes:
-        # Check by name
-        # We need the node name? Is 'synset' name?
-        # Synset name is like 'entity.n.01', not 'entity'.
-        # We rely on exact name match or WNID.
-        # However, `synset` object is passed here.
         # Check WNID
         try:
             wnid = get_synset_wnid(synset)
@@ -329,10 +336,6 @@ def should_prune_node(synset: Any, child_count: int, is_root: bool, config: Smar
                     return True
 
     # 1. Linear Chain Check
-    # If it only has 1 child, it's just adding noise depth. Prune it.
-    # UNLESS it's extremely significant?
-    # No, even significant single-child nodes (like "canine > dog")
-    # are usually better flattened if "canine" effectively equals "dog" in this subtree.
     if child_count <= 1:
         return True
 

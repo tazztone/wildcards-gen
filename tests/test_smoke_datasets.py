@@ -33,6 +33,7 @@ def test_openimages_smoke_execution_smart_flatten():
     mock_synset.pos.return_value = "n"
     mock_synset.offset.return_value = 12345678  # Returns int for :08d formatting
     mock_synset.hypernym_paths.return_value = [[mock_synset]]  # Path includes self
+    mock_synset.definition.return_value = "Mock definition"
 
     # Configure lemmas for get_synset_name
     mock_lemma = MagicMock()
@@ -161,6 +162,11 @@ def test_tencent_smoke_execution_smart_flatten():
     mock_children = {0: [1], 1: [2]}
     mock_roots = [0]
 
+    mock_synset = MagicMock()
+    mock_synset.definition.return_value = "Dummy gloss"
+    mock_synset.pos.return_value = "n"
+    mock_synset.offset.return_value = 11111111
+
     with (
         patch("wildcards_gen.core.datasets.tencent.download_tencent_hierarchy"),
         patch(
@@ -168,7 +174,7 @@ def test_tencent_smoke_execution_smart_flatten():
             return_value=(mock_categories, mock_children, mock_roots),
         ),
         patch("wildcards_gen.core.datasets.tencent.ensure_nltk_data"),
-        patch("wildcards_gen.core.datasets.tencent.get_synset_from_wnid", return_value=MagicMock()),
+        patch("wildcards_gen.core.datasets.tencent.get_synset_from_wnid", return_value=mock_synset),
         patch("wildcards_gen.core.datasets.tencent.get_synset_gloss", return_value="Dummy gloss"),
         patch("wildcards_gen.core.builder.should_prune_node", return_value=True),
         patch("wildcards_gen.core.builder.apply_semantic_arrangement") as mock_arrange,
@@ -199,3 +205,16 @@ def test_tencent_smoke_execution_smart_flatten():
             return False
 
         assert find_key(result, "GroupX"), f"Arranged group 'GroupX' not found in result: {result}"
+
+        # Verify Round-Trip (Catch "MagicMock is not serializable" bugs)
+        try:
+            from ruamel.yaml import YAML
+
+            yaml = YAML()
+            from io import StringIO
+
+            stream = StringIO()
+            yaml.dump(result, stream)
+            assert stream.getvalue(), "YAML dump should not be empty"
+        except Exception as e:
+            pytest.fail(f"Tencent result structure is not valid YAML-serializable: {e}")
