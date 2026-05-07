@@ -9,7 +9,7 @@ Provides functions to:
 
 import functools
 import logging
-from typing import Optional, Set, List, Any
+from typing import Optional, Set, List, Any, Union, FrozenSet
 
 import nltk
 from nltk.corpus import wordnet as wn
@@ -112,7 +112,7 @@ def get_synset_wnid(synset) -> str:
     return f"{synset.pos()}{synset.offset():08d}"
 
 
-def is_in_valid_set(synset, valid_wnids: Optional[Set[str]]) -> bool:
+def is_in_valid_set(synset, valid_wnids: Optional[Union[Set[str], FrozenSet[str]]]) -> bool:
     """Check if synset's WNID is in the valid set."""
     if valid_wnids is None:
         return True
@@ -143,13 +143,18 @@ def _get_all_descendants_cached(
 
 def get_all_descendants(
     synset,
-    valid_wnids: Optional[Set[str]] = None
+    valid_wnids: Optional[Union[Set[str], FrozenSet[str]]] = None
 ) -> List[str]:
     """
     Get all descendant names of a synset.
     Wrapper that handles caching by freezing the validation set.
     """
-    frozen_valid = frozenset(valid_wnids) if valid_wnids else None
+    if not valid_wnids:
+        frozen_valid = None
+    elif isinstance(valid_wnids, frozenset):
+        frozen_valid = valid_wnids
+    else:
+        frozen_valid = frozenset(valid_wnids)
     return _get_all_descendants_cached(synset, frozen_valid)
 
 

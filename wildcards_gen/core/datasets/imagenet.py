@@ -13,7 +13,7 @@ Supports:
 import json
 import functools
 import logging
-from typing import Dict, List, Optional, Set, Any
+from typing import Dict, List, Optional, Set, Any, FrozenSet, Union
 
 from ruamel.yaml.comments import CommentedMap, CommentedSeq
 
@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 
 
 @functools.lru_cache(maxsize=1)
-def load_imagenet_1k_wnids() -> Set[str]:
+def load_imagenet_1k_wnids() -> FrozenSet[str]:
     """Load the set of ImageNet-1k WNIDs."""
     logger.info("Loading ImageNet-1k class list...")
     list_path = ensure_imagenet_1k_data()
@@ -47,14 +47,14 @@ def load_imagenet_1k_wnids() -> Set[str]:
         for key, value in data.items():
             if isinstance(value, list) and len(value) >= 1:
                 valid_wnids.add(value[0])
-        return valid_wnids
+        return frozenset(valid_wnids)
     except Exception as e:
         logger.error(f"Failed to load ImageNet-1k WNIDs: {e}")
-        return set()
+        return frozenset()
 
 
 @functools.lru_cache(maxsize=1)
-def load_imagenet_21k_wnids() -> Set[str]:
+def load_imagenet_21k_wnids() -> FrozenSet[str]:
     """Load the set of ImageNet-21k WNIDs."""
     logger.info("Loading ImageNet-21k class list...")
     ids_path, _ = ensure_imagenet_21k_data()
@@ -67,14 +67,14 @@ def load_imagenet_21k_wnids() -> Set[str]:
                     wnids.add(line)
     except Exception as e:
         logger.error(f"Failed to load ImageNet-21k WNIDs: {e}")
-    return wnids
+    return frozenset(wnids)
 
 
 def build_tree_recursive(
     synset,
     structure_mgr: StructureManager,
     parent: CommentedMap,
-    valid_wnids: Optional[Set[str]],
+    valid_wnids: Optional[Union[Set[str], FrozenSet[str]]],
     depth: int,
     max_depth: int,
     with_glosses: bool = True,
