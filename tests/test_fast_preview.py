@@ -18,8 +18,12 @@ def test_traversal_budget():
 @patch("wildcards_gen.core.datasets.imagenet.ensure_imagenet_1k_data")
 def test_imagenet_limit(mock_ensure):
     # Setup mock WordNet hierarchy
-    with patch("wildcards_gen.core.datasets.imagenet.wn") as mock_wn:
+    with patch("wildcards_gen.core.datasets.imagenet.wn") as mock_wn, \
+         patch("wildcards_gen.core.datasets.imagenet.get_primary_synset") as mock_get_primary:
         mock_root = MagicMock()
+        mock_get_primary.side_effect = lambda x: mock_root if x == "vehicle" else None
+        mock_root.pos.return_value = "n"
+        mock_root.offset.return_value = 12345
         mock_root.name.return_value = "vehicle.n.01"
         mock_root.lemmas.return_value = [MagicMock(name="vehicle")]
         mock_root.lemmas()[0].name.return_value = "vehicle"
@@ -27,6 +31,8 @@ def test_imagenet_limit(mock_ensure):
         children = []
         for i in range(15):
             c = MagicMock()
+            c.pos.return_value = "n"
+            c.offset.return_value = 20000 + i
             c.name.return_value = f"child{i}.n.01"
             c.lemmas.return_value = [MagicMock(name=f"child{i}")]
             c.lemmas()[0].name.return_value = f"child{i}"

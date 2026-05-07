@@ -90,9 +90,9 @@ def build_taxonomy_tree(
     budget: Optional[TraversalBudget] = None,
 ) -> Optional[TaxonomyNode]:
     """Pure extractor. No SmartConfig, no pruning, no shaping."""
+    name = get_synset_name(synset)
     if budget and not budget.consume():
         return None
-    name = get_synset_name(synset)
 
     # 1. Subtree Exclusion Check
     if excluded_synsets and synset in excluded_synsets:
@@ -122,6 +122,9 @@ def build_taxonomy_tree(
         descendants = get_all_descendants(synset, valid_wnids)
         if not descendants and (valid_wnids is None or is_in_valid_set(synset, valid_wnids)):
             descendants = [name]
+
+        if budget:
+            descendants = budget.truncate_to_budget(descendants or [])
 
         return TaxonomyNode(
             name=name,
@@ -210,7 +213,8 @@ def generate_imagenet_tree(
     # Get root synset
     try:
         root_synset = wn.synset(root_synset_str)
-    except Exception:
+    except Exception as e:
+        print(f"DEBUG: Could not find root synset: {root_synset_str}. Error: {e}")
         logger.error(f"Could not find root synset: {root_synset_str}")
         return None
 

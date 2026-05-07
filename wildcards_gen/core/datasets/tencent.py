@@ -87,6 +87,9 @@ def build_taxonomy_tree(
 
         collect_leaves_recursive(idx)
 
+        if budget:
+            leaves = budget.truncate_to_budget(leaves)
+
         return TaxonomyNode(
             name=name,
             children=[],
