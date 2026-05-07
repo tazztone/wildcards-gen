@@ -141,6 +141,19 @@ def test_openimages_smoke_empty_arrangement():
         # Should not crash, and "Leaf" should be visible (likely in a flat list or 'misc' depending on implementation)
         assert result is not None
 
+        # Verify Round-Trip (Catch "MagicMock is not serializable" bugs)
+        try:
+            from ruamel.yaml import YAML
+
+            yaml = YAML()
+            from io import StringIO
+
+            stream = StringIO()
+            yaml.dump(result, stream)
+            assert stream.getvalue(), "YAML dump should not be empty"
+        except Exception as e:
+            pytest.fail(f"Result structure is not valid YAML-serializable: {e}")
+
 
 # === Tencent Smoke Tests ===
 
