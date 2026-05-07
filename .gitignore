@@ -219,3 +219,4 @@ test_*.yaml
 *.log
 *.db
 embeddings.db
+scratch/
