@@ -92,6 +92,7 @@ def get_primary_synset(word: str) -> Optional[Any]:
     return None
 
 
+@functools.lru_cache(maxsize=4096)
 def get_synset_name(synset) -> str:
     """Get clean name from synset (e.g., 'dog' from 'dog.n.01')."""
     return synset.lemmas()[0].name().replace('_', ' ')
@@ -107,6 +108,7 @@ def get_synset_gloss(synset) -> str:
     return synset.definition()
 
 
+@functools.lru_cache(maxsize=4096)
 def get_synset_wnid(synset) -> str:
     """Get WNID from synset (e.g., 'n02084071')."""
     return f"{synset.pos()}{synset.offset():08d}"
@@ -128,13 +130,16 @@ def _get_all_descendants_cached(
     descendants = set()
     try:
         # closure() can be slow for high-up nodes like 'entity.n.01'
-        for s in synset.closure(lambda s: s.hyponyms()):
-            name = get_synset_name(s)
-            if valid_wnids:
-                if is_in_valid_set(s, valid_wnids):
-                    descendants.add(name)
-            else:
-                descendants.add(name)
+        if valid_wnids:
+            # Pre-parse valid_wnids for faster O(1) tuple lookup
+            valid_keys = {(wnid[0], int(wnid[1:])) for wnid in valid_wnids if len(wnid) >= 2}
+
+            for s in synset.closure(lambda s: s.hyponyms()):
+                if (s.pos(), s.offset()) in valid_keys:
+                    descendants.add(get_synset_name(s))
+        else:
+            for s in synset.closure(lambda s: s.hyponyms()):
+                descendants.add(get_synset_name(s))
     except Exception as e:
         logger.warning(f"Error traversing descendants of {synset}: {e}")
 
