@@ -15,7 +15,7 @@ class TestArranger(unittest.TestCase):
     @patch("wildcards_gen.core.arranger.get_cached_embeddings")
     @patch("wildcards_gen.core.arranger.compute_umap_embeddings")
     @patch("wildcards_gen.core.arranger.get_lca_name")
-    @patch("wildcards_gen.core.arranger.get_medoid_name")
+    @patch("wildcards_gen.core.arranger.get_medoid_name", return_value=None)
     def test_arrange_list_basic(
         self,
         mock_get_medoid,
@@ -90,7 +90,7 @@ class TestArranger(unittest.TestCase):
     @patch("wildcards_gen.core.arranger.get_cached_embeddings")
     @patch("wildcards_gen.core.arranger.compute_umap_embeddings")
     @patch("wildcards_gen.core.arranger.get_lca_name")
-    @patch("wildcards_gen.core.arranger.get_medoid_name")
+    @patch("wildcards_gen.core.arranger.get_medoid_name", return_value=None)
     def test_arrange_list_fallback_naming(
         self,
         mock_get_medoid,
@@ -111,8 +111,7 @@ class TestArranger(unittest.TestCase):
 
             # Fail both LCA and Medoid
             mock_get_lca.return_value = None
-            mock_get_medoid.return_value = None
-
+            
             items = ["a", "b", "c", "d"]
             groups, leftovers, _, _ = arrange_list(items, model_name="dummy", threshold=0.5, min_cluster_size=2)
 
@@ -174,7 +173,7 @@ class TestArranger(unittest.TestCase):
     @patch("wildcards_gen.core.arranger.get_cached_embeddings")
     @patch("wildcards_gen.core.arranger.compute_umap_embeddings")
     @patch("wildcards_gen.core.arranger.get_lca_name")
-    @patch("wildcards_gen.core.arranger.get_medoid_name")
+    @patch("wildcards_gen.core.arranger.get_medoid_name", return_value=None)
     @patch("wildcards_gen.core.arranger.get_primary_synset")
     def test_hybrid_naming_collision(
         self,
@@ -212,8 +211,7 @@ class TestArranger(unittest.TestCase):
 
             # Both return SAME LCA "bird"
             mock_get_lca.return_value = "bird"
-            mock_get_medoid.return_value = None  # Fix: prevent MagicMock return
-
+            
             # Define side effect for get_medoid for the two clusters (approx)
             # Actually arranger calls get_medoid inside _generate_descriptive_name or only if LCA fails?
             # It calls it inside now if needed? No, logic is:
