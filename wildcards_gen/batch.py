@@ -119,13 +119,17 @@ class BatchProcessor:
             output_root = os.path.normpath(os.path.join(self.base_dir, output_root))
         report_path = os.path.join(output_root, "batch_report.md")
         mgr = StructureManager()
-        def count_nodes(data):
-            if isinstance(data, dict):
-                count = 1
-                for v in data.values():
-                    count += count_nodes(v)
-                return count
-            return 1
+        def get_structure_stats(data):
+            nodes, leaves = 0, 0
+            stack = [data]
+            while stack:
+                curr = stack.pop()
+                nodes += 1
+                if isinstance(curr, dict):
+                    stack.extend(curr.values())
+                elif isinstance(curr, list):
+                    leaves += len(curr)
+            return nodes, leaves
         with open(report_path, 'w', encoding='utf-8') as f:
             f.write("# Batch Execution Report\n\n")
             f.write("| Job | Dataset | Nodes | Leaves | Duration | Status |\n")
@@ -139,8 +143,7 @@ class BatchProcessor:
                 if job_obj and os.path.exists(job_obj.output_path):
                     try:
                         data = mgr.load_structure(job_obj.output_path)
-                        nodes = count_nodes(data)
-                        leaves = len(mgr.extract_terms(data))
+                        nodes, leaves = get_structure_stats(data)
                     except: pass
                 dur = f"{res['duration']:.1f}s"
                 f.write(f"| {res['name']} | {res['dataset']} | {nodes} | {leaves} | {dur} | ✅ |\n")
