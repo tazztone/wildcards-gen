@@ -49,7 +49,7 @@ class ConstraintShaper:
                 val = processed[key]
                 processed[key] = self._flatten_singles(val, is_root=False)
             else:
-                processed = self._flatten_singles(processed, is_root=True)
+                processed = self._flatten_singles(processed, is_root=False)
 
         # 4. Normalize Casing (Categories: Title Case, Items: lowercase)
         processed = self._normalize_casing(processed)
@@ -139,8 +139,18 @@ class ConstraintShaper:
                         #   Misc: [...]
                         # This IS what they had. They want to avoid the double 'Wine'.
 
-                        # Best fix: Rename the sub-'Wine' to 'General' or 'Base'
-                        v[f"General {k}"] = v.pop(match_key)
+                        # Best fix: Rename the sub-category to 'General' or 'Base'
+                        new_key = "General"
+                        if new_key in v:
+                            new_key = "Base"
+                        if new_key in v:
+                            new_key = f"General {k}"
+
+                        # Preserve comment for the renamed child (must be done BEFORE popping)
+                        if isinstance(v, CommentedMap) and match_key in v.ca.items:
+                             v.ca.items[new_key] = v.ca.items[match_key]
+                             
+                        v[new_key] = v.pop(match_key)
                         new_node[k] = v
                     continue
 
@@ -297,16 +307,8 @@ class ConstraintShaper:
                     return new_node
 
             # Promote single child content
-            # Only promote if:
-            # 1. Child is a list AND key is generic (Other/Misc)
-            # 2. Child is a dict and we have explicit redundancy (already handled by _prune_tautologies)
-            # 3. Parent key is a "wrapper" node with only 1 child and it's not a root.
-
-            # If we want to keep Matter -> Food -> Beverage -> Wine:
-            # Beverage: { Wine: [...] } must NOT flatten to Wine: [...]
             if isinstance(val, dict):
-                # Keep the hierarchy if the names are different
-                return new_node
+                return val
 
             if isinstance(val, list):
                 # Only flatten generic wrappers for lists
