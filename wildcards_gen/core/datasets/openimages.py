@@ -147,6 +147,9 @@ def build_taxonomy_tree_from_synsets(
         for child in children:
             collect_labels_recursive(child)
 
+        if budget:
+            labels = budget.truncate_to_budget(labels)
+
         return TaxonomyNode(
             name=name,
             children=[],
@@ -221,6 +224,9 @@ def build_taxonomy_tree_from_json(
                 collect_leaves_recursive(sc)
 
         collect_leaves_recursive(node)
+
+        if budget:
+            leaves = budget.truncate_to_budget(leaves)
 
         return TaxonomyNode(
             name=name,

@@ -50,6 +50,20 @@ class TraversalBudget:
             return False
         return self._exhausted
 
+    def truncate_to_budget(self, items: List[Any]) -> List[Any]:
+        """
+        Consumes budget for each item in the list and returns truncated list.
+        """
+        if self.limit is None:
+            return items
+
+        truncated = []
+        for item in items:
+            if self.consume(1):
+                truncated.append(item)
+            else:
+                break
+        return truncated
 
 class SmartConfig:
     """Configuration for smart pruning."""
@@ -296,7 +310,7 @@ def is_synset_significant(synset: Any, config: SmartConfig) -> bool:
     try:
         # closure is robust but slow-ish; acceptable for offline gen
         hyponyms = list(synset.closure(lambda s: s.hyponyms()))
-         hyponym_count = len(hyponyms)
+        hyponym_count = len(hyponyms)
         if hyponym_count >= config.min_hyponyms:
             return True
     except AttributeError:

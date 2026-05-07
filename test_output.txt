@@ -1,0 +1,23 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.12, pytest-9.0.2, pluggy-1.6.0
+rootdir: /home/tazztone/_coding/wildcards-gen
+configfile: pyproject.toml
+plugins: mock-3.15.1, anyio-4.12.1
+collected 4 items
+
+tests/test_fast_preview.py .DEBUG: Entering generate_imagenet_tree with root=vehicle.n.01, limit=5
+DEBUG: Budget exhausted for child4 at depth 1
+DEBUG: Budget exhausted for child5 at depth 1
+DEBUG: Budget exhausted for child6 at depth 1
+DEBUG: Budget exhausted for child7 at depth 1
+DEBUG: Budget exhausted for child8 at depth 1
+DEBUG: Budget exhausted for child9 at depth 1
+DEBUG: Budget exhausted for child10 at depth 1
+DEBUG: Budget exhausted for child11 at depth 1
+DEBUG: Budget exhausted for child12 at depth 1
+DEBUG: Budget exhausted for child13 at depth 1
+DEBUG: Budget exhausted for child14 at depth 1
+DEBUG: result is TaxonomyNode(name='vehicle', children=[TaxonomyNode(name='child0', children=[], items=['child0'], metadata={'instruction': None, 'synset': <MagicMock id='125615242352528'>, 'wnid': 'n00020000', 'depth': 1, 'is_root': False}), TaxonomyNode(name='child1', children=[], items=['child1'], metadata={'instruction': None, 'synset': <MagicMock id='125615356421488'>, 'wnid': 'n00020001', 'depth': 1, 'is_root': False}), TaxonomyNode(name='child2', children=[], items=['child2'], metadata={'instruction': None, 'synset': <MagicMock id='125615377290816'>, 'wnid': 'n00020002', 'depth': 1, 'is_root': False}), TaxonomyNode(name='child3', children=[], items=['child3'], metadata={'instruction': None, 'synset': <MagicMock id='125615244513008'>, 'wnid': 'n00020003', 'depth': 1, 'is_root': False})], items=[], metadata={'instruction': None, 'synset': <MagicMock name='wn.synset()' id='125615283843056'>, 'wnid': 'n00012345', 'depth': 0, 'is_root': True})
+...
+
+============================== 4 passed in 2.73s ===============================
