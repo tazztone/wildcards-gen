@@ -120,6 +120,9 @@ class SmartConfig:
         self.semantic_arrangement_method = semantic_arrangement_method
         self.debug_arrangement = debug_arrangement
         self.skip_nodes = set(skip_nodes) if skip_nodes else set()
+        # Pre-calculate variants with spaces to optimize lookup
+        if self.skip_nodes:
+            self.skip_nodes.update({n.replace(" ", "_") for n in self.skip_nodes if " " in n})
         self.orphans_label_template = orphans_label_template
         self.preview_limit = preview_limit
         self.umap_n_neighbors = umap_n_neighbors
@@ -323,10 +326,9 @@ def should_prune_node(synset: Any, child_count: int, is_root: bool, config: Smar
 
         # Check Name (Lemma)
         if synset:
-            # Check lemma names
-            for lemma in synset.lemma_names():
-                if lemma in config.skip_nodes or lemma.replace("_", " ") in config.skip_nodes:
-                    return True
+            # Check lemma names via disjoint set comparison
+            if not config.skip_nodes.isdisjoint(synset.lemma_names()):
+                return True
 
     # 1. Linear Chain Check
     # If it only has 1 child, it's just adding noise depth. Prune it.
