@@ -295,27 +295,22 @@ class ConstraintShaper:
             key = list(new_node.keys())[0]
             val = new_node[key]
 
-            # If we are at the root level, we generally want to keep the name
-            # e.g. Matter: { Food: ... } -> Keep Matter.
+            # If we are at the root level and preserve_roots is True, keep it.
             if is_root:
                 return new_node
 
-            # Protect leaf lists from flattening (preserves Category name for list)
-            # UNLESS the key is a generic container like 'misc' or 'Other'
-            if isinstance(val, list):
-                if key not in ["misc", "Other", "misc (Category 1)"]:
-                    return new_node
+            # Only promote single child content if the current node is a generic container
+            # or if it's a tautology (already handled by _prune_tautologies mostly, 
+            # but we allow 'Base'/'General' to be promoted if they are single children).
+            generic_names = {"other", "misc", "general", "base", "everything"}
+            is_generic = any(g in key.lower() for g in generic_names)
 
-            # Promote single child content
-            if isinstance(val, dict):
-                return val
-
-            if isinstance(val, list):
-                # Only flatten generic wrappers for lists
-                if key.lower() in ["misc", "other"]:
+            if is_generic:
+                if isinstance(val, dict):
                     return val
-                return new_node
+                if isinstance(val, list):
+                    return val
 
-            return val
+            return new_node
 
         return new_node

@@ -77,15 +77,15 @@ def build_taxonomy_tree(
         # Collect all leaves in this subtree
         leaves = []
 
-        def collect_leaves_recursive(c_idx):
+        def collect_leaves(c_idx):
             sub_children = children_map.get(c_idx, [])
             if not sub_children:
-                leaves.append(categories[c_idx]["name"].split(",")[0].strip())
+                yield categories[c_idx]["name"].split(",")[0].strip()
             else:
                 for sub_child in sub_children:
-                    collect_leaves_recursive(sub_child)
+                    yield from collect_leaves(sub_child)
 
-        collect_leaves_recursive(idx)
+        leaves = list(collect_leaves(idx))
 
         if budget:
             leaves = budget.truncate_to_budget(leaves)

@@ -5,7 +5,7 @@ Configuration management.
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Set
 
 # Base Paths
 BASE_DIR = Path(__file__).parent.parent.parent
@@ -31,7 +31,7 @@ class Config:
     # GUI Defaults
     gui_share: bool = False
     gui_port: int = 7862
-    skip_nodes: Optional[List[str]] = field(default_factory=list)
+    skip_nodes: Set[str] = field(default_factory=set)
 
     # ...
     _config: Dict[str, Any] = field(default_factory=dict)

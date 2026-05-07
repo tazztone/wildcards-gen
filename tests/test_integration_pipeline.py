@@ -1,3 +1,4 @@
+import sklearn  # Workaround for torch import bug
 import sys
 from unittest.mock import MagicMock, patch
 

@@ -66,6 +66,8 @@ COMMON_ROOTS = {
     "Communication": "communication.n.02",
 }
 
+SMART_DATASETS = {"ImageNet", "Open Images", "Tencent ML-Images"}
+
 
 # =============================================================================
 # 3. UTILITY FUNCTIONS (PURE & FORMATTING)
@@ -191,7 +193,7 @@ def search_wordnet(query):
 def update_ds_ui(dataset_name, strategy):
     """Calculate visibility and state updates for dataset-related UI components."""
     is_imagenet = dataset_name == "ImageNet"
-    can_use_smart = dataset_name in ["ImageNet", "Open Images", "Tencent ML-Images"]
+    can_use_smart = dataset_name in SMART_DATASETS
     is_smart = (strategy == "Smart") and can_use_smart
     new_strategy = "Smart" if (can_use_smart and dataset_name != "COCO") else strategy
 
